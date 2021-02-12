@@ -104,7 +104,7 @@ public class LexicalAnalyzer {
         setFinalState(7, "intnum", true);
         next_state = new int[]{12, 12, 8, 8, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 13, 13, 13, 0, 13};
         setNonFinalState(8, next_state);
-        next_state = new int[]{10, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 10, 9, 10, 10, 10, 0, 10};
+        next_state = new int[]{4, 4, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 10, 9, 10, 10, 10, 0, 10};
         setNonFinalState(9, next_state);
         setFinalState(10, "invalidnum", true);
         setFinalState(11, "invalidcmt", false);
@@ -122,7 +122,7 @@ public class LexicalAnalyzer {
         setNonFinalState(18, next_state);
         next_state = new int[]{10, 10, 20, 22, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 10};
         setNonFinalState(19, next_state);
-        next_state = new int[]{10, 10, 20, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 10};
+        next_state = new int[]{10, 10, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 17, 17, 17, 17, 0, 17};
         setNonFinalState(20, next_state);
         next_state = new int[]{21, 21, 21, 21, 21, 25, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 25, 25, 21, 25};
         setNonFinalState(21, next_state);
