@@ -167,7 +167,7 @@ public class LexicalAnalyzer {
         setNonFinalState(48, next_state);
         next_state = new int[]{49, 49, 49, 49, 49, 49, 47, 31, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 11};
         setNonFinalState(49, next_state);
-        next_state = new int[]{10,	10,	50,	50,	10,	10,	10,	10,	10,	10,	10,	10,	10,	10	,10,	10,	10,	10,	10,	10,	10};
+        next_state = new int[]{10, 10, 50, 50, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
         setNonFinalState(50, next_state);
     }
 
