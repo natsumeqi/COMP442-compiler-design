@@ -1,0 +1,22 @@
+//  inline comments
+
+
+
+/*  block comments
+        @ # $ ~
+    // nest comment
+*/
+
+
+
+/*
+/*  /* nested block comments */
+*/
+*/
+
+
+
+/* unterminated block comment
+    /* nest  */
+
+

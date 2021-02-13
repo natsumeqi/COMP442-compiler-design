@@ -1,0 +1,41 @@
+" valid string "
+" abc 123_ @~&$. "
+" /*  */ "
+" unterminated string
+
+abc
+abc1
+abc_1
+abc1_
+_abc1
+1abc
+_1abc
+
+a_bc
+a1bc
+
+@ @@
+
+a=a+1;
+
+""
+
+0123abct90s_h_;
+1a2
+
+a=0a(a+b);
+
+123.ab
+
+
+_sadg14(word).
+
+
+1.2e-a123
+
+_abts;=ghuetashcp.rlg914[
+
+12.340
+
+
+ab&r
