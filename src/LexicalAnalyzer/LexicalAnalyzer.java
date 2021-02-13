@@ -88,7 +88,7 @@ public class LexicalAnalyzer {
      */
     public void createTable() {
         System.out.println("Starting creating the transition table... ");
-        transition_table = new State[50];
+        transition_table = new State[51];
         setFinalState(0, "invalidchar", false);
         int[] next_state;
         next_state = new int[]{2, 2, 6, 8, 4, 23, 26, 46, 33, 36, 40, 43, 46, 46, 46, 46, 1, 1, 1, 0, 1};
@@ -99,12 +99,12 @@ public class LexicalAnalyzer {
         next_state = new int[]{4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5};
         setNonFinalState(4, next_state);
         setFinalState(5, "invalidid", true);
-        next_state = new int[]{4, 4, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 14, 7, 7, 7, 0, 7};
+        next_state = new int[]{4, 9, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 14, 7, 7, 7, 0, 7};
         setNonFinalState(6, next_state);
         setFinalState(7, "intnum", true);
         next_state = new int[]{12, 12, 8, 8, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 13, 13, 13, 0, 13};
         setNonFinalState(8, next_state);
-        next_state = new int[]{4, 4, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 10, 9, 10, 10, 10, 0, 10};
+        next_state = new int[]{4, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 10, 9, 10, 10, 10, 0, 10};
         setNonFinalState(9, next_state);
         setFinalState(10, "invalidnum", true);
         setFinalState(11, "invalidcmt", false);
@@ -122,7 +122,7 @@ public class LexicalAnalyzer {
         setNonFinalState(18, next_state);
         next_state = new int[]{10, 10, 20, 22, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 10};
         setNonFinalState(19, next_state);
-        next_state = new int[]{10, 10, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 17, 17, 17, 17, 0, 17};
+        next_state = new int[]{10, 10, 50, 50, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 0, 17};
         setNonFinalState(20, next_state);
         next_state = new int[]{21, 21, 21, 21, 21, 25, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 25, 25, 21, 25};
         setNonFinalState(21, next_state);
@@ -167,6 +167,8 @@ public class LexicalAnalyzer {
         setNonFinalState(48, next_state);
         next_state = new int[]{49, 49, 49, 49, 49, 49, 47, 31, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 11};
         setNonFinalState(49, next_state);
+        next_state = new int[]{10,	10,	50,	50,	10,	10,	10,	10,	10,	10,	10,	10,	10,	10	,10,	10,	10,	10,	10,	10,	10};
+        setNonFinalState(50, next_state);
     }
 
 
