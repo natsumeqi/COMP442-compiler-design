@@ -1,4 +1,4 @@
-package LexicalAnalyzer;
+package lexicalAnalyzer;
 
 import java.io.*;
 
@@ -32,7 +32,7 @@ public class LexicalAnalyzer {
      *
      * @param file_path the path of .src files
      */
-    public void fileIOSetup(String file_path) {
+    public void IOFileSetup(String file_path) {
 
         try {
             File file_read = new File(file_path);
@@ -45,15 +45,18 @@ public class LexicalAnalyzer {
             System.out.println("Starting writing to the file: " + outfile_err.getName());
             writer_tok = new PrintWriter(outfile_tok);
             writer_err = new PrintWriter(outfile_err);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+
+
     /**
      * flush contents to files and close files
      */
-    public void fileIOClose() {
+    public void IOFileClose() {
         System.out.println("Flushing & closing files. ");
         try {
             reader.close();
@@ -205,6 +208,7 @@ public class LexicalAnalyzer {
 
             if (lookup_char == 65535) {                      // when reach the end of file
                 is_finished = true;
+//                curr_token = new Token("$", "$", curr_line);
                 writer_tok.write("\r\n");
                 break;
             }

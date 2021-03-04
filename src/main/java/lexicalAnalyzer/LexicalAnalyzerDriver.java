@@ -1,4 +1,4 @@
-package LexicalAnalyzer;
+package lexicalAnalyzer;
 
 import java.io.File;
 
@@ -31,11 +31,12 @@ public class LexicalAnalyzerDriver {
     static void LexicalAnalyzerOneFile(String file_path) {
         LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer();
         lexicalAnalyzer.createTable();
-        lexicalAnalyzer.fileIOSetup(file_path);
+        lexicalAnalyzer.IOFileSetup(file_path);
+
         while (lexicalAnalyzer.nextToken() != null) {
             if (lexicalAnalyzer.isFinished())
                 break;
         }
-        lexicalAnalyzer.fileIOClose();
+        lexicalAnalyzer.IOFileClose();
     }
 }

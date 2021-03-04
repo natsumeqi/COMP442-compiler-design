@@ -1,4 +1,4 @@
-package LexicalAnalyzer;
+package lexicalAnalyzer;
 
 public class Token {
 
@@ -7,6 +7,10 @@ public class Token {
     private int location;
     private boolean is_error;
 
+    public Token(String type, String lexeme) {
+        this.type = type;
+        this.lexeme = lexeme;
+    }
 
     public Token(String type, String lexeme, int location) {
         this.type = type;
