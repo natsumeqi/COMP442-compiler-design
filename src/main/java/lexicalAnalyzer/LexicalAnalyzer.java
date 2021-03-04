@@ -36,13 +36,13 @@ public class LexicalAnalyzer {
 
         try {
             File file_read = new File(file_path);
-            System.out.println("Starting reading the file: " + file_read.getName());
+            System.out.println("[Lexer] Reading the file: " + file_read.getName());
             reader = new BufferedReader(new FileReader(file_path));
             String file_path_temp = file_path.substring(0, file_path.length() - 4);
             File outfile_tok = new File(file_path_temp + ".outlextokens");
             File outfile_err = new File(file_path_temp + ".outlexerrors");
-            System.out.println("Starting writing to the file: " + outfile_tok.getName());
-            System.out.println("Starting writing to the file: " + outfile_err.getName());
+            System.out.println("[Lexer] Writing to the file: " + outfile_tok.getName());
+            System.out.println("[Lexer] Writing to the file: " + outfile_err.getName());
             writer_tok = new PrintWriter(outfile_tok);
             writer_err = new PrintWriter(outfile_err);
 
@@ -57,7 +57,7 @@ public class LexicalAnalyzer {
      * flush contents to files and close files
      */
     public void IOFileClose() {
-        System.out.println("Flushing & closing files. ");
+        System.out.println("[Lexer] Flushing & closing files. ");
         try {
             reader.close();
             writer_tok.flush();
@@ -90,7 +90,7 @@ public class LexicalAnalyzer {
      * create the transition table, each row is a state object in which stores a map <Character, Integer> for transitions
      */
     public void createTable() {
-        System.out.println("Starting creating the transition table... ");
+        System.out.println("[Lexer] Creating the transition table... ");
         transition_table = new State[51];
         setFinalState(0, "invalidchar", false);
         int[] next_state;
@@ -197,6 +197,7 @@ public class LexicalAnalyzer {
                     curr_lexeme.append(lookup_char);
                 }
                 curr_token = createToken(curr_state);       // generate the token
+//                System.out.println(curr_token.toString());
                 writeToBuffers();
             } else {
                 backup_char = null;
