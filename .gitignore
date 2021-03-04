@@ -23,6 +23,7 @@
 hs_err_pid*
 
 # intellij
-.idea/
-
+.idea
+.run
 out/
+target/
