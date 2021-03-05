@@ -1,6 +1,5 @@
 package syntacticAnalyzer;
 
-import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.Token;
 
@@ -16,8 +15,8 @@ public class SyntacticAnalyzer {
     private final Map<String, Rule> rules;
     private final HashSet<String> terminal_set;
     private HashSet<String> nonTerminal_set;
-    private final Map<String, ArrayList<String>> first_sets;
-    private final Map<String, ArrayList<String>> follow_sets;
+    //    private final Map<String, ArrayList<String>> first_sets;
+//    private final Map<String, ArrayList<String>> follow_sets;
     private final Stack<String> stack;
     private Token lookahead_token;
     private String lookahead_type;   // token type read
@@ -35,20 +34,23 @@ public class SyntacticAnalyzer {
 
         // import grammar
         Grammar grammar = new Grammar();
-//        grammar.createSymbolsEx();
-//        grammar.createRulesEx();
-        grammar.importRules();
-
-        rules = grammar.getRules();
-//        grammar.createParsingTable();
-//        grammar.importFollowSets();
-        grammar.importParsingTable();
-        parsing_table = grammar.getParsing_table();
+        grammar.createSymbolsEx();
+        grammar.createRulesEx();
+        grammar.createParsingTableEx();
         terminal_set = new HashSet<>(grammar.getTerminal_list());
-        nonTerminal_set = new HashSet<>(grammar.getNonTerminal_list());
-        grammar.importFirstFollowSets();
-        first_sets = grammar.getFirst_sets();
-        follow_sets = grammar.getFollow_sets();
+        rules = grammar.getRules();
+        parsing_table = grammar.getParsing_table();
+
+//        Grammar grammar = new Grammar();
+//        grammar.importRules();
+//        rules = grammar.getRules();
+//        grammar.importParsingTable();
+//        parsing_table = grammar.getParsing_table();
+//        terminal_set = new HashSet<>(grammar.getTerminal_list());
+//        nonTerminal_set = new HashSet<>(grammar.getNonTerminal_list());
+//        grammar.importFirstFollowSets();
+//        first_sets = grammar.getFirst_sets();
+//        follow_sets = grammar.getFollow_sets();
 
         // test grammar
 //        terminalSet.forEach(System.out::println);
@@ -111,27 +113,29 @@ public class SyntacticAnalyzer {
         System.out.println("[Parser] Starting parsing...");
         boolean error = false;
         stack.push("$");
-        stack.push("START");
-//        stack.push("E");
-//        derivation = "E";
-        derivation = "START";
+//        stack.push("START");
+//        derivation = "START";
 
+        stack.push("E");
+        derivation = "E";
         skipCommentsRead();
 
         while (!stack.peek().equals("$")) {
 
             top_of_stack = stack.peek();
-//            System.out.println("top of stack: " + top_of_stack);
-
+            System.out.println("top of stack: " + top_of_stack);
+//            System.out.println("lookahead : "+ lookahead);
             if (terminal_set.contains(top_of_stack)) {
 //                System.out.println("top is a terminal");
-//                System.out.println("token type read: " + lookahead);
+                System.out.println("token type read: " + lookahead);
                 if (top_of_stack.equals(lookahead)) {
 //                    System.out.println("token: "+lookaheadToken.toString());
 
                     stack.pop();
-//                    System.out.println("lexeme: "+lookaheadToken.getLexeme());
+                    System.out.println("lexeme: "+lookahead_token.getLexeme());
+//                    System.out.println("lookahead : "+ lookahead);
                     derivation = derivation.replaceFirst(lookahead, lookahead_token.getLexeme());
+//                    System.out.println(derivation);
 
                     skipCommentsRead();
 
@@ -141,6 +145,7 @@ public class SyntacticAnalyzer {
                 }
             } else {
 //                System.out.println("top is not a terminal");
+//                System.out.println(lookahead);
                 if (!lookupParsingTable(top_of_stack, lookahead).equals("error")) {
                     stack.pop();
                     inverseRHSMultiplePush(top_of_stack, lookupParsingTable(top_of_stack, lookahead));
@@ -150,7 +155,7 @@ public class SyntacticAnalyzer {
                 }
             }
 //            writer_derivation.append("=> ").append(derivation).append("\r\n");
-//            System.out.println("=> " + derivation);
+            System.out.println("=> " + derivation);
         }
         return lookahead.equals("$") && !error;
     }
@@ -160,8 +165,8 @@ public class SyntacticAnalyzer {
         do {
 //            System.out.println("skip loop");
             lookahead_token = lexical_analyzer.nextToken();
-//          System.out.println(lookahead_token);
-//            System.out.println(lexical_analyzer.isFinished());
+          System.out.println("lookahead: " + lookahead_token);
+            System.out.println(lexical_analyzer.isFinished());
             if (lexical_analyzer.isFinished()) {
                 lookahead_type = "$";
                 lookahead = "$";
@@ -170,7 +175,7 @@ public class SyntacticAnalyzer {
                 lookahead_type = lookahead_token.getType();
             }
         } while (lookahead_type.equals("blockcmt") || lookahead_type.equals("inlinecmt"));
-        lookahead = toTerminalSymbols(lookahead_type);
+        lookahead = toTerminalSymbolsEx(lookahead_type);
     }
 
     private String lookupParsingTable(String top_of_stack, String lookahead) {
@@ -218,25 +223,25 @@ public class SyntacticAnalyzer {
      */
     private void skipErrors() {
 
-        System.out.println("syntax error at: " + lookahead_token.getLocation());
-//        System.out.println("lookahead: " + lookahead);
-//        System.out.println(follow_sets.get(top_of_stack));
-//        System.out.println(top_of_stack);
-        if (terminal_set.contains(top_of_stack)) {
-            stack.pop();
-        } else {
-            if (!terminal_set.contains(top_of_stack)) {
-                if (lookahead.equals("$") || follow_sets.get(top_of_stack).contains(lookahead)) {
-                    stack.pop();
-                } else {
-                    while (!first_sets.get(top_of_stack).contains(lookahead) ||
-                            (first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead))) {
-                        skipCommentsRead();
-
-                    }
-                }
-            }
-        }
+//        System.out.println("syntax error at: " + lookahead_token.getLocation());
+////        System.out.println("lookahead: " + lookahead);
+////        System.out.println(follow_sets.get(top_of_stack));
+////        System.out.println(top_of_stack);
+//        if (terminal_set.contains(top_of_stack)) {
+//            stack.pop();
+//        } else {
+//            if (!terminal_set.contains(top_of_stack)) {
+//                if (lookahead.equals("$") || follow_sets.get(top_of_stack).contains(lookahead)) {
+//                    stack.pop();
+//                } else {
+//                    while (!first_sets.get(top_of_stack).contains(lookahead) ||
+//                            (first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead))) {
+//                        skipCommentsRead();
+//
+//                    }
+//                }
+//            }
+//        }
     }
 
     // match the token type to rules
@@ -268,20 +273,19 @@ public class SyntacticAnalyzer {
     // for test example
     private String toTerminalSymbolsEx(String lookahead_type) {
         switch (lookahead_type) {
-            case "id":
-                return "0";
+
             case "intnum":
                 return "1";
             case "openpar":
                 return "(";
             case "closepar":
                 return ")";
-            case "mult":
-                return "*";
-            case "plus":
-                return "+";
+//            case "mult":
+//                return "mult";
+//            case "plus":
+//                return "plus";
             default:
-                return null;
+                return lookahead_type;
         }
     }
 

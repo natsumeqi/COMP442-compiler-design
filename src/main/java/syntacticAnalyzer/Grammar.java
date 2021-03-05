@@ -130,8 +130,9 @@ public class Grammar {
 //            System.out.println("headers");
             for (Element header : first) {
                 headers.add(header.text());
-                if(!header.text().isEmpty()){
-                terminal_list.add(header.text());}
+                if (!header.text().isEmpty()) {
+                    terminal_list.add(header.text());
+                }
 //                System.out.println(header.text());
             }
             for (int i = 1; i < rows.size(); i++) {
@@ -195,32 +196,31 @@ public class Grammar {
 
     // example symbols
     public void createSymbolsEx() {
-        terminal_list = (ArrayList<String>) Arrays.asList("0", "1", "(", ")", "+", "*", "$");
-        nonTerminal_list = (ArrayList<String>) Arrays.asList("E", "E'", "T", "T'", "F");
+        terminal_list =  new ArrayList<> (Arrays.asList("id", "(", ")", "plus", "mult", "$"));
+        nonTerminal_list =  new ArrayList<> (Arrays.asList("E", "E'", "T", "T'", "F"));
     }
 
     // example rules
     public void createRulesEx() {
         rules = new HashMap<>();
         rules.put("r1", new Rule("r1", "E", " T E' "));
-        rules.put("r2", new Rule("r2", "E'", "+ T E' "));
+        rules.put("r2", new Rule("r2", "E'", " plus T E' "));
         rules.put("r3", new Rule("r3", "E'", "EPSILON"));
         rules.put("r4", new Rule("r4", "T", " F T' "));
-        rules.put("r5", new Rule("r5", "T'", " * F T' "));
+        rules.put("r5", new Rule("r5", "T'", " mult F T' "));
         rules.put("r6", new Rule("r6", "T'", "EPSILON"));
-        rules.put("r7", new Rule("r7", "F", " 0 "));
-        rules.put("r8", new Rule("r8", "F", " 1 "));
-        rules.put("r9", new Rule("r9", "F", " ( E ) "));
+        rules.put("r7", new Rule("r7", "F", " id "));
+        rules.put("r8", new Rule("r8", "F", " ( E ) "));
     }
 
     // example parsing table
-    public void createParsingTable() {
+    public void createParsingTableEx() {
         parsing_table = new HashMap<>();
-        addToParsingRow("E", new String[]{"r1", "r1", "r1", "error", "error", "error", "error"});
-        addToParsingRow("E'", new String[]{"error", "error", "error", "r3", "r2", "error", "r3"});
-        addToParsingRow("T", new String[]{"r4", "r4", "r4", "error", "error", "error", "error"});
-        addToParsingRow("T'", new String[]{"error", "error", "error", "r6", "r6", "r5", "r6"});
-        addToParsingRow("F", new String[]{"r7", "r8", "r9", "error", "error", "error", "error"});
+        addToParsingRow("E", new String[]{"r1", "r1", "error", "error", "error", "error"});
+        addToParsingRow("E'", new String[]{"error", "error", "r3", "r2", "error", "r3"});
+        addToParsingRow("T", new String[]{"r4", "r4", "error", "error", "error", "error"});
+        addToParsingRow("T'", new String[]{"error", "error", "r6", "r6", "r5", "r6"});
+        addToParsingRow("F", new String[]{"r7", "r8", "error", "error", "error", "error"});
     }
 
     private void addToParsingRow(String nonTerminal, String[] rulesInRow) {

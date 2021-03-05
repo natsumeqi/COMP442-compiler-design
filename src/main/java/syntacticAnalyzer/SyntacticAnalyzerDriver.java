@@ -1,7 +1,5 @@
 package syntacticAnalyzer;
 
-import lexicalAnalyzer.LexicalAnalyzer;
-
 import java.io.File;
 
 public class SyntacticAnalyzerDriver {

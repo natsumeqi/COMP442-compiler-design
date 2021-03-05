@@ -184,7 +184,13 @@ public class LexicalAnalyzer {
         int curr_state = 1;
         curr_token = null;
         curr_lexeme = new StringBuilder();
+        boolean will_finish = false;
         do {
+            if(will_finish){
+                is_finished = true;
+                break;
+            }
+
             char lookup_char = nextChar();      // read next character
             char input_char = initialToInput(lookup_char);      // mapping to characters in the transition table
             curr_state = lookupTable(curr_state, input_char);   // look up the next state
@@ -208,10 +214,10 @@ public class LexicalAnalyzer {
             }
 
             if (lookup_char == 65535) {                      // when reach the end of file
-                is_finished = true;
+                will_finish = true;
 //                curr_token = new Token("$", "$", curr_line);
                 writer_tok.write("\r\n");
-                break;
+//                break;
             }
         } while (curr_token == null);
         return curr_token;
