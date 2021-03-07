@@ -1,20 +1,24 @@
 package syntacticAnalyzer;
 
-import AST.IdNode;
-import AST.Node;
-import AST.NumNode;
+import AST.*;
 import lexicalAnalyzer.Token;
 
 public class NodeFactory {
 
-    public static Node makeNode(Token token) {
+    public Node makeNode(Token token) {
 
-        switch (token.getType()) {
+        String data = token.getLexeme();
+        String type = token.getType();
+        switch (type) {
             case "intnum":
             case "floatNum":
-                return new NumNode(token.getLexeme());
+                return new NumNode(data);
             case "id":
-                return new IdNode(token.getLexeme());
+                return new IdNode(data);
+            case "plus":
+                return new AddOpNode(data, type);
+            case "mult":
+                return new MultOpNode(data, type);
         }
 
         return null;

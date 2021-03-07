@@ -13,7 +13,10 @@ public class Grammar {
 
     private ArrayList<String> terminal_list;
     private ArrayList<String> nonTerminal_list;
+    private ArrayList<String> semantic_actions_list;
     private Map<String, Rule> rules;
+    private Map<String, SemanticAction> semantic_actions;
+    private Map<String, Rule> rules_attribute;
     private final Map<String, ArrayList<String>> follow_sets;
     private final Map<String, ArrayList<String>> first_sets;
     private Map<String, Map<String, String>> parsing_table;
@@ -198,6 +201,7 @@ public class Grammar {
     public void createSymbolsEx() {
         terminal_list =  new ArrayList<> (Arrays.asList("id", "(", ")", "plus", "mult", "$"));
         nonTerminal_list =  new ArrayList<> (Arrays.asList("E", "E'", "T", "T'", "F"));
+        semantic_actions_list = new ArrayList<>(Arrays.asList("sa_A", "sa_B", "sa_C","sa_D","sa_E","sa_F","sa_G","sa_H","sa_I","sa_J","sa_K","sa_L"));
     }
 
     // example rules
@@ -221,6 +225,34 @@ public class Grammar {
         addToParsingRow("T", new String[]{"r4", "r4", "error", "error", "error", "error"});
         addToParsingRow("T'", new String[]{"error", "error", "r6", "r6", "r5", "r6"});
         addToParsingRow("F", new String[]{"r7", "r8", "error", "error", "error", "error"});
+    }
+
+    public void createSemanticActions(){
+        semantic_actions = new HashMap<>();
+        semantic_actions.put("sa_A", new SemanticAction("sa_A", "E'_i", "T_s"));
+        semantic_actions.put("sa_B", new SemanticAction("sa_B", "E_s", "E'_s"));
+        semantic_actions.put("sa_C", new SemanticAction("sa_C", "E'_i", "makeFamily(plus, E'_i, T_s)"));
+        semantic_actions.put("sa_D", new SemanticAction("sa_D", "E'_s","E'_s"));
+        semantic_actions.put("sa_E", new SemanticAction("sa_E", "E'_s","E'_i"));
+        semantic_actions.put("sa_F", new SemanticAction("sa_F", "T'_i","F_s"));
+        semantic_actions.put("sa_G", new SemanticAction("sa_G","T_s","T'_s"  ));
+        semantic_actions.put("sa_H", new SemanticAction("sa_H", "T'_i","makeFamily(mult,T'_i,F_s)"));
+        semantic_actions.put("sa_I", new SemanticAction("sa_I", "T'_s", "T'_s"));
+        semantic_actions.put("sa_J", new SemanticAction("sa_J", "T'_s", "T'_i"));
+        semantic_actions.put("sa_K", new SemanticAction("sa_K", "F_s","makeNode(id)"));
+        semantic_actions.put("sa_L", new SemanticAction("sa_L", "F_s", "E_s"));
+    }
+
+    public void createRulesWithAttributeEx(){
+        rules_attribute = new HashMap<>();
+        rules_attribute.put("r1", new Rule("r1", "E", " T sa_A E' sa_B "));
+        rules_attribute.put("r2", new Rule("r2", "E'", " plus T sa_C E' sa_D "));
+        rules_attribute.put("r3", new Rule("r3", "E'", "EPSILON sa_E"));
+        rules_attribute.put("r4", new Rule("r4", "T", " F sa_F T' sa_G"));
+        rules_attribute.put("r5", new Rule("r5", "T'", " mult F sa_H T' sa_I "));
+        rules_attribute.put("r6", new Rule("r6", "T'", "EPSILON sa_J"));
+        rules_attribute.put("r7", new Rule("r7", "F", " id sa_K"));
+        rules_attribute.put("r8", new Rule("r8", "F", " ( E ) sa_L"));
     }
 
     private void addToParsingRow(String nonTerminal, String[] rulesInRow) {
@@ -271,5 +303,29 @@ public class Grammar {
 
     public Map<String, ArrayList<String>> getFirst_sets() {
         return first_sets;
+    }
+
+    public ArrayList<String> getSemantic_actions_list() {
+        return semantic_actions_list;
+    }
+
+    public void setSemantic_actions_list(ArrayList<String> semantic_actions_list) {
+        this.semantic_actions_list = semantic_actions_list;
+    }
+
+    public Map<String, SemanticAction> getSemantic_actions() {
+        return semantic_actions;
+    }
+
+    public void setSemantic_actions(Map<String, SemanticAction> semantic_actions) {
+        this.semantic_actions = semantic_actions;
+    }
+
+    public Map<String, Rule> getRules_attribute() {
+        return rules_attribute;
+    }
+
+    public void setRules_attribute(Map<String, Rule> rules_attribute) {
+        this.rules_attribute = rules_attribute;
     }
 }

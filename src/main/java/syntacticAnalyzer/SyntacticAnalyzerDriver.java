@@ -27,7 +27,7 @@ public class SyntacticAnalyzerDriver {
     static void syntacticAnalyzerOneFile(String file_path) {
         SyntacticAnalyzer syntacticAnalyzer = new SyntacticAnalyzer();
         syntacticAnalyzer.parserSetup(file_path);
-//        syntacticAnalyzer.parserIOFileSetup(file_path);
+        syntacticAnalyzer.parserIOFileSetup(file_path);
 
         boolean syntacticCorrect = syntacticAnalyzer.parse();
         if (syntacticCorrect) {
