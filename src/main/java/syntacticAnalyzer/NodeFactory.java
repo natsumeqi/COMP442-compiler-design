@@ -5,20 +5,26 @@ import lexicalAnalyzer.Token;
 
 public class NodeFactory {
 
-    public Node makeNode(Token token) {
+    public Node makeNode(String type, String lexeme ) {
 
-        String data = token.getLexeme();
-        String type = token.getType();
         switch (type) {
             case "intnum":
             case "floatNum":
-                return new NumNode(data);
+                return new NumNode(lexeme);
             case "id":
-                return new IdNode(data);
+                return new IdNode(lexeme);
             case "plus":
-                return new AddOpNode(data, type);
+                return new AddOpNode("+");
             case "mult":
-                return new MultOpNode(data, type);
+                return new MultOpNode("*");
+            case "prog":
+                return new ProgNode();
+            case "ClassList":
+                return new ClassListNode();
+            case "FuncDefList":
+                return new FuncDefListNode();
+            case "StatBlock":
+                    return new StatBlockNode();
         }
 
         return null;

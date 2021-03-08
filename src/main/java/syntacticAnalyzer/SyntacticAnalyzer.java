@@ -1,7 +1,5 @@
 package syntacticAnalyzer;
 
-import AST.IdNode;
-import AST.MultOpNode;
 import AST.Node;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.Token;
@@ -14,16 +12,13 @@ public class SyntacticAnalyzer {
 
 
     private final LexicalAnalyzer lexical_analyzer;
-    private final Map<String, Map<String, String>> parsing_table;
-    private final Map<String, Rule> rules;
-    private final Map<String, SemanticAction> semantic_actions;
-    private final HashSet<String> terminal_set;
-    private HashSet<String> nonTerminal_set;
-    private HashSet<String> semantic_actions_set;
-    //    private final Map<String, ArrayList<String>> first_sets;
+
+//        private final Map<String, ArrayList<String>> first_sets;
 //    private final Map<String, ArrayList<String>> follow_sets;
+
     private final Stack<String> parsing_stack;
     private final Stack<Node> semantic_stack;
+
     private Token lookahead_token;
     private Token terminal_suc_token; // store the terminal token that has been parsed
     private String lookahead_type;   // token type read
@@ -31,10 +26,14 @@ public class SyntacticAnalyzer {
     private String derivation;
     private int index_terminal_derivation;
     private String top_of_stack;
+
     private PrintWriter writer_derivation;
     private PrintWriter writer_err_report;
     private PrintWriter writer_AST;
-    private NodeFactory nodeFactory;
+    private PrintWriter writer_test;
+
+    private final NodeFactory nodeFactory;
+    private final Grammar grammar;
 
 
     public SyntacticAnalyzer() {
@@ -44,17 +43,9 @@ public class SyntacticAnalyzer {
         nodeFactory = new NodeFactory();
 
         // import grammar
-        Grammar grammar = new Grammar();
-        grammar.createSymbolsEx();
-        grammar.createRulesWithAttributeEx();
-        grammar.createParsingTableEx();
-        grammar.createSemanticActions();
-        terminal_set = new HashSet<>(grammar.getTerminal_list());
-        nonTerminal_set = new HashSet<>(grammar.getNonTerminal_list());
-        semantic_actions_set = new HashSet<>(grammar.getSemantic_actions_list());
-        rules = grammar.getRules_attribute();
-        parsing_table = grammar.getParsing_table();
-        semantic_actions = grammar.getSemantic_actions();
+        grammar = new Grammar();
+//        grammar.generateGrammarEx();
+        grammar.generateGrammarProject();
 
 
 //        Grammar grammar = new Grammar();
@@ -69,13 +60,13 @@ public class SyntacticAnalyzer {
 //        follow_sets = grammar.getFollow_sets();
 
         // test grammar
-//        terminalSet.forEach(System.out::println);
-//        System.out.println(terminalSet.size());
-//        nonTerminalSet.forEach(System.out::println);
-//        System.out.println(nonTerminalSet.size());
-//        rules.entrySet().stream().forEach(entry -> System.out.println(entry.getKey()));
-//        rules.entrySet().stream().forEach(entry -> System.out.println(entry.getValue().toString()));
-//        System.out.println(rules.size());
+//        grammar.getTerminal_list().forEach(System.out::println);
+//        System.out.println(grammar.getTerminal_list().size());
+//        grammar.getNonTerminal_list().forEach(System.out::println);
+//        System.out.println(grammar.getNonTerminal_list().size());
+//        grammar.getRules_attribute().entrySet().stream().forEach(entry -> System.out.println(entry.getKey()));
+//        grammar.getRules_attribute().entrySet().stream().forEach(entry -> System.out.println(entry.getValue().toString()));
+//        System.out.println(grammar.getRules_attribute().size());
 //        parsingTable.entrySet().stream().forEach(entry-> System.out.println(entry.getKey()+": "+entry.getValue().toString()));
 
 //        Set<String> keysInRules = new HashSet<>(rules.keySet());
@@ -95,6 +86,7 @@ public class SyntacticAnalyzer {
 //        System.out.println(commonKeys.size());
 //        follow_sets.entrySet().forEach(entry -> System.out.println(entry.getKey()));
 //        first_sets.entrySet().forEach(entry -> System.out.println(entry.getKey()));
+
     }
 
 
@@ -129,36 +121,38 @@ public class SyntacticAnalyzer {
         System.out.println("[Parser] Starting parsing...");
         boolean error = false;
         parsing_stack.push("$");
-//        stack.push("START");
-//        derivation = "START";
+        parsing_stack.push("START");
+        derivation = "START";
 
-        parsing_stack.push("E");
-        derivation = "E";
+//        parsing_stack.push("E");
+//        derivation = "E";
         skipCommentsRead();
 
+
         while (!parsing_stack.peek().equals("$")) {
+
 
             top_of_stack = parsing_stack.peek();
             System.out.println("[parsing stack] top: " + top_of_stack);
 //            System.out.println("lookahead : "+ lookahead);
-            if (terminal_set.contains(top_of_stack)) {
+            if (grammar.getTerminal_list().contains(top_of_stack)) {
 //                System.out.println("top is a terminal");
-                System.out.println("[parse]token type read: " + lookahead);
+//                System.out.println("[parse]token type read: " + lookahead);
                 if (top_of_stack.equals(lookahead)) {
 //                    System.out.println("token: "+lookaheadToken.toString());
                     terminal_suc_token = lookahead_token;
                     parsing_stack.pop();
-                    System.out.println("[parse]lexeme: " + lookahead_token.getLexeme());
-                    System.out.println("[parse]index: " + index_terminal_derivation);
-                    System.out.println("1:" + derivation.substring(0, index_terminal_derivation));
-                    System.out.println("lookahead : " + lookahead);
+//                    System.out.println("[parse]lexeme: " + lookahead_token.getLexeme());
+//                    System.out.println("[parse]index: " + index_terminal_derivation);
+//                    System.out.println("1:" + derivation.substring(0, index_terminal_derivation));
+//                    System.out.println("lookahead : " + lookahead);
                     derivation = derivation.substring(0, index_terminal_derivation) +
                             derivation.substring(index_terminal_derivation).replaceFirst(lookahead, lookahead_token.getLexeme());
 
-                    derivation = derivation.replaceAll(" sa_\\w", "");
+                    derivation = derivation.replaceAll(" sa-\\w", "");
                     index_terminal_derivation = derivation.indexOf(lookahead_token.getLexeme());
-                    System.out.println("[parse][der]" + derivation);
-                    System.out.println("[parse][der]index: " + index_terminal_derivation);
+//                    System.out.println("[parse][der]" + derivation);
+//                    System.out.println("[parse][der]index: " + index_terminal_derivation);
                     skipCommentsRead();
 
                 } else {
@@ -168,8 +162,8 @@ public class SyntacticAnalyzer {
             } else {
 //                System.out.println("top is not a terminal");
 //                System.out.println(lookahead);
-                if (nonTerminal_set.contains(top_of_stack)) {
-
+                if (grammar.getNonTerminal_list().contains(top_of_stack)) {
+//            System.out.println("[non terminal branch]lookahead: " + lookahead_token);
 
                     if (!lookupParsingTable(top_of_stack, lookahead).equals("error")) {
                         parsing_stack.pop();
@@ -178,17 +172,30 @@ public class SyntacticAnalyzer {
                         skipErrors();
                         error = true;
                     }
+
+
+
+                    // semantic action branch
                 } else {
-                    if (semantic_actions_set.contains(top_of_stack)) {
+
+//                    grammar.getSemantic_actions_list().forEach(System.out::println);
+                    System.out.println(grammar.getSemantic_actions_list().contains(top_of_stack));
+                    if (grammar.getSemantic_actions_list().contains(top_of_stack)) {
+                        System.out.println("[semantic action begins]");
                         semanticActionOnStack();
                     }
                 }
             }
             writer_derivation.append("=> ").append(derivation).append("\r\n");
-            System.out.println("=> " + derivation);
+//            System.out.println("=> " + derivation);
         }
+
+        System.out.println(semantic_stack.peek());
         return lookahead.equals("$") && !error;
     }
+
+
+
 
     // ignore comments token
     private void skipCommentsRead() {
@@ -205,11 +212,15 @@ public class SyntacticAnalyzer {
                 lookahead_type = lookahead_token.getType();
             }
         } while (lookahead_type.equals("blockcmt") || lookahead_type.equals("inlinecmt"));
-        lookahead = toTerminalSymbolsEx(lookahead_type);
+        lookahead = toTerminalSymbols(lookahead_type);
     }
 
+
+
+
+
     private void semanticActionOnStack() {
-        SemanticAction semantic_action = semantic_actions.get(top_of_stack);
+        SemanticAction semantic_action = grammar.getSemantic_actions().get(top_of_stack);
         parsing_stack.pop();
         String left_sem_act = semantic_action.getSem_act_LHS();
         String right_sem_act = semantic_action.getSem_act_RHS();
@@ -223,8 +234,11 @@ public class SyntacticAnalyzer {
         if (right_sem_act.contains("makeNode(")) {
             System.out.println("[semantic stack] token going to be made as a leaf: " + terminal_suc_token.toString());
 
-
-            node_to_push = nodeFactory.makeNode(terminal_suc_token);
+                String node_type = right_sem_act.substring(right_sem_act.indexOf("(")+1,right_sem_act.indexOf(")"));
+                String node_lexeme = terminal_suc_token.getLexeme();
+            System.out.println(node_type);
+            System.out.println(node_lexeme);
+                node_to_push = nodeFactory.makeNode(node_type , node_lexeme);
 
             assert node_to_push != null;
             node_to_push.setName(left_sem_act);
@@ -238,26 +252,26 @@ public class SyntacticAnalyzer {
                 String parameter = right_sem_act.substring(right_sem_act.indexOf("makeFamily(") + 11, right_sem_act.indexOf(")"));
                 String[] parameters = parameter.split(",");
                 String op = parameters[0];
-                Token op_token = new Token(op, op);
+
                 ArrayList<Node> para_nodes = new ArrayList<Node>();
                 for (int i = parameters.length - 1; i > 0; i--) {
                     node_on_top = semantic_stack.peek();
-                    System.out.println("[node on the stack top]" + node_on_top.toString());
+                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
                     System.out.println("parameter: " + parameters[i]);
                     if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
                         Node node_to_pop = semantic_stack.pop();
-                        System.out.println("[node to pop] " + node_to_pop.toString());
+                        System.out.println("[node to pop] " + node_to_pop.m_sa_name);
                         para_nodes.add(node_to_pop);
                     }
                 }
-                System.out.println("[op token]" + op_token.toString());
 
 
-                Node opNode = nodeFactory.makeNode(op_token);
+
+                Node opNode = nodeFactory.makeNode(op,op);
 
 //                Node opNode = new MultOpNode("mult");
                 System.out.println("[opNode]" + opNode);
-                System.out.println("[opNode] " + opNode.toString());
+
                 System.out.println(para_nodes.size());
                 System.out.println("[para_nodes][0]" + para_nodes.get(0));
                 System.out.println("[para_nodes][1]" + para_nodes.get(1));
@@ -322,15 +336,16 @@ public class SyntacticAnalyzer {
 //        System.out.println("top of stack: " + top_of_stack);
 //        System.out.println("lookahead: " + lookahead);
 //        System.out.println(parsingTable.get(top_of_stack).get(lookahead));
-        return parsing_table.get(top_of_stack).get(lookahead);
+        return grammar.getParsing_table().get(top_of_stack).get(lookahead);
     }
 
 
     private void inverseRHSMultiplePush(String LHS, String rule) {
 //        System.out.println("LHS: " + LHS);
         System.out.println("rule: " + rule);
-        String RHS_in_rule = rules.get(rule).getRule_RHS();
-//        System.out.println("RHS: " + RHS_in_rule);
+
+        String RHS_in_rule = grammar.getRules_attribute().get(rule).getRule_RHS();
+
         if (!RHS_in_rule.equals("EPSILON")) {
             int index_LHS = derivation.indexOf(LHS);
 //            System.out.println("index LHS : " + index_LHS);
@@ -342,7 +357,7 @@ public class SyntacticAnalyzer {
                 RHS_to_replace = RHS_to_replace.replace("EPSILON", "");
             }
             derivation = derivation.replaceFirst(LHS.trim(), RHS_to_replace.trim());
-            derivation = derivation.replaceAll(" sa_\\w", "");
+            derivation = derivation.replaceAll(" sa-\\w", "");
 
 
 //       derivation.replace(index_LHS, index_LHS+LHS.length()-1, RHS_in_rule);

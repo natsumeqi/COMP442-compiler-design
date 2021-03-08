@@ -14,7 +14,7 @@ public class Grammar {
     private ArrayList<String> terminal_list;
     private ArrayList<String> nonTerminal_list;
     private ArrayList<String> semantic_actions_list;
-    private Map<String, Rule> rules;
+    private Map<String, Rule> rules;      // first step without attribute
     private Map<String, SemanticAction> semantic_actions;
     private Map<String, Rule> rules_attribute;
     private final Map<String, ArrayList<String>> follow_sets;
@@ -24,22 +24,44 @@ public class Grammar {
 
     public Grammar() {
         terminal_list = new ArrayList<>();
-        nonTerminal_list = new ArrayList<>();
-        rules = new HashMap<>();
+        nonTerminal_list = new ArrayList<>( );
+        semantic_actions_list = new ArrayList<>();
+        rules_attribute = new HashMap<>();
         follow_sets = new HashMap<>();
         first_sets = new HashMap<>();
         parsing_table = new HashMap<>();
     }
 
 
-    public void createSymbolsProject() {
-        terminal_list = (ArrayList<String>) Arrays.asList(",", "+", "-", "|", "[", "intLit", "]", "=", "class", "id", "{", "}", ";", "(", ")", "floatLit", "!", ":",
-                "void", ".", "*", "/", "&", "inherits", "sr", "main", "eq", "geq", "gt", "leq", "lt", "neq", "if", "then", "else", "read", "return", "while", "write",
-                "float", "integer", "private", "public", "func", "var", "break", "continue", "string", "qm", "stringLit");
+//    public void createSymbolsProject() {
+//        terminal_set =  new HashSet<> (Arrays.asList(",", "+", "-", "|", "[", "intLit", "]", "=", "class", "id", "{", "}", ";", "(", ")", "floatLit", "!", ":",
+//                "void", ".", "*", "/", "&", "inherits", "sr", "main", "eq", "geq", "gt", "leq", "lt", "neq", "if", "then", "else", "read", "return", "while", "write",
+//                "float", "integer", "private", "public", "func", "var", "break", "continue", "string", "qm", "stringLit"));
+//
+//        nonTerminal_set =  new HashSet<>(Arrays.asList("START", "aParams", "aParamsTail", "addOp", "arithExpr", "arraySize", "assignOp", "assignStat", "classDecl",
+//                "expr", "fParams", "fParamsTail", "factor", "funcBody", "funcDecl", "funcDef", "funcHead", "functionCall", "idnest", "indice", "memberDecl", "multOp",
+//                "prog", "relExpr", "sign", "statBlock", "statement", "term", "type", "varDecl", "variable", "visibility"));
+//    }
 
-        nonTerminal_list = (ArrayList<String>) Arrays.asList("START", "aParams", "aParamsTail", "addOp", "arithExpr", "arraySize", "assignOp", "assignStat", "classDecl",
-                "expr", "fParams", "fParamsTail", "factor", "funcBody", "funcDecl", "funcDef", "funcHead", "functionCall", "idnest", "indice", "memberDecl", "multOp",
-                "prog", "relExpr", "sign", "statBlock", "statement", "term", "type", "varDecl", "variable", "visibility");
+
+    public void generateGrammarProject(){
+        importRules();
+        importParsingTable();
+        importFirstFollowSets();
+        importSemanticActions();
+    }
+
+    private void importSemanticActions() {
+        semantic_actions_list = new ArrayList<>(Arrays.asList("sa-1", "sa-2", "sa-3","sa-4","sa-5","sa-6"));
+
+        semantic_actions = new HashMap<>();
+        semantic_actions.put("sa-3", new SemanticAction("sa-3", "PROG_s", "makeFamily(prog, CLASSLIST_s, FUNCDEFLIST_s, STATBLOCK_s)"));
+        semantic_actions.put("sa-1", new SemanticAction("sa-1", "FUNCDEFLIST_i", "CLASSLIST_s"));
+        semantic_actions.put("sa-2", new SemanticAction("sa-2", "STATBLOCK_i", "FUNCDEFLIST_s"));
+        semantic_actions.put("sa-4", new SemanticAction("sa-4", "CLASSLIST_s","makeNode(ClassList)"));
+        semantic_actions.put("sa-5", new SemanticAction("sa-5", "FUNCDEFLIST_s","makeNode(FuncDefList)"));
+        semantic_actions.put("sa-6", new SemanticAction("sa-6", "STATBLOCK_s","makeNode(StatBlock)"));
+
     }
 
 
@@ -170,7 +192,7 @@ public class Grammar {
     public void importRules() {
 
         BufferedReader reader;
-        String rules_file_path = "./src/main/resources/LL1.paquetFinal.grm.ucalgary";
+        String rules_file_path = "./src/main/resources/LL1.ucalgary.attribute";
         File file_read = new File(rules_file_path);
         System.out.println("[Grammar] Reading the grammar rules from file: " + file_read.getName());
         try {
@@ -186,21 +208,34 @@ public class Grammar {
                     } else {
                         rule.setRule_RHS(ruleString[1].substring(0, ruleString[1].lastIndexOf(".") - 1));
                     }
+                    // match rule ID with the ones in parsing table
                     String ruleId = rule.getRule_LHS() + "_" + rule.getRule_RHS().trim().replaceAll(" ", "_");
+                    ruleId = ruleId.replaceAll("_sa-\\d", "");
                     rule.setRule_id(ruleId);
 //                    System.out.println(rule.toString());
-                    rules.put(rule.getRule_id(), rule);
+                    rules_attribute.put(rule.getRule_id(), rule);
                 }
             }
+
+            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public void generateGrammarEx(){
+        createSymbolsEx();
+       createRulesWithAttributeEx();
+       createParsingTableEx();
+        createSemanticActionsEx();
+    }
+
+
+
     // example symbols
     public void createSymbolsEx() {
-        terminal_list =  new ArrayList<> (Arrays.asList("id", "(", ")", "plus", "mult", "$"));
-        nonTerminal_list =  new ArrayList<> (Arrays.asList("E", "E'", "T", "T'", "F"));
+        terminal_list =  new ArrayList<>(Arrays.asList("id", "(", ")", "plus", "mult", "$"));
+        nonTerminal_list = new ArrayList<>(Arrays.asList("E", "E'", "T", "T'", "F"));
         semantic_actions_list = new ArrayList<>(Arrays.asList("sa_A", "sa_B", "sa_C","sa_D","sa_E","sa_F","sa_G","sa_H","sa_I","sa_J","sa_K","sa_L"));
     }
 
@@ -227,7 +262,7 @@ public class Grammar {
         addToParsingRow("F", new String[]{"r7", "r8", "error", "error", "error", "error"});
     }
 
-    public void createSemanticActions(){
+    public void createSemanticActionsEx(){
         semantic_actions = new HashMap<>();
         semantic_actions.put("sa_A", new SemanticAction("sa_A", "E'_i", "T_s"));
         semantic_actions.put("sa_B", new SemanticAction("sa_B", "E_s", "E'_s"));
@@ -264,8 +299,7 @@ public class Grammar {
         parsing_table.put(nonTerminal, parsingTable_row);
     }
 
-
-    public List<String> getTerminal_list() {
+    public ArrayList<String> getTerminal_list() {
         return terminal_list;
     }
 
@@ -273,7 +307,7 @@ public class Grammar {
         this.terminal_list = terminal_list;
     }
 
-    public List<String> getNonTerminal_list() {
+    public ArrayList<String> getNonTerminal_list() {
         return nonTerminal_list;
     }
 
