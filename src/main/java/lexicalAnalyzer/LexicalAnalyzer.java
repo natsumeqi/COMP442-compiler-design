@@ -57,7 +57,7 @@ public class LexicalAnalyzer {
      * flush contents to files and close files
      */
     public void IOFileClose() {
-        System.out.println("[Lexer] Flushing & closing files. ");
+//        System.out.println("[Lexer] Flushing & closing files. ");
         try {
             reader.close();
             writer_tok.flush();

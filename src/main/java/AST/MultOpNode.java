@@ -12,14 +12,6 @@ public class MultOpNode extends Node {
 		super(p_data, p_parent);
 	}
 
-	public MultOpNode(String p_data, String p_name) {
-		super(p_data, p_name);
-	}
-
-//	@Override
-//	Node makeNode(Token token) {
-//		return null;
-//	}
 
 	public MultOpNode(String p_data, Node p_leftChild, Node p_rightChild){
 		super(p_data); 

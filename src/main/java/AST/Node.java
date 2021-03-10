@@ -40,13 +40,11 @@ public abstract class Node {
     }
 
 
-    public Node(String p_data, String p_name) {
+    public Node(String p_data, String p_type) {
         this.setData(p_data);
-        this.setName(p_name);
+        this.setType(p_type);
         this.m_nodeId = Node.m_curNodeId;
         Node.m_curNodeId++;
-        this.lm_sibling = this;
-        this.m_parent = this;
     }
 
     public List<Node> getChildren() {
@@ -65,7 +63,6 @@ public abstract class Node {
     public void addChild(Node p_child) {
         p_child.setParent(this);
         this.m_children.add(p_child);
-        System.out.println("add child ok");
     }
 
     public String getName() {
@@ -108,11 +105,11 @@ public abstract class Node {
     }
 
     public void print() {
-        System.out.println("=====================================================================");
-        System.out.println("Node type                 | data      | type      | subtreestring");
-        System.out.println("=====================================================================");
+        System.out.println("===============================================================================");
+        System.out.println("Node type                      | data           | type      | subtreestring");
+        System.out.println("===============================================================================");
         this.printSubtree();
-        System.out.println("=====================================================================");
+        System.out.println("===============================================================================");
 
     }
 
@@ -120,11 +117,11 @@ public abstract class Node {
         for (int i = 0; i < Node.m_nodelevel; i++)
             System.out.print("  ");
 
-        String toprint = String.format("%-25s", this.getClass().getName());
+        String toprint = String.format("%-30s", this.getClass().getName());
         for (int i = 0; i < Node.m_nodelevel; i++)
             toprint = toprint.substring(0, toprint.length() - 2);
-        toprint += String.format("%-12s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
-        toprint += String.format("%-20s", (this.getType() == null || this.getType().isEmpty()) ? " | " : " | " + this.getType());
+        toprint += String.format("%-17s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
+        toprint += String.format("%-25s", (this.getType() == null || this.getType().isEmpty()) ? " | " : " | " + this.getType());
         System.out.println(toprint);
 
         Node.m_nodelevel++;
@@ -134,6 +131,9 @@ public abstract class Node {
         }
         Node.m_nodelevel--;
     }
+
+
+
 
 
     /**
@@ -170,7 +170,6 @@ public abstract class Node {
                 y_siblings.m_parent = x_siblings.m_parent;
             }
 //            System.out.println("[y_siblings] "+y_siblings.toString());
-            System.out.println("+++++");
             return y_siblings;
         }
         return this;

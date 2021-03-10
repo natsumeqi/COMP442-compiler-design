@@ -1,0 +1,114 @@
+Rule{rule_id='CLASSDECL_EPSILON', rule_LHS='CLASSDECL', rule_RHS='EPSILON sa-7'}
+Rule{rule_id='INTNUM_intnum', rule_LHS='INTNUM', rule_RHS=' intnum '}
+Rule{rule_id='STATEMENT_write_lpar_EXPR_rpar_semi', rule_LHS='STATEMENT', rule_RHS=' write lpar EXPR rpar semi '}
+Rule{rule_id='FUNCDEF_FUNCTION_FUNCDEF', rule_LHS='FUNCDEF', rule_RHS=' FUNCTION FUNCDEF '}
+Rule{rule_id='STATEMENT_return_lpar_EXPR_rpar_semi', rule_LHS='STATEMENT', rule_RHS=' return lpar EXPR rpar semi '}
+Rule{rule_id='VISIBILITY_public', rule_LHS='VISIBILITY', rule_RHS=' public '}
+Rule{rule_id='MEMBERDECL_FUNCDECL', rule_LHS='MEMBERDECL', rule_RHS=' FUNCDECL '}
+Rule{rule_id='SIGN_plus', rule_LHS='SIGN', rule_RHS=' plus '}
+Rule{rule_id='FUNCHEAD_func_id_CLASSMETHOD_lpar_FPARAMS_rpar_colon_FUNCDECLTAIL', rule_LHS='FUNCHEAD', rule_RHS=' func id CLASSMETHOD lpar FPARAMS rpar colon FUNCDECLTAIL '}
+Rule{rule_id='VARIABLE_id_VARIABLEIDNEST', rule_LHS='VARIABLE', rule_RHS=' id VARIABLEIDNEST '}
+Rule{rule_id='FUNCDECL_func_id_lpar_FPARAMS_rpar_colon_FUNCDECLTAIL_semi', rule_LHS='FUNCDECL', rule_RHS=' func sa-5 id lpar FPARAMS rpar colon FUNCDECLTAIL semi '}
+Rule{rule_id='FUNCORVARIDNESTTAIL_dot_id_FUNCORVARIDNEST', rule_LHS='FUNCORVARIDNESTTAIL', rule_RHS=' dot id FUNCORVARIDNEST '}
+Rule{rule_id='INDICEREP_lsqbr_EXPR_rsqbr_INDICEREP', rule_LHS='INDICEREP', rule_RHS=' lsqbr EXPR rsqbr INDICEREP '}
+Rule{rule_id='TERMTAIL_EPSILON', rule_LHS='TERMTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='ARITHEXPRTAIL_EPSILON', rule_LHS='ARITHEXPRTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='FACTOR_intnum', rule_LHS='FACTOR', rule_RHS=' intnum '}
+Rule{rule_id='FUNCSTATTAILIDNEST_dot_id_FUNCSTATTAIL', rule_LHS='FUNCSTATTAILIDNEST', rule_RHS=' dot id FUNCSTATTAIL '}
+Rule{rule_id='VARDECL_TYPE_id_ARRAYSIZEREPT_semi', rule_LHS='VARDECL', rule_RHS=' TYPE id ARRAYSIZEREPT semi '}
+Rule{rule_id='FUNCTION_FUNCHEAD_FUNCBODY', rule_LHS='FUNCTION', rule_RHS=' FUNCHEAD FUNCBODY '}
+Rule{rule_id='RELOP_leq', rule_LHS='RELOP', rule_RHS=' leq '}
+Rule{rule_id='TYPE_float', rule_LHS='TYPE', rule_RHS=' float '}
+Rule{rule_id='APARAMSTAIL_comma_EXPR_APARAMSTAIL', rule_LHS='APARAMSTAIL', rule_RHS=' comma EXPR APARAMSTAIL '}
+Rule{rule_id='ADDOP_plus', rule_LHS='ADDOP', rule_RHS=' plus '}
+Rule{rule_id='ASSIGNSTATTAIL_ASSIGNOP_EXPR', rule_LHS='ASSIGNSTATTAIL', rule_RHS=' ASSIGNOP EXPR '}
+Rule{rule_id='INHERIT_inherits_id_NESTEDID', rule_LHS='INHERIT', rule_RHS=' inherits id NESTEDID '}
+Rule{rule_id='STATBLOCK_EPSILON', rule_LHS='STATBLOCK', rule_RHS='EPSILON '}
+Rule{rule_id='STATEMENT_if_lpar_EXPR_rpar_then_STATBLOCK_else_STATBLOCK_semi', rule_LHS='STATEMENT', rule_RHS=' if lpar EXPR rpar then STATBLOCK else STATBLOCK semi '}
+Rule{rule_id='MULTOP_and', rule_LHS='MULTOP', rule_RHS=' and '}
+Rule{rule_id='PROG_CLASSDECL_FUNCDEF_main_FUNCBODY', rule_LHS='PROG', rule_RHS=' CLASSDECL FUNCDEF main sa-6 FUNCBODY sa-3'}
+Rule{rule_id='FUNCORASSIGNSTATIDNEST_INDICEREP_FUNCORASSIGNSTATIDNESTVARTAIL', rule_LHS='FUNCORASSIGNSTATIDNEST', rule_RHS=' INDICEREP FUNCORASSIGNSTATIDNESTVARTAIL '}
+Rule{rule_id='EXPR_ARITHEXPR_EXPRTAIL', rule_LHS='EXPR', rule_RHS=' ARITHEXPR EXPRTAIL '}
+Rule{rule_id='STATEMENTLIST_EPSILON', rule_LHS='STATEMENTLIST', rule_RHS='EPSILON '}
+Rule{rule_id='TERM_FACTOR_TERMTAIL', rule_LHS='TERM', rule_RHS=' FACTOR TERMTAIL '}
+Rule{rule_id='APARAMS_EXPR_APARAMSTAIL', rule_LHS='APARAMS', rule_RHS=' EXPR APARAMSTAIL '}
+Rule{rule_id='APARAMS_EPSILON', rule_LHS='APARAMS', rule_RHS='EPSILON '}
+Rule{rule_id='NESTEDID_EPSILON', rule_LHS='NESTEDID', rule_RHS='EPSILON '}
+Rule{rule_id='TYPE_integer', rule_LHS='TYPE', rule_RHS=' integer '}
+Rule{rule_id='FUNCORASSIGNSTATIDNESTFUNCTAIL_EPSILON', rule_LHS='FUNCORASSIGNSTATIDNESTFUNCTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='SIGN_minus', rule_LHS='SIGN', rule_RHS=' minus '}
+Rule{rule_id='FUNCORASSIGNSTATIDNESTFUNCTAIL_dot_id_FUNCSTATTAIL', rule_LHS='FUNCORASSIGNSTATIDNESTFUNCTAIL', rule_RHS=' dot id FUNCSTATTAIL '}
+Rule{rule_id='STATEMENT_read_lpar_VARIABLE_rpar_semi', rule_LHS='STATEMENT', rule_RHS=' read lpar VARIABLE rpar semi '}
+Rule{rule_id='FACTOR_stringlit', rule_LHS='FACTOR', rule_RHS=' stringlit '}
+Rule{rule_id='NESTEDID_comma_id_NESTEDID', rule_LHS='NESTEDID', rule_RHS=' comma id NESTEDID '}
+Rule{rule_id='STATEMENT_continue_semi', rule_LHS='STATEMENT', rule_RHS=' continue semi '}
+Rule{rule_id='STATBLOCK_lcurbr_STATEMENTLIST_rcurbr', rule_LHS='STATBLOCK', rule_RHS=' lcurbr STATEMENTLIST rcurbr'}
+Rule{rule_id='TYPE_string', rule_LHS='TYPE', rule_RHS=' string '}
+Rule{rule_id='FUNCORASSIGNSTATIDNESTVARTAIL_dot_id_FUNCORASSIGNSTATIDNEST', rule_LHS='FUNCORASSIGNSTATIDNESTVARTAIL', rule_RHS=' dot id FUNCORASSIGNSTATIDNEST '}
+Rule{rule_id='FUNCDECLTAIL_TYPE', rule_LHS='FUNCDECLTAIL', rule_RHS=' TYPE '}
+Rule{rule_id='INDICEREP_EPSILON', rule_LHS='INDICEREP', rule_RHS='EPSILON '}
+Rule{rule_id='VARIABLEIDNEST_INDICEREP_VARIABLEIDNESTTAIL', rule_LHS='VARIABLEIDNEST', rule_RHS=' INDICEREP VARIABLEIDNESTTAIL '}
+Rule{rule_id='ADDOP_minus', rule_LHS='ADDOP', rule_RHS=' minus '}
+Rule{rule_id='RELOP_gt', rule_LHS='RELOP', rule_RHS=' gt '}
+Rule{rule_id='ASSIGNOP_assign', rule_LHS='ASSIGNOP', rule_RHS=' assign '}
+Rule{rule_id='ARRAYSIZEREPT_EPSILON', rule_LHS='ARRAYSIZEREPT', rule_RHS='EPSILON '}
+Rule{rule_id='FUNCSTATTAILIDNEST_EPSILON', rule_LHS='FUNCSTATTAILIDNEST', rule_RHS='EPSILON '}
+Rule{rule_id='FACTOR_FUNCORVAR', rule_LHS='FACTOR', rule_RHS=' FUNCORVAR '}
+Rule{rule_id='FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL', rule_LHS='FUNCORVARIDNEST', rule_RHS=' INDICEREP FUNCORVARIDNESTTAIL '}
+Rule{rule_id='CLASSMETHOD_EPSILON', rule_LHS='CLASSMETHOD', rule_RHS='EPSILON '}
+Rule{rule_id='STATEMENTLIST_STATEMENT_STATEMENTLIST', rule_LHS='STATEMENTLIST', rule_RHS=' STATEMENT STATEMENTLIST '}
+Rule{rule_id='FUNCORVARIDNESTTAIL_EPSILON', rule_LHS='FUNCORVARIDNESTTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='FPARAMSTAIL_comma_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL', rule_LHS='FPARAMSTAIL', rule_RHS=' comma TYPE id ARRAYSIZEREPT FPARAMSTAIL '}
+Rule{rule_id='FUNCDEF_EPSILON', rule_LHS='FUNCDEF', rule_RHS='EPSILON '}
+Rule{rule_id='VARDECLREP_EPSILON', rule_LHS='VARDECLREP', rule_RHS='EPSILON '}
+Rule{rule_id='RELOP_lt', rule_LHS='RELOP', rule_RHS=' lt '}
+Rule{rule_id='FACTOR_not_FACTOR', rule_LHS='FACTOR', rule_RHS=' not FACTOR '}
+Rule{rule_id='MEMBERDECL_VARDECL', rule_LHS='MEMBERDECL', rule_RHS=' VARDECL '}
+Rule{rule_id='STATEMENT_break_semi', rule_LHS='STATEMENT', rule_RHS=' break semi '}
+Rule{rule_id='FUNCORVAR_id_FUNCORVARIDNEST', rule_LHS='FUNCORVAR', rule_RHS=' id FUNCORVARIDNEST '}
+Rule{rule_id='VISIBILITY_EPSILON', rule_LHS='VISIBILITY', rule_RHS='EPSILON '}
+Rule{rule_id='FUNCSTATTAIL_INDICEREP_dot_id_FUNCSTATTAIL', rule_LHS='FUNCSTATTAIL', rule_RHS=' INDICEREP dot id FUNCSTATTAIL '}
+Rule{rule_id='EXPRTAIL_RELOP_ARITHEXPR', rule_LHS='EXPRTAIL', rule_RHS=' RELOP ARITHEXPR '}
+Rule{rule_id='CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY', rule_LHS='CLASSDECLBODY', rule_RHS=' VISIBILITY MEMBERDECL CLASSDECLBODY '}
+Rule{rule_id='FUNCBODY_lcurbr_METHODBODYVAR_STATEMENTLIST_rcurbr', rule_LHS='FUNCBODY', rule_RHS=' lcurbr METHODBODYVAR STATEMENTLIST rcurbr'}
+Rule{rule_id='CLASSDECLBODY_EPSILON', rule_LHS='CLASSDECLBODY', rule_RHS='EPSILON '}
+Rule{rule_id='VARIABLEIDNESTTAIL_EPSILON', rule_LHS='VARIABLEIDNESTTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='EXPRTAIL_EPSILON', rule_LHS='EXPRTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='FUNCORASSIGNSTAT_id_FUNCORASSIGNSTATIDNEST', rule_LHS='FUNCORASSIGNSTAT', rule_RHS=' id FUNCORASSIGNSTATIDNEST '}
+Rule{rule_id='METHODBODYVAR_EPSILON', rule_LHS='METHODBODYVAR', rule_RHS='EPSILON '}
+Rule{rule_id='FACTOR_floatnum', rule_LHS='FACTOR', rule_RHS=' floatnum '}
+Rule{rule_id='STATBLOCK_STATEMENT', rule_LHS='STATBLOCK', rule_RHS=' STATEMENT '}
+Rule{rule_id='RELOP_eq', rule_LHS='RELOP', rule_RHS=' eq '}
+Rule{rule_id='RELOP_neq', rule_LHS='RELOP', rule_RHS=' neq '}
+Rule{rule_id='INTNUM_EPSILON', rule_LHS='INTNUM', rule_RHS='EPSILON '}
+Rule{rule_id='TYPE_id', rule_LHS='TYPE', rule_RHS=' id '}
+Rule{rule_id='STATEMENT_FUNCORASSIGNSTAT_semi', rule_LHS='STATEMENT', rule_RHS=' FUNCORASSIGNSTAT semi '}
+Rule{rule_id='FUNCORASSIGNSTATIDNESTVARTAIL_ASSIGNSTATTAIL', rule_LHS='FUNCORASSIGNSTATIDNESTVARTAIL', rule_RHS=' ASSIGNSTATTAIL '}
+Rule{rule_id='ARRAYSIZEREPT_lsqbr_INTNUM_rsqbr_ARRAYSIZEREPT', rule_LHS='ARRAYSIZEREPT', rule_RHS=' lsqbr INTNUM rsqbr ARRAYSIZEREPT '}
+Rule{rule_id='FUNCORVARIDNEST_lpar_APARAMS_rpar_FUNCORVARIDNESTTAIL', rule_LHS='FUNCORVARIDNEST', rule_RHS=' lpar APARAMS rpar FUNCORVARIDNESTTAIL '}
+Rule{rule_id='FACTOR_lpar_EXPR_rpar', rule_LHS='FACTOR', rule_RHS=' lpar EXPR rpar '}
+Rule{rule_id='FPARAMS_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL', rule_LHS='FPARAMS', rule_RHS=' TYPE id ARRAYSIZEREPT FPARAMSTAIL '}
+Rule{rule_id='INHERIT_EPSILON', rule_LHS='INHERIT', rule_RHS='EPSILON '}
+Rule{rule_id='VARDECLREP_VARDECL_VARDECLREP', rule_LHS='VARDECLREP', rule_RHS=' VARDECL VARDECLREP '}
+Rule{rule_id='METHODBODYVAR_var_lcurbr_VARDECLREP_rcurbr', rule_LHS='METHODBODYVAR', rule_RHS=' var lcurbr VARDECLREP rcurbr '}
+Rule{rule_id='FUNCORASSIGNSTATIDNEST_lpar_APARAMS_rpar_FUNCORASSIGNSTATIDNESTFUNCTAIL', rule_LHS='FUNCORASSIGNSTATIDNEST', rule_RHS=' lpar APARAMS rpar FUNCORASSIGNSTATIDNESTFUNCTAIL '}
+Rule{rule_id='MULTOP_mult', rule_LHS='MULTOP', rule_RHS=' mult '}
+Rule{rule_id='TERMTAIL_MULTOP_FACTOR_TERMTAIL', rule_LHS='TERMTAIL', rule_RHS=' MULTOP FACTOR TERMTAIL '}
+Rule{rule_id='FPARAMSTAIL_EPSILON', rule_LHS='FPARAMSTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='ARITHEXPR_TERM_ARITHEXPRTAIL', rule_LHS='ARITHEXPR', rule_RHS=' TERM ARITHEXPRTAIL '}
+Rule{rule_id='START_PROG', rule_LHS='START', rule_RHS=' PROG '}
+Rule{rule_id='FUNCSTATTAIL_lpar_APARAMS_rpar_FUNCSTATTAILIDNEST', rule_LHS='FUNCSTATTAIL', rule_RHS=' lpar APARAMS rpar FUNCSTATTAILIDNEST '}
+Rule{rule_id='VISIBILITY_private', rule_LHS='VISIBILITY', rule_RHS=' private '}
+Rule{rule_id='ARITHEXPRTAIL_ADDOP_TERM_ARITHEXPRTAIL', rule_LHS='ARITHEXPRTAIL', rule_RHS=' ADDOP TERM ARITHEXPRTAIL '}
+Rule{rule_id='VARIABLEIDNESTTAIL_dot_id_VARIABLEIDNEST', rule_LHS='VARIABLEIDNESTTAIL', rule_RHS=' dot id VARIABLEIDNEST '}
+Rule{rule_id='FACTOR_qm_lsqbr_EXPR_colon_EXPR_colon_EXPR_rsqbr', rule_LHS='FACTOR', rule_RHS=' qm lsqbr EXPR colon EXPR colon EXPR rsqbr '}
+Rule{rule_id='CLASSMETHOD_sr_id', rule_LHS='CLASSMETHOD', rule_RHS=' sr id '}
+Rule{rule_id='FACTOR_SIGN_FACTOR', rule_LHS='FACTOR', rule_RHS=' SIGN FACTOR '}
+Rule{rule_id='CLASSDECL_class_id_INHERIT_lcurbr_CLASSDECLBODY_rcurbr_semi_CLASSDECL', rule_LHS='CLASSDECL', rule_RHS=' class sa-4 id INHERIT lcurbr CLASSDECLBODY rcurbr semi CLASSDECL '}
+Rule{rule_id='APARAMSTAIL_EPSILON', rule_LHS='APARAMSTAIL', rule_RHS='EPSILON '}
+Rule{rule_id='FPARAMS_EPSILON', rule_LHS='FPARAMS', rule_RHS='EPSILON '}
+Rule{rule_id='MULTOP_div', rule_LHS='MULTOP', rule_RHS=' div '}
+Rule{rule_id='RELOP_geq', rule_LHS='RELOP', rule_RHS=' geq '}
+Rule{rule_id='ADDOP_or', rule_LHS='ADDOP', rule_RHS=' or '}
+Rule{rule_id='FUNCDECLTAIL_void', rule_LHS='FUNCDECLTAIL', rule_RHS=' void '}
+Rule{rule_id='STATEMENT_while_lpar_EXPR_rpar_STATBLOCK_semi', rule_LHS='STATEMENT', rule_RHS=' while lpar EXPR rpar STATBLOCK semi '}

@@ -1,8 +1,6 @@
 START -> PROG  .
 
-PROG -> CLASSDECL FUNCDEF main FUNCBODY sa-3 .
-
-
+PROG -> CLASSDECL sa-01 FUNCDEF main sa-02 FUNCBODY sa-03 .
 
 
 ADDOP -> plus  . 
@@ -27,7 +25,7 @@ ASSIGNOP -> assign  .
 
 ASSIGNSTATTAIL -> ASSIGNOP EXPR  . 
 
-CLASSDECL -> class sa-4 id INHERIT lcurbr CLASSDECLBODY rcurbr semi CLASSDECL  .
+CLASSDECL -> class id sa-09 INHERIT sa-07 lcurbr CLASSDECLBODY sa-08 rcurbr semi sa-04 CLASSDECL  .
 CLASSDECL ->  . 
 
 CLASSDECLBODY -> VISIBILITY MEMBERDECL CLASSDECLBODY  . 
@@ -58,7 +56,7 @@ FPARAMSTAIL ->  .
 
 FUNCBODY -> lcurbr METHODBODYVAR STATEMENTLIST rcurbr .
 
-FUNCDECL -> func sa-5 id lpar FPARAMS rpar colon FUNCDECLTAIL semi  .
+FUNCDECL -> func id lpar FPARAMS rpar colon FUNCDECLTAIL semi  .
 
 FUNCDECLTAIL -> TYPE  . 
 FUNCDECLTAIL -> void  . 
@@ -66,7 +64,7 @@ FUNCDECLTAIL -> void  .
 FUNCDEF -> FUNCTION FUNCDEF  . 
 FUNCDEF ->  . 
 
-FUNCHEAD -> func id CLASSMETHOD lpar FPARAMS rpar colon FUNCDECLTAIL  . 
+FUNCHEAD -> func sa-05 id CLASSMETHOD lpar FPARAMS rpar colon FUNCDECLTAIL  . 
 
 FUNCORASSIGNSTAT -> id FUNCORASSIGNSTATIDNEST  . 
 
@@ -98,14 +96,14 @@ FUNCTION -> FUNCHEAD FUNCBODY  .
 INDICEREP -> lsqbr EXPR rsqbr INDICEREP  . 
 INDICEREP ->  . 
 
-INHERIT -> inherits id NESTEDID  . 
+INHERIT -> inherits id sa-06 NESTEDID  . 
 INHERIT ->  . 
 
 INTNUM -> intnum  . 
 INTNUM ->  . 
 
-MEMBERDECL -> FUNCDECL  . 
-MEMBERDECL -> VARDECL  . 
+MEMBERDECL -> FUNCDECL sa-10 . 
+MEMBERDECL -> VARDECL sa-11 . 
 
 METHODBODYVAR -> var lcurbr VARDECLREP rcurbr  . 
 METHODBODYVAR ->  . 
@@ -131,7 +129,7 @@ SIGN -> minus  .
 
 
 
-STATBLOCK -> lcurbr STATEMENTLIST rcurbr sa-6 .
+STATBLOCK -> lcurbr STATEMENTLIST rcurbr .
 STATBLOCK -> STATEMENT  . 
 STATBLOCK ->  . 
 

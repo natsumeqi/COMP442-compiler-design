@@ -1,6 +1,5 @@
 package AST;
 
-import lexicalAnalyzer.Token;
 
 public class IdNode extends Node {
 	
@@ -16,10 +15,6 @@ public class IdNode extends Node {
 		super(p_data, p_type);
 	}
 
-//	@Override
-//	Node makeNode(Token token) {
-//		return null;
-//	}
 
 
 }
