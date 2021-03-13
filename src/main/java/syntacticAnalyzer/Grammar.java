@@ -83,22 +83,73 @@ public class Grammar {
     }
 
     private void importSemanticActions() {
-        semantic_actions_list = new ArrayList<>(Arrays.asList("sa-01", "sa-02", "sa-03", "sa-04", "sa-05", "sa-06", "sa-07",
-                "sa-08","sa-09", "sa-10", "sa-11"));
+
 
         semantic_actions = new HashMap<>();
         semantic_actions.put("sa-01", new SemanticAction("sa-01", "ClassList_s", "makeFamily(ClassList, ClassDecl_s, n)"));
-        semantic_actions.put("sa-02", new SemanticAction("sa-02", "MainBlock_s", "makeNode(MainBlock)"));
+        semantic_actions.put("sa-02", new SemanticAction("sa-02", "MainBlock_s", "makeFamily(MainBlock, FuncBody_s)"));
         semantic_actions.put("sa-03", new SemanticAction("sa-03", "Prog_s", "makeFamily(Prog, ClassList_s, FuncDefList_s, MainBlock_s)"));
         semantic_actions.put("sa-04", new SemanticAction("sa-04", "ClassDecl_s", "makeFamily(ClassDecl, Id_i, InherList_s, MembList_s)"));
-        semantic_actions.put("sa-05", new SemanticAction("sa-05", "FuncDefList_s", "makeNode(FuncDefList)"));
+        semantic_actions.put("sa-05", new SemanticAction("sa-05", "FuncDefList_s", "makeFamily(FuncDefList, FuncDef_s, n)"));
         semantic_actions.put("sa-06", new SemanticAction("sa-06", "Id_s", "makeNode(Id)"));
         semantic_actions.put("sa-07", new SemanticAction("sa-07", "InherList_s", "makeFamily(InherList, Id_s, n)"));
-        semantic_actions.put("sa-08", new SemanticAction("sa-08", "MembList_s", "makeFamily(MembList, VarDecl_s, FuncDecl_s, n2)"));
+        semantic_actions.put("sa-08", new SemanticAction("sa-08", "MembList_s", "makeFamily(MembList, VarDecl_s, FuncDecl_s, n)"));
         semantic_actions.put("sa-09", new SemanticAction("sa-09", "Id_i", "makeNode(Id)"));
-        semantic_actions.put("sa-10", new SemanticAction("sa-10", "FuncDecl_s", "makeNode(FuncDecl)"));
-        semantic_actions.put("sa-11", new SemanticAction("sa-11", "VarDecl_s", "makeNode(VarDecl)"));
+        semantic_actions.put("sa-10", new SemanticAction("sa-10", "FuncDecl_s", "makeFamily(FuncDecl, Id_s, FParamList_s, Type_s)"));
+        semantic_actions.put("sa-11", new SemanticAction("sa-11", "VarDecl_s", "makeFamily(VarDecl, Type_s, Id_s, DimList_s)"));
+        semantic_actions.put("sa-12", new SemanticAction("sa-12", "FParamList_s", "makeFamily(FParamList, FParam_s, n)"));
+        semantic_actions.put("sa-13", new SemanticAction("sa-13", "Type_s", "makeNode(Type)"));
+        semantic_actions.put("sa-14", new SemanticAction("sa-14", "DimList_s", "makeFamily(DimList, Dim_s, n)"));
+        semantic_actions.put("sa-15", new SemanticAction("sa-15", "Dim_s", "makeNode(Dim)"));
+        semantic_actions.put("sa-16", new SemanticAction("sa-16", "FParam_s", "makeFamily(FParam, Type_s, Id_s, DimList_s)"));
+        semantic_actions.put("sa-17", new SemanticAction("sa-17", "FuncDef_s", "makeFamily(FuncDef, Id_s, Scope_s, FParamList_s, Type_s, FuncBody_s)"));
+        semantic_actions.put("sa-18", new SemanticAction("sa-18", "FuncBody_s", "makeFamily(FuncBody, MethVar_s, StatBlock_s)"));
+        semantic_actions.put("sa-19", new SemanticAction("sa-19", "Scope_s", "makeFamily(Scope, Id_s)"));
+        semantic_actions.put("sa-20", new SemanticAction("sa-20", "MethVar_s", "makeFamily(MethVar, VarDecl_s, n)"));
+        semantic_actions.put("sa-21", new SemanticAction("sa-21", "StatBlock_s", "makeFamily(StatBlock, VarDecl_s, IfStat_s, WhileStat_s, ReadStat_s, WriteStat_s, ReturnStat_s, BreakStat_s, ContiStat_s, FuncCallStat_s, AssignStat_s, n)"));
+        semantic_actions.put("sa-22", new SemanticAction("sa-22", "IfStat_s", "makeFamily(IfStat, Expr_s, StatBlock_s, StatBlock_s)"));
+        semantic_actions.put("sa-23", new SemanticAction("sa-23", "WhileStat_s", "makeFamily(WhileStat, Expr_s, StatBlock_s)"));
+        semantic_actions.put("sa-24", new SemanticAction("sa-24", "ReadStat_s", "makeFamily(ReadStat, Variable_s)"));
+        semantic_actions.put("sa-25", new SemanticAction("sa-25", "WriteStat_s", "makeFamily(WriteStat, Expr_s)"));
+        semantic_actions.put("sa-26", new SemanticAction("sa-26", "ReturnStat_s", "makeFamily(ReturnStat, Expr_s)"));
+        semantic_actions.put("sa-27", new SemanticAction("sa-27", "BreakStat_s", "makeNode(BreakStat)"));
+        semantic_actions.put("sa-28", new SemanticAction("sa-28", "ContiStat_s", "makeNode(ContiStat)"));
+        semantic_actions.put("sa-29", new SemanticAction("sa-29", "FuncCallStat_s", "makeNode(FuncCallStat, FuncCall_s)"));
+        semantic_actions.put("sa-30", new SemanticAction("sa-30", "Expr_s", "makeFamily(Expr, ArithExpr_s, RelExpr_s, any)"));
+        semantic_actions.put("sa-31", new SemanticAction("sa-31", "Variable_s", "makeFamily(Variable, DataMem_s, FuncCall_s, n)"));
+        semantic_actions.put("sa-32", new SemanticAction("sa-32", "AssignStat_s", "makeFamily(AssignStat, Variable_s, Expr_s)"));
+        semantic_actions.put("sa-33", new SemanticAction("sa-33", "ArithExpr_s", "makeFamily(ArithExpr, Term_s, AddOp_s, any)"));
+        semantic_actions.put("sa-34", new SemanticAction("sa-34", "RelExpr_s", "makeFamily(RelExpr, Expr_s, RelOp_s, Expr_s)"));
+        semantic_actions.put("sa-35", new SemanticAction("sa-35", "Term_s", "makeFamily(Term, Factor_s, MultOp_s, any)"));
+        semantic_actions.put("sa-36", new SemanticAction("sa-36", "Factor_s", "makeFamily(Factor, Num_s, String_s, FuncOrVar_s, ArithExpr_s, Not_s, Sign_s, any)"));
+        semantic_actions.put("sa-37", new SemanticAction("sa-37", "AddOp", "makeFamily(AddOp_i, ArithExpr_s, Term_s, reuse)"));
+        semantic_actions.put("sa-38", new SemanticAction("sa-38", "MultOp", "makeFamily(MultOp_i, Term_s, Factor_s, reuse)"));
 
+        semantic_actions.put("sa-39", new SemanticAction("sa-39", "Num_s", "makeNode(Num)"));
+        semantic_actions.put("sa-40", new SemanticAction("sa-40", "String_s", "makeNode(String)"));
+        semantic_actions.put("sa-41", new SemanticAction("sa-41", "Not_s", "makeFamily(Not, Factor_s)"));
+        semantic_actions.put("sa-42", new SemanticAction("sa-42", "Sign_s", "makeFamily(Sign_i, Factor_s, reuse)"));
+        semantic_actions.put("sa-43", new SemanticAction("sa-43", "InlineIf_s", "makeFamily(InlineIf, Expr_s, Expr_s, Expr_s)"));
+        semantic_actions.put("sa-44", new SemanticAction("sa-44", "FuncOrVar_s", "makeFamily(FuncOrVar, DataMem_s, FuncCall_s, n)"));
+        semantic_actions.put("sa-45", new SemanticAction("sa-45", "RelOp_s", "makeNode(RelOp)"));
+        semantic_actions.put("sa-46", new SemanticAction("sa-46", "Sign_i", "makeNode(Sign)"));
+        semantic_actions.put("sa-47", new SemanticAction("sa-47", "AddOp_i", "makeNode(AddOp)"));
+        semantic_actions.put("sa-48", new SemanticAction("sa-48", "MultOp_i", "makeNode(MultOp)"));
+        semantic_actions.put("sa-49", new SemanticAction("sa-49", "FuncCall_s", "makeFamily(FuncCall, Id_s, AParams_s)"));
+        semantic_actions.put("sa-50", new SemanticAction("sa-50", "AParams_s", "makeFamily(AParams, Expr_s, n)"));
+        semantic_actions.put("sa-51", new SemanticAction("sa-51", "Indice_s", "makeFamily(Indice, ArithExpr_s, n)"));
+        semantic_actions.put("sa-52", new SemanticAction("sa-52", "DataMem_s", "makeFamily(DataMem, Id_s, Indice_s)"));
+        semantic_actions.put("sa-53", new SemanticAction("sa-53", "Type_s", "makeFamily(Type, Id_s)"));
+
+
+
+
+
+
+        // initialize semantic actions list
+        for(Map.Entry<String, SemanticAction> pair: semantic_actions.entrySet()){
+            semantic_actions_list.add(pair.getKey());
+        }
     }
 
 
