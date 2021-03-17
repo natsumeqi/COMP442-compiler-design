@@ -7,6 +7,8 @@ import java.util.List;
 public abstract class Node {
 
     public String m_sa_name = null;
+    public int m_line;
+
     private List<Node> m_children = new ArrayList<Node>();
     private Node m_parent = null;
     public String m_data = null;
@@ -27,9 +29,19 @@ public abstract class Node {
         this.setData(p_data);
         this.m_nodeId = Node.m_curNodeId;
         Node.m_curNodeId++;
-        System.out.println(m_curNodeId);
+//        System.out.println(m_curNodeId);
         this.lm_sibling = this;
         this.m_parent = this;
+    }
+
+    public Node(String p_data, int line) {
+        this.setData(p_data);
+        this.m_nodeId = Node.m_curNodeId;
+        Node.m_curNodeId++;
+//        System.out.println(m_curNodeId);
+        this.lm_sibling = this;
+        this.m_parent = this;
+        this.m_line = line;
     }
 
     public Node(String p_data, Node p_parent) {
@@ -94,6 +106,14 @@ public abstract class Node {
         return (this.m_parent == null);
     }
 
+    public int getM_line() {
+        return m_line;
+    }
+
+    public void setM_line(int m_line) {
+        this.m_line = m_line;
+    }
+
     public boolean isLeaf() {
         if (this.m_children.size() == 0)
             return true;
@@ -106,11 +126,11 @@ public abstract class Node {
     }
 
     public void print() {
-        System.out.println("==================================================================================================================");
-        System.out.println("Node type                                                         | data           | type      | subtreestring");
-        System.out.println("==================================================================================================================");
+        System.out.println("============================================================================================================================");
+        System.out.println("Node type                                                                   | data                | type      | subtreestring");
+        System.out.println("============================================================================================================================");
         this.printSubtree();
-        System.out.println("==================================================================================================================");
+        System.out.println("============================================================================================================================");
 
     }
 
@@ -118,10 +138,10 @@ public abstract class Node {
         for (int i = 0; i < Node.m_nodelevel; i++)
             System.out.print("  ");
 
-        String toprint = String.format("%-65s", this.getClass().getName());
+        String toprint = String.format("%-75s", this.getClass().getName());
         for (int i = 0; i < Node.m_nodelevel; i++)
             toprint = toprint.substring(0, toprint.length() - 2);
-        toprint += String.format("%-17s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
+        toprint += String.format("%-22s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
         toprint += String.format("%-25s", (this.getType() == null || this.getType().isEmpty()) ? " | " : " | " + this.getType());
         System.out.println(toprint);
 

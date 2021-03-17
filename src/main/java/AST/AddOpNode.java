@@ -4,8 +4,8 @@ package AST;
 
 public class AddOpNode extends Node {
 	
-	public AddOpNode(String p_data){
-		super(p_data);
+	public AddOpNode(String p_data, int line){
+		super(p_data, line);
 	}
 	
 	public AddOpNode(String p_data, Node p_parent){

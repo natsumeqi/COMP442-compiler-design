@@ -4,17 +4,17 @@ import AST.*;
 
 public class NodeFactory {
 
-    public Node makeNode(String type, String lexeme) {
+    public Node makeNode(String type, String lexeme, int line) {
 
         switch (type) {
             case "Num":
-                return new NumNode(lexeme);
+                return new NumNode(lexeme,line);
             case "Id":
-                return new IdNode(lexeme);
-            case "plus":
-                return new AddOpNode("+");
-            case "mult":
-                return new MultOpNode("*");
+                return new IdNode(lexeme, line);
+            case "AddOp":
+                return new AddOpNode(lexeme, line);
+            case "MultOp":
+                return new MultOpNode(lexeme, line);
             case "Prog":
                 return new ProgNode();
             case "ClassList":
@@ -43,11 +43,13 @@ public class NodeFactory {
                 if(lexeme.equals("Type"))
                     return new TypeNode("");
                 else
-                    return new TypeNode(lexeme);
+                    return new TypeNode(lexeme, line);
             case "DimList":
                 return new DimListNode();
             case  "Dim":
-                return new DimNode(lexeme);
+                return new DimNode("["+lexeme+"]");
+            case  "DimNull":
+                return new DimNode("[]");
             case "FuncDef":
                 return new FuncDefNode();
             case "Scope":
@@ -83,15 +85,15 @@ public class NodeFactory {
             case "RelExpr":
                 return new RelExprNode();
             case "RelOp":
-                return new RelOpNode(lexeme);
+                return new RelOpNode(lexeme, line);
             case "Term":
                 return new TermNode();
             case "String":
-                return new StringNode(lexeme);
+                return new StringNode(lexeme, line);
             case "Not":
                 return new NotNode();
             case "Sign":
-                return new SignNode(lexeme);
+                return new SignNode(lexeme, line);
             case "InlineIf":
                 return new InlineIfNode();
             case "FuncOrVar":
@@ -106,6 +108,12 @@ public class NodeFactory {
                 return new IndiceNode();
             case "DataMem":
                 return new DataMemNode();
+            case "MembDecl":
+                return new MembDeclNode();
+            case "Visibility":
+                return new VisibilityNode(lexeme, line);
+            case "VisibilityDefault":
+                return new VisibilityNode();
 
         }
 

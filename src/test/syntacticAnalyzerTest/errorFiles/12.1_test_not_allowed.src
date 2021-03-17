@@ -1,0 +1,100 @@
+// ====== Class declarations ====== //
+class POLYNOMIAL {
+	public func evaluate(float x) : float;
+};
+
+class LINEAR inherits POLYNOMIAL {
+	private float a;
+	private float b;
+
+	public func build(float A, float B) : LINEAR;
+	public func evaluate(float x) : float;
+};
+
+class QUADRATIC inherits POLYNOMIAL {
+	private float a;
+	private float b;
+	private float c;
+
+	public func build(float A, float B, float C) : QUADRATIC;
+	public func evaluate(float x) : float;
+};
+
+// ====== Function Definitions ====== //
+func POLYNOMIAL::evaluate(float x) : float
+{
+  return (0);
+}
+
+func LINEAR::evaluate(float x) : float
+{
+  var
+  {
+    float result;
+  }
+  result = 0.0;
+  result = a * x + b;
+  return (result);
+}
+
+func QUADRATIC::evaluate(float x) : float
+{
+  var
+  {
+    float result;
+  }
+  //Using Horner's method
+  result = a;
+  result = result * x + b;
+  result = result * x + c;
+  return (result[]);                                    // return type: array (not allowed)
+}
+
+func LINEAR::build(float A, float B) : LINEAR
+{
+  var
+  {
+    LINEAR new_function;
+  }
+  new_function.a = A;
+  new_function.b = B;
+  return (new_function);
+}
+
+func QUADRATIC::build(float A, float B, float C) : QUADRATIC
+{
+  var
+  {
+    QUADRATIC new_function;
+  }
+  var                                           // multiple local variable declarations block (not allowed)
+  {
+     float result;
+  }
+  new_function.a = A;
+  new_function.b = B;
+  new_function.c = C;
+  return (new_function);
+}
+
+
+
+// ====== no main ====== //                 // no main function definition (not allowed)
+
+
+
+
+
+
+/*
+    functions: definitions
+    --------------------------------------
+|X| no main function definition (not allowed)
+|X| return type: array (not allowed)
+
+
+    function body: local variable declaration block
+    --------------------------------------
+|X| multiple local variable declarations block (not allowed)
+
+*/

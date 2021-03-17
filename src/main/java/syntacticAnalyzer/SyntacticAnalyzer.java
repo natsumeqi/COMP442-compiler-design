@@ -62,7 +62,7 @@ public class SyntacticAnalyzer {
 //        grammar.getNonTerminal_list().forEach(System.out::println);
 //        System.out.println(grammar.getNonTerminal_list().size());
 //            grammar.getRules_attribute().forEach((key, value) -> System.out.println(key));
-        grammar.getRules_attribute().forEach((key, value) -> System.out.println(value.toString()));
+//        grammar.getRules_attribute().forEach((key, value) -> System.out.println(value.toString()));
 
 //        System.out.println(grammar.getRules_attribute().size());
 //        parsingTable.entrySet().stream().forEach(entry-> System.out.println(entry.getKey()+": "+entry.getValue().toString()));
@@ -85,6 +85,7 @@ public class SyntacticAnalyzer {
 //        follow_sets.entrySet().forEach(entry -> System.out.println(entry.getKey()));
 //        first_sets.entrySet().forEach(entry -> System.out.println(entry.getKey()));
 
+//        System.out.println(grammar.getSymbol_map().get("rsqbr"));
     }
 
 
@@ -98,7 +99,7 @@ public class SyntacticAnalyzer {
             String file_path_temp = src_file_path.substring(0, src_file_path.length() - 4);
             File outfile_derivation = new File(file_path_temp + ".outderivation");
             File outfile_error = new File(file_path_temp + ".outsyntaxerrors");
-            File outfile_AST = new File(file_path_temp + ".dot");
+            File outfile_AST = new File(file_path_temp + ".outast");
 //            File outfile_test = new File(file_path_temp + ".outtest");
             System.out.println("[Lexer] Writing to the file: " + outfile_derivation.getName());
             System.out.println("[Lexer] Writing to the file: " + outfile_error.getName());
@@ -132,7 +133,7 @@ public class SyntacticAnalyzer {
         parsing_stack.push("$");
         parsing_stack.push("START");
         derivation = "START";
-
+        writer_derivation.append(derivation).append("\r\n");
 
 //        parsing_stack.push("E");
 //        derivation = "E";
@@ -159,13 +160,23 @@ public class SyntacticAnalyzer {
 //                    System.out.println("[parse]index: " + index_terminal_derivation);
 //                    System.out.println("1:" + derivation.substring(0, index_terminal_derivation));
 //                    System.out.println("lookahead : " + lookahead);
-                    derivation = derivation.substring(0, index_terminal_derivation) +
-                            derivation.substring(index_terminal_derivation).replaceFirst(lookahead, lookahead_token.getLexeme());
+//                    System.out.println("[parse][before der]" + derivation);
 
-                    derivation = derivation.replaceAll(" sa-\\w", "");
-                    index_terminal_derivation = derivation.indexOf(lookahead_token.getLexeme());
+                    // process derivation
+                    if (index_terminal_derivation < derivation.length()) {
+                        String temp_derivation = derivation;
+
+                        derivation = derivation.substring(0, index_terminal_derivation) +
+                                derivation.substring(index_terminal_derivation).replaceFirst(lookahead, lookahead_token.getLexeme());
+                        if (!temp_derivation.equals(derivation)) {
+                            // store the index of the latest terminal in derivation
+                            index_terminal_derivation += derivation.substring(index_terminal_derivation).indexOf(lookahead_token.getLexeme());
 //                    System.out.println("[parse][der]" + derivation);
 //                    System.out.println("[parse][der]index: " + index_terminal_derivation);
+                            writer_derivation.append("=> ").append(derivation).append("\r\n");
+                        }
+
+                    }
                     skipCommentsRead();
 
                 } else {
@@ -198,7 +209,7 @@ public class SyntacticAnalyzer {
                     }
                 }
             }
-            writer_derivation.append("=> ").append(derivation).append("\r\n");
+//            writer_derivation.append("=> ").append(derivation).append("\r\n");
 //            System.out.println("=> " + derivation);
         }
 
@@ -208,6 +219,19 @@ public class SyntacticAnalyzer {
 
         printToDot(semantic_stack.peek());
 
+//        System.out.println(lookahead.equals("$"));
+        if (!lookahead.equals("$") && !error) {
+//            writer_err_report.append("")
+            System.out.println("here");
+            System.out.println("Syntax error at: " + lookahead_token.getLocation() + ";\t Unexpected: '" + lookahead + "'.");
+            writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
+                    append(lookahead).append("'\r\n");
+
+        }
+
+        // output error info
+//        System.out.println(lookahead_token);
+
         return lookahead.equals("$") && !error;
     }
 
@@ -215,7 +239,9 @@ public class SyntacticAnalyzer {
     // output to a dot.file for displaying the AST node
     public void printToDot(Node node) {
 
-        writer_AST.append("graph AST {").append("\r\n");
+        writer_AST.append("digraph AST {").append("\r\n");
+        writer_AST.append("node [shape=record];\r\n");
+        writer_AST.append("node [fontname=Sans];charset=\"UTF-8\" splines=true splines=spline rankdir =LR\r\n");
 
         printNodetoDot(node);
 
@@ -226,16 +252,43 @@ public class SyntacticAnalyzer {
     private void printNodetoDot(Node node) {
 
         List<Node> children = node.getChildren();
-        String name_id = node.m_sa_name + node.m_nodeId;
+        String node_name_data = node.m_sa_name.substring(0, node.m_sa_name.indexOf("_"));
+        if (node.getData() != null && !node.getData().isEmpty()) {
+            String data_for_dot = node.getData();
+            switch (data_for_dot) {
+                case ">":
+                    data_for_dot = "gt";
+                    break;
+                case "<":
+                    data_for_dot = "lt";
+                    break;
+                case ">=":
+                    data_for_dot = "geq";
+                    break;
+                case "<=":
+                    data_for_dot = "leq";
+                    break;
+                default:
+            }
+
+            node_name_data = node_name_data + " | " + data_for_dot;
+        }
+        if(node.getM_line()!=0){
+            node_name_data = node_name_data + " | "+ node.getM_line();
+        }
+        String node_id = String.valueOf(node.m_nodeId);
         if (children.isEmpty()) {
-            writer_AST.append(name_id);
+
+            writer_AST.append(node_id);
             writer_AST.append(";\r\n");
+            writer_AST.append(node_id).append("[label=\"").append(node_name_data).append("\"]\r\n");
         } else {
 
             for (Node child : children) {
-                writer_AST.append(name_id).append(" -- ");
+                writer_AST.append(node_id).append(" -> ");
                 printNodetoDot(child);
             }
+            writer_AST.append(node_id).append("[label=\"").append(node_name_data).append("\"];\r\n");
         }
 
     }
@@ -262,10 +315,11 @@ public class SyntacticAnalyzer {
 //        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
             String node_type = right_sem_act.substring(right_sem_act.indexOf("(") + 1, right_sem_act.indexOf(")"));
             String node_lexeme = terminal_suc_token.getLexeme();
+            int node_line = terminal_suc_token.getLocation();
 //            System.out.println(node_type);
 //            System.out.println(node_lexeme);
             System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + node_type);
-            node_to_push = nodeFactory.makeNode(node_type, node_lexeme);
+            node_to_push = nodeFactory.makeNode(node_type, node_lexeme, node_line);
 
             assert node_to_push != null;
             node_to_push.setName(left_sem_act);
@@ -280,78 +334,89 @@ public class SyntacticAnalyzer {
                 String parameter = right_sem_act.substring(right_sem_act.indexOf("makeFamily(") + 11, right_sem_act.indexOf(")"));
                 String[] parameters = parameter.split(",");
                 String op = parameters[0];
+                int node_line;
+                if (terminal_suc_token != null) {
+                    node_line = terminal_suc_token.getLocation();
+                }else{
+                    node_line = lookahead_token.getLocation();
+                }
+
 //                System.out.println("op: " + op);
 
                 // recorde the list of children
                 ArrayList<Node> para_nodes = new ArrayList<>();
-
+                Node opNode_backup = null;
 
                 // variable number of children
-
                 if (parameters[parameters.length - 1].trim().equals("n")) {
-                    node_on_top = semantic_stack.peek();
-//                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
+                    assert semantic_stack.peek() != null;
+                    if (!semantic_stack.isEmpty()) {
+                        node_on_top = semantic_stack.peek();
+                        //                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
 //                    System.out.println("para[2]" + parameters[parameters.length - 2].trim());
-
 //                    int num_kids = Integer.parseInt(parameters[parameters.length-1].trim().substring(parameters[parameters.length-1].trim().indexOf("n")+1));
-                    int num_kids = parameters.length - 2;
-                    System.out.println("num_kids: " + num_kids);
-                    ArrayList<String> string_kids = new ArrayList<>();
+                        int num_kids = parameters.length - 2;
+//                    System.out.println("num_kids: " + num_kids);
+                        ArrayList<String> string_kids = new ArrayList<>();
 
-                    for (int i = 1; i <= num_kids; i++) {
-                        string_kids.add(parameters[i].trim());
-                        System.out.println(parameters[i].trim());
-                    }
-                    System.out.println("size of list: " + string_kids.size());
-                    String name_node_on_top = node_on_top.m_sa_name;
-                    System.out.println(name_node_on_top);
-                    while (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
-                        Node node_to_pop = semantic_stack.pop();
-                        System.out.println("[!!!node to pop]: " + node_to_pop.m_sa_name);
-                        para_nodes.add(node_to_pop);
-                        if (!semantic_stack.isEmpty()) {
-                            node_on_top = semantic_stack.peek();
-                            name_node_on_top = node_on_top.m_sa_name;
+                        for (int i = 1; i <= num_kids; i++) {
+                            string_kids.add(parameters[i].trim());
+//                        System.out.println(parameters[i].trim());
+                        }
+//                    System.out.println("size of list: " + string_kids.size());
+                        String name_node_on_top = node_on_top.m_sa_name;
+//                    System.out.println(name_node_on_top);
+                        while (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                            Node node_to_pop = semantic_stack.pop();
+//                        System.out.println("[!!!node to pop]: " + node_to_pop.m_sa_name);
+                            para_nodes.add(node_to_pop);
+                            if (!semantic_stack.isEmpty()) {
+                                node_on_top = semantic_stack.peek();
+                                name_node_on_top = node_on_top.m_sa_name;
 //                            System.out.println("[node on top]: " + node_on_top.m_sa_name);
-                        } else {
-                            break;
+                            } else {
+                                break;
+                            }
                         }
                     }
+
                 } else {
 
                     // any one of kids can make a family
                     if (parameters[parameters.length - 1].trim().equals("any")) {
 
-                        node_on_top = semantic_stack.peek();
+                        // only 2 kids can be interchangeable
+                        if (parameters[parameters.length - 2].trim().equals("2")) {
+                            node_on_top = semantic_stack.peek();
 //                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
 //                    System.out.println("para[2]" + parameters[parameters.length - 2].trim());
-
 //                    int num_kids = Integer.parseInt(parameters[parameters.length-1].trim().substring(parameters[parameters.length-1].trim().indexOf("n")+1));
-                        int num_kids = parameters.length - 2;
-                        System.out.println("num_kids: " + num_kids);
-                        ArrayList<String> string_kids = new ArrayList<>();
 
-                        for (int i = 1; i <= num_kids; i++) {
-                            string_kids.add(parameters[i].trim());
-                            System.out.println(parameters[i].trim());
-                        }
-                        String name_node_on_top = node_on_top.m_sa_name;
-                        System.out.println(name_node_on_top);
-                        if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
-                            Node node_to_pop = semantic_stack.pop();
-                            System.out.println("[!!!node to pop]: " + node_to_pop.m_sa_name);
-                            para_nodes.add(node_to_pop);
-                        }
+                            // real kid
+                            int index_kid = parameters.length - 3;
+//                            System.out.println("num_kids: " + num_kids);
+                            ArrayList<String> string_kids = new ArrayList<>();
+
+//                            System.out.println(parameters[index_kid].trim());
+//                            System.out.println(parameters[index_kid - 1].trim());
+
+                            string_kids.add(parameters[index_kid].trim());
+                            string_kids.add(parameters[index_kid - 1].trim());
 
 
-                    } else {
-                        if (parameters[parameters.length - 1].trim().equals("reuse")) {
-                            //
-                            for (int i = parameters.length - 2; i >= 0; i--) {
+                            String name_node_on_top = node_on_top.m_sa_name;
+//                            System.out.println("[any 2]name_node_on_top: " + name_node_on_top);
+                            if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                Node node_to_pop = semantic_stack.pop();
+//                                System.out.println("[!!!node to pop]: " + node_to_pop.m_sa_name);
+                                para_nodes.add(node_to_pop);
+                            }
+
+                            for (int i = parameters.length - 5; i > 0; i--) {
                                 if (!semantic_stack.isEmpty()) {
                                     node_on_top = semantic_stack.peek();
-                    System.out.println("[reuse][node on the stack top]" + node_on_top.m_sa_name);
-                    System.out.println("[reuse]parameter: " + parameters[i]);
+//                                    System.out.println("[any 2 branch][node on the stack top]" + node_on_top.m_sa_name);
+//                                    System.out.println("[any 2 branch]parameter: " + parameters[i]);
                                     if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
                                         Node node_to_pop = semantic_stack.pop();
 //                                    System.out.println("[node to pop] " + node_to_pop.m_sa_name);
@@ -361,17 +426,70 @@ public class SyntacticAnalyzer {
                             }
 
 
+                        } else {
+                            // any one of kids can make a family (general case)
+                            node_on_top = semantic_stack.peek();
+//                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
+//                    System.out.println("para[2]" + parameters[parameters.length - 2].trim());
+//                    int num_kids = Integer.parseInt(parameters[parameters.length-1].trim().substring(parameters[parameters.length-1].trim().indexOf("n")+1));
+                            int num_kids = parameters.length - 2;
+//                            System.out.println("num_kids: " + num_kids);
+                            ArrayList<String> string_kids = new ArrayList<>();
+
+                            for (int i = 1; i <= num_kids; i++) {
+                                string_kids.add(parameters[i].trim());
+//                                System.out.println(parameters[i].trim());
+                            }
+                            String name_node_on_top = node_on_top.m_sa_name;
+//                            System.out.println(name_node_on_top);
+                            if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                Node node_to_pop = semantic_stack.pop();
+//                                System.out.println("[!!!node to pop]: " + node_to_pop.m_sa_name);
+                                para_nodes.add(node_to_pop);
+                            }
+                        }
+
+                    } else {
+
+                        // first create a parent node, then reuse the node to make a family
+                        if (parameters[parameters.length - 1].trim().equals("reuse")) {
+                            Arrays.stream(parameters).forEach(System.out::println);
+                            String op_name = parameters[0];
+                            System.out.println("size of parameters: " + parameters.length);
+                            System.out.println("op_name: " + op_name);
+                            for (int i = parameters.length - 2; i >= 0; i--) {
+                                System.out.println(i);
+                                if (!semantic_stack.isEmpty()) {
+                                    node_on_top = semantic_stack.peek();
+                                    System.out.println("[reuse][node on the stack top]" + node_on_top.m_sa_name);
+                                    System.out.println("[reuse]parameter: " + parameters[i]);
+                                    if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
+                                        System.out.println(parameters[i].trim());
+                                        // reserve the node for opNode
+                                        if (node_on_top.m_sa_name.equals(op_name)) {
+                                            System.out.println("original node on top : " + node_on_top);
+                                            opNode_backup = semantic_stack.pop();
+                                        } else {
+
+                                            Node node_to_pop = semantic_stack.pop();
+                                            System.out.println("[node to pop] " + node_to_pop.m_sa_name);
+                                            para_nodes.add(node_to_pop);
+
+                                        }
+
+                                    }
+                                }
+                            }
 
 
                         } else {
-
 
                             // fixed number of children
                             for (int i = parameters.length - 1; i > 0; i--) {
                                 if (!semantic_stack.isEmpty()) {
                                     node_on_top = semantic_stack.peek();
-                    System.out.println("[fixed number branch][node on the stack top]" + node_on_top.m_sa_name);
-                    System.out.println("[fixed number branch]parameter: " + parameters[i]);
+//                                    System.out.println("[fixed number branch][node on the stack top]" + node_on_top.m_sa_name);
+//                                    System.out.println("[fixed number branch]parameter: " + parameters[i]);
                                     if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
                                         Node node_to_pop = semantic_stack.pop();
 //                                    System.out.println("[node to pop] " + node_to_pop.m_sa_name);
@@ -379,7 +497,6 @@ public class SyntacticAnalyzer {
                                     }
                                 }
                             }
-
 
 
                         }
@@ -391,73 +508,18 @@ public class SyntacticAnalyzer {
                 }
 
 
-//
-//                // 2 variables
-//                if (parameters[parameters.length - 1].trim().equals("n2")) {
-//                    node_on_top = semantic_stack.peek();
-////                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
-////                    System.out.println("para[2]" + parameters[parameters.length - 2].trim());
-//
-//                    String para1 = parameters[parameters.length - 2].trim();
-//                    String para2 = parameters[parameters.length - 3].trim();
-//
-//                    while (para1.equals(node_on_top.m_sa_name) || para2.equals(node_on_top.m_sa_name)) {
-//                        Node node_to_pop = semantic_stack.pop();
-////                        System.out.println("[node to pop]: " + node_to_pop.m_sa_name);
-//                        para_nodes.add(node_to_pop);
-//                        if (!semantic_stack.isEmpty()) {
-//                            node_on_top = semantic_stack.peek();
-////                            System.out.println("[node on top]: " + node_on_top.m_sa_name);
-//                        } else {
-//                            break;
-//                        }
-//                    }
-//                } else {
-//
-//                    // 1 variable
-//                    if (parameters[parameters.length - 1].trim().equals("n")) {
-//                        node_on_top = semantic_stack.peek();
-////                        System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
-////                        System.out.println("para[2]" + parameters[parameters.length - 2].trim());
-//                        while (parameters[parameters.length - 2].trim().equals(node_on_top.m_sa_name)) {
-//
-//                            Node node_to_pop = semantic_stack.pop();
-////                            System.out.println("[node to pop]: " + node_to_pop.m_sa_name);
-//                            para_nodes.add(node_to_pop);
-//                            if (!semantic_stack.isEmpty()) {
-//                                node_on_top = semantic_stack.peek();
-////                                System.out.println("[node on top]: " + node_on_top.m_sa_name);
-//                            } else {
-//                                break;
-//                            }
-//                        }
-//                    } else {
-//
-//                        // fixed number of children
-//                        for (int i = parameters.length - 1; i > 0; i--) {
-//                            if (!semantic_stack.isEmpty()) {
-//                                node_on_top = semantic_stack.peek();
-////                    System.out.println("[node on the stack top]" + node_on_top.m_sa_name);
-////                    System.out.println("parameter: " + parameters[i]);
-//                                if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
-//                                    Node node_to_pop = semantic_stack.pop();
-////                                    System.out.println("[node to pop] " + node_to_pop.m_sa_name);
-//                                    para_nodes.add(node_to_pop);
-//                                }
-//                            }
-//                        }
-//                    }
-
                 Node opNode;
-                if (parameters[parameters.length - 1].trim().equals("reuse")){
-                    System.out.println("reuse previous node -i");
-                    System.out.println("[opNode(last)]: "+para_nodes.get(para_nodes.size()-1));
-                    opNode = para_nodes.get(para_nodes.size()-1);
-                    // keep the arraylist consistent with the following call of makeFamily
-                    para_nodes.remove(para_nodes.size()-1);
-                }else{
-                    System.out.println("op:"+op);
-                    opNode = nodeFactory.makeNode(op, op);
+
+                // keep the arraylist consistent with the following call of makeFamily
+                if (parameters[parameters.length - 1].trim().equals("reuse")) {
+//                    System.out.println("reuse previous node -i");
+//                    System.out.println("opNode_backup: "+ opNode_backup);
+//                    System.out.println("[opNode(last)]: " + para_nodes.get(para_nodes.size() - 1));
+                    opNode = opNode_backup;
+
+                } else {
+//                    System.out.println("op:" + op);
+                    opNode = nodeFactory.makeNode(op, op, node_line);
 //                    System.out.println("[opNode]" + opNode);
                 }
 
@@ -469,7 +531,7 @@ public class SyntacticAnalyzer {
 
 
                 node_to_push = makeFamily(opNode, para_nodes);
-                node_to_push.print();
+//                node_to_push.print();
 
 
                 semantic_stack.push(node_to_push);
@@ -489,10 +551,10 @@ public class SyntacticAnalyzer {
                         Node temp = semantic_stack.pop();
                         temp.setName(left_sem_act);
                         semantic_stack.push(temp);
-                        System.out.println("[MMM----]" + right_sem_act + " migration to: " + left_sem_act);
+//                        System.out.println("[MMM----]" + right_sem_act + " migration to: " + left_sem_act);
 //                        temp.print();
                     } else {
-                        System.out.println("node on top is null!!!");
+//                        System.out.println("node on top is null!!!");
                     }
                 }
             }
@@ -510,18 +572,24 @@ public class SyntacticAnalyzer {
             case 2:
                 return kids.get(0).equals(name_node) || kids.get(1).equals(name_node);
             case 3:
-                return kids.get(0).equals(name_node) || kids.get(1).equals(name_node)||
+                return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
                         kids.get(2).equals(name_node);
             case 6:
                 return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
                         kids.get(2).equals(name_node) || kids.get(3).equals(name_node) ||
                         kids.get(4).equals(name_node) || kids.get(5).equals(name_node);
+            case 7:
+                return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
+                        kids.get(2).equals(name_node) || kids.get(3).equals(name_node) ||
+                        kids.get(4).equals(name_node) || kids.get(5).equals(name_node) ||
+                        kids.get(6).equals(name_node);
             case 10:
                 return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
                         kids.get(2).equals(name_node) || kids.get(3).equals(name_node) ||
                         kids.get(4).equals(name_node) || kids.get(5).equals(name_node) ||
                         kids.get(6).equals(name_node) || kids.get(7).equals(name_node) ||
                         kids.get(8).equals(name_node) || kids.get(9).equals(name_node);
+
             default:
                 System.err.println("NO matched kids in makeFamily()");
                 return false;
@@ -566,8 +634,14 @@ public class SyntacticAnalyzer {
             if (RHS_in_rule.contains("EPSILON")) {
                 RHS_to_replace = RHS_to_replace.replace("EPSILON", "");
             }
+
+//            System.out.println("LHS: " + LHS);
+//            System.out.println("RHS_to_replace: " + RHS_to_replace);
             derivation = derivation.replaceFirst(LHS.trim(), RHS_to_replace.trim());
-            derivation = derivation.replaceAll(" sa-\\w", "");
+            derivation = derivation.replaceAll(" sa-\\d\\d", "");
+            writer_derivation.append("=> ").append(derivation).append("\r\n");
+
+//            System.out.println(" [inverse]: " + derivation);
 
 
             String[] symbols = RHS_in_rule.split("\\s");
@@ -589,6 +663,8 @@ public class SyntacticAnalyzer {
             derivation = derivation.replaceFirst(LHS.trim(), "");
             derivation = derivation.replace("  ", " ");
             derivation = derivation.replace(" EPSILON", "");
+            writer_derivation.append("=> ").append(derivation).append("\r\n");
+
 //            System.out.println("=> " + derivation);
         }
     }
@@ -605,32 +681,50 @@ public class SyntacticAnalyzer {
         String expected = grammar.getSymbol_map().get(top_of_stack) == null ? top_of_stack : grammar.getSymbol_map().get(top_of_stack);
 
         // output error info
-        System.out.println("Syntax error at: " + lookahead_token.getLocation());
-        writer_err_report.append("Syntax error at: ").append(String.valueOf(lookahead_token.getLocation())).append("; Unexpected: \"").
-                append(lookahead).append("\";  Expected: \"").append(expected).append("\".");
-//        System.out.println("lookahead: " + lookahead);
 
+        if (lookahead_token != null) {
+//            System.out.println(lookahead);
+            String unexpected = grammar.getSymbol_map().get(lookahead) == null ? lookahead : grammar.getSymbol_map().get(lookahead);
+//            System.out.println(unexpected);
+            System.out.println("Syntax error at: " + lookahead_token.getLocation());
+            writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
+                    append(unexpected).append("';\t Expected: '").append(expected).append("'\r\n");
+
+//        System.out.println("lookahead: " + lookahead);
 //        System.out.println("top of stack: " + top_of_stack);
 //        System.out.println(terminal_suc_token.getLexeme());
 //        System.out.println(first_sets.get(top_of_stack));
 //        System.out.println(follow_sets.get(top_of_stack));
 
 
-        if (grammar.getTerminal_list().contains(top_of_stack)) {
-            parsing_stack.pop();
-        } else {
-            if (!grammar.getTerminal_list().contains(top_of_stack)) {
-                if (lookahead.equals("$") || follow_sets.get(top_of_stack).contains(lookahead)) {
+            if (grammar.getTerminal_list().contains(top_of_stack)) {
+                parsing_stack.pop();
+            } else {
+                if (!grammar.getTerminal_list().contains(top_of_stack)) {
+                    if (lookahead.equals("$") || follow_sets.get(top_of_stack).contains(lookahead)) {
 
-                    parsing_stack.pop();
-                } else {
-                    while (!first_sets.get(top_of_stack).contains(lookahead) &&
-                            ((first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead)))) {
-                        skipCommentsRead();
-//                        System.out.println("loook ahead: "+lookahead);
+                        parsing_stack.pop();
+                    } else {
+                        while (!first_sets.get(top_of_stack).contains(lookahead) ||
+                                ((first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead)))) {
+                            skipCommentsRead();
+//                        System.out.println("[2 branch]loook ahead: "+lookahead);
+                            if (lookahead.equals("$")) {
+                                break;
+                            }
+                        }
                     }
                 }
             }
+        } else {
+
+            System.out.println("Syntax error at: " + terminal_suc_token.getLocation() + "; Unexpected: " + lookahead);
+            System.out.println("The program has syntax error(s).");
+            writer_err_report.append("Syntax error at line: ").append(String.valueOf(terminal_suc_token.getLocation())).append(";\t Unexpected: '").
+                    append(lookahead).append("'\r\n");
+            writer_err_report.flush();
+            writer_err_report.close();
+            System.exit(0);
         }
     }
 

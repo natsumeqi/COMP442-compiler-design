@@ -33,7 +33,7 @@ public class SyntacticAnalyzerDriver {
         if (syntacticCorrect) {
             System.out.println("The program is syntactically correct.");
         } else {
-            System.out.println("The program has syntax error(s)");
+            System.out.println("The program has syntax error(s).");
         }
         syntacticAnalyzer.parserIOFileClose();
     }

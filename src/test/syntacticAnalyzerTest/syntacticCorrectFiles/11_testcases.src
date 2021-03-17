@@ -1,0 +1,416 @@
+// ====== Class declarations ====== //
+class POLYNOMIAL0 {
+                                                        // no member
+};
+
+class POLYNOMIAL {
+    private integer i;
+	private float a;                                    // no member function declaration
+};
+
+class LINEAR inherits POLYNOMIAL, POLYNOMIAL0 {              //  multiple inherited classes
+	private float a;
+	float b;                                                //  absence of member specifier
+	float f3;                                               // type: float
+    string s1;                                             // type: string
+    integer arr3[20][10][5];                                // type: n-dim array
+    integer arr4[][];                                       // type: array (without size)
+
+	public func build(float A, float B) : LINEAR;
+	public func evaluate(float x) : float;
+};
+
+class QUADRATIC inherits POLYNOMIAL {
+	private float a;
+	private float b;
+	private float c;
+
+	public func build(float A, float B, float C) : QUADRATIC;
+	public func evaluate(float x) : float;
+};
+
+// ====== Function Definitions ====== //
+
+func POLYNOMIAL1::evaluate() : void
+{
+
+}
+
+
+func POLYNOMIAL::evaluate(string s) : string              // return type: string
+{                                                          //  formal parameters type: string
+  return ("hello");
+}
+
+func POLYNOMIAL::evaluate(integer x, POLYNOMIAL0 p) : integer          // return type: integer
+{                                                                      //  formal parameters type: id
+  return (0);
+}
+
+func POLYNOMIAL::evaluate(float x) : float
+{
+  return (0);
+}
+
+func LINEAR::evaluate(float x) : float
+{
+  var
+  {
+    float result;
+  }
+  result = 0.0;
+  result = a * x + b;
+  return (result);
+}
+
+func QUADRATIC::evaluate(float x) : float
+{
+  var
+  {
+    float result;
+  }
+  //Using Horner's method
+  result = a;
+  result = result * x + b;
+  result = result * x + c;
+  return (result);
+}
+
+func LINEAR::build(float A, float B) : LINEAR
+{
+  var
+  {
+    LINEAR new_function;
+  }
+  new_function.a = A;
+  new_function.b = B;
+  return (new_function);
+}
+
+func QUADRATIC::build(float A, float B, float C) : QUADRATIC
+{
+  var
+  {
+    QUADRATIC new_function;
+  }
+  new_function.a = A;
+  new_function.b = B;
+  new_function.c = C;
+  return (new_function);
+}
+
+func test(integer arr[][], integer size,integer arr1[10][]) : void    // type: n-dim array
+{                                                                     // type: array (with size)
+
+                                                           // no local variable declarations block
+}
+
+
+func test1(): void
+{
+  var
+  {                                                         // no variables in block
+  }
+                                                            // no statement
+}
+
+
+func test2(): void
+{
+  var
+  {                                                         // no variables in block
+  }
+  bubbleSort(arr, 7);                                       // 1 statement
+}
+
+
+func test3(): void
+{
+  var
+  {
+    integer n;
+    integer i;
+    integer j;
+  }
+  if (arr[j] > arr[j+1])
+     then {}
+     else {
+     arr[j] = arr[j+1];                     // if: 1-statement then or else blocks
+     };
+}
+
+
+
+func testVariableIdnest(): void
+{
+      x = a(b).c;                               //  id(id).id
+      a(b).c();                                 //  id(id).id()
+      a.b[c] = 0;                               //  id.id[id]
+      a[b].c = 0;                               //  id[id].id
+      a[b].c[d] = 0;                            //  id[id].id[id]
+      a.b[c][d] = 0;                            //  d.id[id][id]
+      a[b][c].d = 0;                            //  id[id][id].id
+      a[b][c].d[e][f] = 0;                      //  id[id][id].id[id][id]
+      x = a(b).c[d];                            //  id(id).id[id]
+      x = a(b).c[d][e];                         //  id(id).id[id][id]
+      a[m+n] = 0;                               //   expression as array index
+}
+
+
+/* sort the array */
+func bubbleSort(integer arr[], integer size) : void
+{
+  var
+  {
+    integer n;
+    integer i;
+    integer j;
+    integer temp;
+  }
+  n = size;
+  i = 0;
+  j = 0;
+  temp = 0;
+  while (i < n-1) {
+    while (j < n-i-1) {
+      if (arr[j] > arr[j+1])
+        then {
+          // swap temp and arr[i]
+          temp = arr[j];
+          arr[j] = arr[j+1];
+          arr[j+1] = temp;
+        } else ;
+        j = j+1;
+      };
+    i = i+1;
+  };
+}
+
+/* Print the array */
+func printArray(integer arr[], integer size) : void
+{
+  var
+  {
+    integer n;
+    integer i;
+  }
+  n = size;
+  i = 0;
+  while (i<n) {
+    write(arr[i]);
+      i = i+1;
+  };
+}
+
+
+
+// ====== main ====== //
+main
+{
+  var
+  {
+    linear f1;
+    quadratic f2;
+    integer counter;
+    float f3;                                           // type: float
+    string s1;                                          // type: string
+    integer arr3[20][10][5];                            // type: n-dim array
+    integer arr4[][];                                   // type: array (without size)
+  }
+  f1 = f1.build(2, 3.5);
+  f2 = f2.build(-2.0, 1.0, 0.0);
+  counter = 1;
+
+  while(counter <= 10)
+  {
+    write(counter);
+    write(f1.evaluate(counter));
+    write(f2.evaluate(counter));
+  };
+
+  while(counter == 10)
+  {                                                     // while: empty block
+  };
+
+  while(counter >= 10)
+  {                                                     // while: 1-statement block
+    break;
+  };
+
+    continue;
+
+    bubbleSort(arr, 7);                         // free function call
+    f1.evaluate();                              // parameters:0
+    test(arr[10][10], size, arr1[10][10]);      // array parameter - n-dim
+                                                // array parameter - with size
+    bubbleSort(arr, 7+7);                       // expression as parameter
+
+
+    read(a.b);                                  // read(<variable>) statement
+
+    z = a*b+1;                                  // involving multop
+
+
+    while ((a*b+1) == 0)                        // involving addop + multop + relop
+    {
+
+    };
+
+    return ((a)+(b));                           // involving parentheses
+    return ((((a+b))));                         // involving nested parentheses
+    return (?[x>y:a:b]);                        // involving ternary operator
+    return (! a);                               // involving not
+    return (+ a);                               // involving sign
+    return ("literals");                        // involving literals
+    return (1.6);
+    return (1);
+    return (?[((a)+(b))*c > 1.1: !((a))=="literals2" : (-a>0)]);  // involving all the above in one expression
+
+
+}
+
+
+
+
+
+/*
+    classes
+    --------------------------------------
+| | no class declaration
+|X| class declaration
+|X| multiple class declarations
+|X| no data member declaration
+|X| data member declaration
+|X| multiple data member declaration
+|X| no member function declaration
+|X| member function declaration
+|X| multiple member function declaration
+|X| no member
+|X| no inherited class
+|X| one inherited class
+|X| multiple inherited classes
+|X| private member specifier
+|X| public member specifier
+|X| absence of member specifier
+
+    functions: definitions
+    --------------------------------------
+| | no main function definition (not allowed)
+|X| main function definition
+| | multiple main function definitions (not allowed)
+|X| no free function definition
+|X| free function definition
+|X| multiple free function definitions
+|X| no member function definition
+|X| member function definition
+|X| multiple member function definitions
+|X| return type: void
+|X| return type: integer
+|X| return type: float
+|X| return type: string
+|X| return type: id
+| | return type: array (not allowed)
+
+
+    functions: formal parameters
+    --------------------------------------
+|X| type: integer
+|X| type: float
+|X| type: string
+|X| type: id
+|X| type: 1-dim array
+|X| type: n-dim array
+|X| type: array (with size)
+|X| type: array (without size)
+
+    functions: calls
+    --------------------------------------
+|X| free function call
+|X| member function call
+|X| parameters:0
+|X| parameters:1
+|X| parameters:n
+|X| array parameter - 1-dim
+|X| array parameter - n-dim
+|X| array parameter - with size
+| | array parameter - without size              // (not allowed in this grammar)
+|X| function call as statement
+|X| function call as expression factor
+|X| expression as parameter
+
+    variable declaration
+    --------------------------------------
+|X| type: integer
+|X| type: float
+|X| type: string
+|X| type: id
+|X| type: 1-dim array
+|X| type: n-dim array
+|X| type: array (with size)
+|X| type: array (without size)
+
+    function body: local variable declaration block
+    --------------------------------------
+|X| no local variable declarations block
+|X| local variable declaration block
+| | multiple local variable declarations block (not allowed)
+|X| no variables in block
+|X| 1 variable declared in block
+|X| multiple variables declared in block
+
+    function body: statements
+    --------------------------------------
+|X| no statement
+|X| 1 statement
+|X| n statements
+|X| if statement
+|X| if: empty then or else blocks
+|X| if: 1-statement then or else blocks
+|X| if: n-statements then or else blocks
+|X| while statement
+|X| while: empty block
+|X| while: 1-statement block
+|X| while: n-statement block
+|X| read(<variable>) statement
+|X| write(<expr>) statement
+|X| return(<expr>) statement
+|X| break statement
+|X| continue statement
+|X| assignment statement
+
+    variable + idnest
+    --------------------------------------
+|X| id
+|X| id.id
+|X| id.id(id)
+|X| id(id).id
+|X| id(id).id()
+|X| id.id[id]
+|X| id[id].id
+|X| id[id].id[id]
+|X| id.id[id][id]
+|X| id[id][id].id
+|X| id[id][id].id[id][id]
+|X| id(id).id[id]
+|X| id(id).id[id][id]
+|X| expression as array index
+
+    expressions
+    --------------------------------------
+|X| single variable
+|X| involving addop
+|X| involving multop
+|X| involving relop
+|X| involving addop + multop
+|X| involving multop + relop
+|X| involving addop + multop + relop
+|X| involving parentheses
+|X| involving nested parenhteses
+|X| involving ternary operator
+|X| involving not
+|X| involving sign
+|X| involving literals
+|X| involving variable + idnest
+|X| involving function calls
+|X| involving all the above in one expression
+*/
