@@ -81,9 +81,8 @@ func QUADRATIC::build(float A, float B, float C) : QUADRATIC
 
 // ====== no main ====== //                 // no main function definition (not allowed)
 
-
-
-
+{
+}
 
 
 /*

@@ -127,7 +127,7 @@ public abstract class Node {
 
     public void print() {
         System.out.println("============================================================================================================================");
-        System.out.println("Node type                                                                   | data                | type      | subtreestring");
+        System.out.println("Node type                                                                   | data                | line      | subtreestring");
         System.out.println("============================================================================================================================");
         this.printSubtree();
         System.out.println("============================================================================================================================");
@@ -142,7 +142,7 @@ public abstract class Node {
         for (int i = 0; i < Node.m_nodelevel; i++)
             toprint = toprint.substring(0, toprint.length() - 2);
         toprint += String.format("%-22s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
-        toprint += String.format("%-25s", (this.getType() == null || this.getType().isEmpty()) ? " | " : " | " + this.getType());
+        toprint += String.format("%-25s", (this.getM_line() == 0  ? " | " : " | " + this.getM_line()));
         System.out.println(toprint);
 
         Node.m_nodelevel++;

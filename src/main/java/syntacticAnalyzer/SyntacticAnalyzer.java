@@ -5,6 +5,7 @@ import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.Token;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -26,8 +27,8 @@ public class SyntacticAnalyzer {
 
     private PrintWriter writer_derivation;
     private PrintWriter writer_err_report;
-    private PrintWriter writer_AST;
-    private PrintWriter writer_test;
+    private PrintWriter writer_DOT;
+    private PrintStream writer_AST;
 
     private final NodeFactory nodeFactory;
     private final Grammar grammar;
@@ -99,14 +100,17 @@ public class SyntacticAnalyzer {
             String file_path_temp = src_file_path.substring(0, src_file_path.length() - 4);
             File outfile_derivation = new File(file_path_temp + ".outderivation");
             File outfile_error = new File(file_path_temp + ".outsyntaxerrors");
+            File outfile_DOT = new File(file_path_temp + ".dot");
             File outfile_AST = new File(file_path_temp + ".outast");
 //            File outfile_test = new File(file_path_temp + ".outtest");
             System.out.println("[Lexer] Writing to the file: " + outfile_derivation.getName());
             System.out.println("[Lexer] Writing to the file: " + outfile_error.getName());
+            System.out.println("[Lexer] Writing to the file: " + outfile_DOT.getName());
             System.out.println("[Lexer] Writing to the file: " + outfile_AST.getName());
             writer_derivation = new PrintWriter(outfile_derivation);
             writer_err_report = new PrintWriter(outfile_error);
-            writer_AST = new PrintWriter(outfile_AST);
+            writer_DOT = new PrintWriter(outfile_DOT);
+            writer_AST = new PrintStream(outfile_AST);
 //            writer_test = new PrintWriter(outfile_test);
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,8 +124,11 @@ public class SyntacticAnalyzer {
         writer_derivation.close();
         writer_err_report.flush();
         writer_err_report.close();
-        writer_AST.flush();
+        writer_DOT.flush();
+        writer_DOT.close();
         writer_AST.close();
+//        writer_AST.flush();
+//        writer_AST.close();
 //        writer_test.flush();
 //        writer_test.close();
     }
@@ -219,6 +226,11 @@ public class SyntacticAnalyzer {
 
         printToDot(semantic_stack.peek());
 
+        PrintStream console = System.out;
+        System.setOut(writer_AST);
+        semantic_stack.peek().print();
+        System.setOut(console);
+
 //        System.out.println(lookahead.equals("$"));
         if (!lookahead.equals("$") && !error) {
 //            writer_err_report.append("")
@@ -239,13 +251,13 @@ public class SyntacticAnalyzer {
     // output to a dot.file for displaying the AST node
     public void printToDot(Node node) {
 
-        writer_AST.append("digraph AST {").append("\r\n");
-        writer_AST.append("node [shape=record];\r\n");
-        writer_AST.append("node [fontname=Sans];charset=\"UTF-8\" splines=true splines=spline rankdir =LR\r\n");
+        writer_DOT.append("digraph AST {").append("\r\n");
+        writer_DOT.append("node [shape=record];\r\n");
+        writer_DOT.append("node [fontname=Sans];charset=\"UTF-8\" splines=true splines=spline rankdir =LR\r\n");
 
         printNodetoDot(node);
 
-        writer_AST.append("}");
+        writer_DOT.append("}");
 
     }
 
@@ -279,16 +291,16 @@ public class SyntacticAnalyzer {
         String node_id = String.valueOf(node.m_nodeId);
         if (children.isEmpty()) {
 
-            writer_AST.append(node_id);
-            writer_AST.append(";\r\n");
-            writer_AST.append(node_id).append("[label=\"").append(node_name_data).append("\"]\r\n");
+            writer_DOT.append(node_id);
+            writer_DOT.append(";\r\n");
+            writer_DOT.append(node_id).append("[label=\"").append(node_name_data).append("\"]\r\n");
         } else {
 
             for (Node child : children) {
-                writer_AST.append(node_id).append(" -> ");
+                writer_DOT.append(node_id).append(" -> ");
                 printNodetoDot(child);
             }
-            writer_AST.append(node_id).append("[label=\"").append(node_name_data).append("\"];\r\n");
+            writer_DOT.append(node_id).append("[label=\"").append(node_name_data).append("\"];\r\n");
         }
 
     }
@@ -686,9 +698,9 @@ public class SyntacticAnalyzer {
 //            System.out.println(lookahead);
             String unexpected = grammar.getSymbol_map().get(lookahead) == null ? lookahead : grammar.getSymbol_map().get(lookahead);
 //            System.out.println(unexpected);
-            System.out.println("Syntax error at: " + lookahead_token.getLocation());
-            writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
-                    append(unexpected).append("';\t Expected: '").append(expected).append("'\r\n");
+//            System.out.println("Syntax error at: " + lookahead_token.getLocation());
+//            writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
+//                    append(unexpected).append("';\t Expected: '").append(expected).append("'\r\n");
 
 //        System.out.println("lookahead: " + lookahead);
 //        System.out.println("top of stack: " + top_of_stack);
@@ -699,28 +711,36 @@ public class SyntacticAnalyzer {
 
             if (grammar.getTerminal_list().contains(top_of_stack)) {
                 parsing_stack.pop();
+//                skipCommentsRead();
+                System.out.println("Syntax error at: " + lookahead_token.getLocation());
+                writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).
+                        append("\t Missing expected symbol: '").append(expected).append("'\t Unexpected: '").append(unexpected).append("'\r\n");
             } else {
-                if (!grammar.getTerminal_list().contains(top_of_stack)) {
                     if (lookahead.equals("$") || follow_sets.get(top_of_stack).contains(lookahead)) {
-
+                        System.out.println("Syntax error at: " + lookahead_token.getLocation());
+                        writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Skip parsing : '").
+                                append(unexpected).append("';\t Expected: '").append(expected).append("'\r\n");
                         parsing_stack.pop();
                     } else {
+                        System.out.println("Syntax error at: " + lookahead_token.getLocation());
+                        writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
+                                append(unexpected).append("';\t Expected: '").append(expected).append("'\r\n");
                         while (!first_sets.get(top_of_stack).contains(lookahead) ||
                                 ((first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead)))) {
                             skipCommentsRead();
 //                        System.out.println("[2 branch]loook ahead: "+lookahead);
+
                             if (lookahead.equals("$")) {
                                 break;
                             }
                         }
-                    }
                 }
             }
         } else {
 
-            System.out.println("Syntax error at: " + terminal_suc_token.getLocation() + "; Unexpected: " + lookahead);
+            System.out.println("Syntax error at the end of the file. \tUnexpected: " + lookahead);
             System.out.println("The program has syntax error(s).");
-            writer_err_report.append("Syntax error at line: ").append(String.valueOf(terminal_suc_token.getLocation())).append(";\t Unexpected: '").
+            writer_err_report.append("Syntax error at the end of the file.").append("\t Unexpected: '").
                     append(lookahead).append("'\r\n");
             writer_err_report.flush();
             writer_err_report.close();
