@@ -13,18 +13,18 @@ import java.util.stream.Stream;
 
 public class Grammar {
 
-    private ArrayList<String> terminal_list;
-    private ArrayList<String> nonTerminal_list;
-    private ArrayList<String> semantic_actions_list;
+    private final ArrayList<String> terminal_list;
+    private final ArrayList<String> nonTerminal_list;
+    private final ArrayList<String> semantic_actions_list;
     private Map<String, String> symbol_map;
 
     private Map<String, Rule> rules;                            // first step without attribute
     private Map<String, SemanticAction> semantic_actions;
-    private Map<String, Rule> rules_attribute;
+    private final Map<String, Rule> rules_attribute;
 
     private final Map<String, ArrayList<String>> follow_sets;
     private final Map<String, ArrayList<String>> first_sets;
-    private Map<String, Map<String, String>> parsing_table;
+    private final Map<String, Map<String, String>> parsing_table;
 
 
     public Grammar() {
@@ -159,66 +159,62 @@ public class Grammar {
      */
     public void importFirstFollowSets() {
 
-        try {
-            File file_parsing_table = new File("./src/main/resources/first_follow_sets.html");
-            Document htmlDoc = Jsoup.parse(file_parsing_table, "UTF-8");
+        String file_name = "/firstFollowSets.html";
+        InputStream in = getClass().getResourceAsStream(file_name);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
 
-            Element table = htmlDoc.select("table").get(2); //select table.
-            Elements rows = table.select("tr");
-            Elements first = rows.get(0).select("th,td");       //header of the table
+        Element table = html_doc.select("table").get(2); //select table.
+        Elements rows = table.select("tr");
+        Elements first = rows.get(0).select("th,td");       //header of the table
 
-            List<String> headers = new ArrayList<String>();
-            for (Element header : first) {
-                headers.add(header.text());
+//        List<String> headers = new ArrayList<String>();
+//        for (Element header : first) {
+//            headers.add(header.text());
+//        }
+
+        // parsing the table in HTML file
+        for (int i = 1; i < rows.size(); i++) {
+            Elements colVals = rows.get(i).select("th,td");
+            ArrayList<String> first_set = new ArrayList<>(Arrays.asList(colVals.get(1).text().split(" ")));
+            if (colVals.get(3).text().equals("yes")) {
+                first_set.add("EPSILON");
             }
+            ArrayList<String> follow_set = new ArrayList<>(Arrays.asList(colVals.get(2).text().split(" ")));
+            String non_terminal = colVals.get(0).text();
+            first_sets.put(non_terminal, first_set);
+            follow_sets.put(non_terminal, follow_set);
+        }
 
-            // parsing the table in HTML file
-            for (int i = 1; i < rows.size(); i++) {
-                Elements colVals = rows.get(i).select("th,td");
-                ArrayList<String> first_set = new ArrayList<>();
-                ArrayList<String> follow_set = new ArrayList<>();
-                first_set.addAll(Arrays.asList(colVals.get(1).text().split(" ")));
-                if (colVals.get(3).text().equals("yes")) {
-                    first_set.add("EPSILON");
-                }
-                follow_set.addAll(Arrays.asList(colVals.get(2).text().split(" ")));
-                String non_terminal = colVals.get(0).text();
-                first_sets.put(non_terminal, first_set);
-                follow_sets.put(non_terminal, follow_set);
-            }
-
-            // output first sets
-            for (Map.Entry<String, ArrayList<String>> entry : first_sets.entrySet()) {
-                StringBuilder first_set_print = new StringBuilder();
-                for (int i = 0; i < entry.getValue().size() - 1; i++) {
-                    String terminal = entry.getValue().get(i);
-                    if (terminal.equals("EPSILON")) {
-                        first_set_print.append(terminal);
-                    } else {
-                        first_set_print.append("'").append(terminal).append("', ");
-                    }
-                }
-                String terminal_last = entry.getValue().get(entry.getValue().size() - 1);
-                if (terminal_last.equals("EPSILON")) {
-                    first_set_print.append(terminal_last);
+        // output first sets
+        for (Map.Entry<String, ArrayList<String>> entry : first_sets.entrySet()) {
+            StringBuilder first_set_print = new StringBuilder();
+            for (int i = 0; i < entry.getValue().size() - 1; i++) {
+                String terminal = entry.getValue().get(i);
+                if (terminal.equals("EPSILON")) {
+                    first_set_print.append(terminal);
                 } else {
-                    first_set_print.append("'").append(terminal_last).append("'");
+                    first_set_print.append("'").append(terminal).append("', ");
                 }
             }
+            String terminal_last = entry.getValue().get(entry.getValue().size() - 1);
+            if (terminal_last.equals("EPSILON")) {
+                first_set_print.append(terminal_last);
+            } else {
+                first_set_print.append("'").append(terminal_last).append("'");
+            }
+        }
 
-            // output follow sets
-            for (Map.Entry<String, ArrayList<String>> entry : follow_sets.entrySet()) {
-                StringBuilder follow_set_print = new StringBuilder();
-                for (int i = 0; i < entry.getValue().size() - 1; i++) {
-                    String terminal = entry.getValue().get(i);
-                    follow_set_print.append("'").append(terminal).append("', ");
-                }
-                String terminalLast = entry.getValue().get(entry.getValue().size() - 1);
-                follow_set_print.append("'").append(terminalLast).append("'");
-//                System.out.println("FOLLOW(<"+ entry.getKey()+">)= [" + follow_set_print +"]");
+        // output follow sets
+        for (Map.Entry<String, ArrayList<String>> entry : follow_sets.entrySet()) {
+            StringBuilder follow_set_print = new StringBuilder();
+            for (int i = 0; i < entry.getValue().size() - 1; i++) {
+                String terminal = entry.getValue().get(i);
+                follow_set_print.append("'").append(terminal).append("', ");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            String terminalLast = entry.getValue().get(entry.getValue().size() - 1);
+            follow_set_print.append("'").append(terminalLast).append("'");
+//                System.out.println("FOLLOW(<"+ entry.getKey()+">)= [" + follow_set_print +"]");
         }
     }
 
@@ -228,41 +224,39 @@ public class Grammar {
      */
     public void importParsingTable() {
 
-        try {
-            File file_parsing_table = new File("./src/main/resources/parsing_table.html");
-            System.out.println("[Grammar] Importing parsing table from file: " + file_parsing_table.getName());
-            Document html_doc = Jsoup.parse(file_parsing_table, "UTF-8");
-            Element table = html_doc.select("table").get(1); //select the table.
-            Elements rows = table.select("tr");
-            Elements first = rows.get(0).select("th,td");       //header of the table
+        String file_name = "/parsingTable.html";
+        System.out.println("[Grammar] Importing parsing table from file: " + file_name);
+        InputStream in = getClass().getResourceAsStream(file_name);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
+        Element table = html_doc.select("table").get(1); //select the table.
+        Elements rows = table.select("tr");
+        Elements first = rows.get(0).select("th,td");       //header of the table
 
-            List<String> headers = new ArrayList<String>();
-            for (Element header : first) {
-                headers.add(header.text());
-                if (!header.text().isEmpty()) {
-                    terminal_list.add(header.text());
+        List<String> headers = new ArrayList<String>();
+        for (Element header : first) {
+            headers.add(header.text());
+            if (!header.text().isEmpty()) {
+                terminal_list.add(header.text());
+            }
+        }
+        for (int i = 1; i < rows.size(); i++) {
+            Element row = rows.get(i);
+            Elements col_vals = rows.get(i).select("th,td");
+            Map<String, String> table_vals = new HashMap<>();
+            int col_count = 1;
+            for (int j = 1; j < col_vals.size(); j++) {
+                String ruleID = col_vals.get(j).text();
+                if (!ruleID.isEmpty()) {
+                    ruleID = ruleID.replace(" → ", "_").replace(" ", "_").replace("&epsilon", "EPSILON");
+                    table_vals.put(headers.get(col_count++), ruleID);
+                } else {
+                    table_vals.put(headers.get(col_count++), "error");
                 }
             }
-            for (int i = 1; i < rows.size(); i++) {
-                Element row = rows.get(i);
-                Elements col_vals = rows.get(i).select("th,td");
-                Map<String, String> table_vals = new HashMap<>();
-                int col_count = 1;
-                for (int j = 1; j < col_vals.size(); j++) {
-                    String ruleID = col_vals.get(j).text();
-                    if (!ruleID.isEmpty()) {
-                        ruleID = ruleID.replace(" → ", "_").replace(" ", "_").replace("&epsilon", "EPSILON");
-                        table_vals.put(headers.get(col_count++), ruleID);
-                    } else {
-                        table_vals.put(headers.get(col_count++), "error");
-                    }
-                }
-                String non_terminal = col_vals.get(0).text();
-                parsing_table.put(non_terminal, table_vals);
-                nonTerminal_list.add(non_terminal);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            String non_terminal = col_vals.get(0).text();
+            parsing_table.put(non_terminal, table_vals);
+            nonTerminal_list.add(non_terminal);
         }
     }
 
@@ -272,12 +266,12 @@ public class Grammar {
      */
     public void importRules() {
 
-        BufferedReader reader;
-        String rules_file_path = "./src/main/resources/LL1.attribute.grm";
-        File file_read = new File(rules_file_path);
-        System.out.println("[Grammar] Reading the grammar rules from file: " + file_read.getName());
+        String file_name = "/LL1Attribute.grm";
+        System.out.println("[Grammar] Reading the grammar rules from file: " + file_name);
+
         try {
-            reader = new BufferedReader(new FileReader(rules_file_path));
+            InputStream in = getClass().getResourceAsStream(file_name);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String this_line;
             while ((this_line = reader.readLine()) != null) {
                 if (!this_line.isEmpty()) {

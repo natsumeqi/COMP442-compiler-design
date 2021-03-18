@@ -9,7 +9,7 @@ class LINEAR inherits POLYNOMIAL {
 
 	public func build(float A, float B) : LINEAR;
 	public func evaluate(float x) : float;
-};;
+};
 
 class QUADRATIC inherits POLYNOMIAL {
 	private float a;
