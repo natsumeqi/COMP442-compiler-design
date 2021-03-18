@@ -29,7 +29,6 @@ public abstract class Node {
         this.setData(p_data);
         this.m_nodeId = Node.m_curNodeId;
         Node.m_curNodeId++;
-//        System.out.println(m_curNodeId);
         this.lm_sibling = this;
         this.m_parent = this;
     }
@@ -38,7 +37,6 @@ public abstract class Node {
         this.setData(p_data);
         this.m_nodeId = Node.m_curNodeId;
         Node.m_curNodeId++;
-//        System.out.println(m_curNodeId);
         this.lm_sibling = this;
         this.m_parent = this;
         this.m_line = line;
@@ -142,7 +140,7 @@ public abstract class Node {
         for (int i = 0; i < Node.m_nodelevel; i++)
             toprint = toprint.substring(0, toprint.length() - 2);
         toprint += String.format("%-22s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
-        toprint += String.format("%-25s", (this.getM_line() == 0  ? " | " : " | " + this.getM_line()));
+        toprint += String.format("%-25s", (this.getM_line() == 0 ? " | " : " | " + this.getM_line()));
         System.out.println(toprint);
 
         Node.m_nodelevel++;
@@ -152,9 +150,6 @@ public abstract class Node {
         }
         Node.m_nodelevel--;
     }
-
-
-
 
 
     /**
@@ -178,19 +173,13 @@ public abstract class Node {
 
 
             // set references to the new siblings
-//            System.out.println(x_siblings.getName());
-//            System.out.println(x_siblings.lm_sibling);
-
             y_siblings.lm_sibling = x_siblings.lm_sibling;
             y_siblings.m_parent = x_siblings.m_parent;
-//            System.out.println(y_siblings);
-//            System.out.println("[y_siblings1] "+y_siblings.toString());
             while (y_siblings.r_sibling != null) {
                 y_siblings = y_siblings.r_sibling;
                 y_siblings.lm_sibling = x_siblings.lm_sibling;
                 y_siblings.m_parent = x_siblings.m_parent;
             }
-//            System.out.println("[y_siblings] "+y_siblings.toString());
             return y_siblings;
         }
         return this;
@@ -212,16 +201,10 @@ public abstract class Node {
 
                 Node y_siblings = y.lm_sibling;
                 this.lm_child = y_siblings;
-//                System.out.println("[y]" + y.getName());
-//                System.out.println("[y_leftmost_sibling]" + y.lm_sibling.getName());
-//                System.out.println("[this_leftmost_child]" + this.lm_child.getName());
-//                System.out.println("[y_siblings]" + y_siblings.getName());
                 while (y_siblings != null) {
-//                    System.out.println("[y_siblings]" + y_siblings.getName());
                     this.addChild(y_siblings);
                     y_siblings = y_siblings.r_sibling;
                 }
-
             }
         }
         return this;

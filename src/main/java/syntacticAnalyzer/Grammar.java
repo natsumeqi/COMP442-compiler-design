@@ -18,7 +18,7 @@ public class Grammar {
     private ArrayList<String> semantic_actions_list;
     private Map<String, String> symbol_map;
 
-    private Map<String, Rule> rules;      // first step without attribute
+    private Map<String, Rule> rules;                            // first step without attribute
     private Map<String, SemanticAction> semantic_actions;
     private Map<String, Rule> rules_attribute;
 
@@ -68,9 +68,6 @@ public class Grammar {
                 {"or", "|"}
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
-//        nonTerminal_set =  new HashSet<>(Arrays.asList("START", "aParams", "aParamsTail", "addOp", "arithExpr", "arraySize", "assignOp", "assignStat", "classDecl",
-//                "expr", "fParams", "fParamsTail", "factor", "funcBody", "funcDecl", "funcDef", "funcHead", "functionCall", "idnest", "indice", "memberDecl", "multOp",
-//                "prog", "relExpr", "sign", "statBlock", "statement", "term", "type", "varDecl", "variable", "visibility"));
     }
 
 
@@ -149,14 +146,11 @@ public class Grammar {
         semantic_actions.put("sa-60", new SemanticAction("sa-60", "FuncCallStat_s", "makeFamily(FuncCallStat, FuncCall_s, DataMem_s, n)"));
 
 
-
-
-
-
         // initialize semantic actions list
-        for(Map.Entry<String, SemanticAction> pair: semantic_actions.entrySet()){
+        for (Map.Entry<String, SemanticAction> pair : semantic_actions.entrySet()) {
             semantic_actions_list.add(pair.getKey());
         }
+
     }
 
 
@@ -174,7 +168,6 @@ public class Grammar {
             Elements first = rows.get(0).select("th,td");       //header of the table
 
             List<String> headers = new ArrayList<String>();
-//            System.out.println("headers");
             for (Element header : first) {
                 headers.add(header.text());
             }
@@ -190,7 +183,6 @@ public class Grammar {
                 }
                 follow_set.addAll(Arrays.asList(colVals.get(2).text().split(" ")));
                 String non_terminal = colVals.get(0).text();
-//                non_terminal = non_terminal.substring(0, 1).toUpperCase() + non_terminal.substring(1).toLowerCase();
                 first_sets.put(non_terminal, first_set);
                 follow_sets.put(non_terminal, follow_set);
             }
@@ -212,13 +204,10 @@ public class Grammar {
                 } else {
                     first_set_print.append("'").append(terminal_last).append("'");
                 }
-//                System.out.println("FIRST(<" + entry.getKey() + ">)= [" + first_set_print + "]");
             }
 
             // output follow sets
             for (Map.Entry<String, ArrayList<String>> entry : follow_sets.entrySet()) {
-//                System.out.println(entry.getKey());
-//                entry.getValue().forEach(System.out::println);
                 StringBuilder follow_set_print = new StringBuilder();
                 for (int i = 0; i < entry.getValue().size() - 1; i++) {
                     String terminal = entry.getValue().get(i);
@@ -232,6 +221,7 @@ public class Grammar {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Parsing HTML file to get parsing table using JSOUP; also terminal list and nonTerminal list
@@ -247,13 +237,11 @@ public class Grammar {
             Elements first = rows.get(0).select("th,td");       //header of the table
 
             List<String> headers = new ArrayList<String>();
-//            System.out.println("headers");
             for (Element header : first) {
                 headers.add(header.text());
                 if (!header.text().isEmpty()) {
                     terminal_list.add(header.text());
                 }
-//                System.out.println(header.text());
             }
             for (int i = 1; i < rows.size(); i++) {
                 Element row = rows.get(i);
@@ -264,7 +252,6 @@ public class Grammar {
                     String ruleID = col_vals.get(j).text();
                     if (!ruleID.isEmpty()) {
                         ruleID = ruleID.replace(" → ", "_").replace(" ", "_").replace("&epsilon", "EPSILON");
-//                        System.out.println(ruleID);
                         table_vals.put(headers.get(col_count++), ruleID);
                     } else {
                         table_vals.put(headers.get(col_count++), "error");
@@ -273,13 +260,12 @@ public class Grammar {
                 String non_terminal = col_vals.get(0).text();
                 parsing_table.put(non_terminal, table_vals);
                 nonTerminal_list.add(non_terminal);
-//                System.out.println("nonterminal: "+non_terminal);
-//                System.out.println("rule: "+tableVal.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     /**
      * import rules from final LL1 grammar file
@@ -287,7 +273,7 @@ public class Grammar {
     public void importRules() {
 
         BufferedReader reader;
-        String rules_file_path = "./src/main/resources/LL1.ucalgary.attribute";
+        String rules_file_path = "./src/main/resources/LL1.attribute.grm";
         File file_read = new File(rules_file_path);
         System.out.println("[Grammar] Reading the grammar rules from file: " + file_read.getName());
         try {
@@ -299,16 +285,16 @@ public class Grammar {
                     Rule rule = new Rule();
                     rule.setRule_LHS(ruleString[0].trim());
                     if (ruleString[1].startsWith("  . ")) {
-                        ruleString[1]= ruleString[1].replace("  .", "EPSILON").trim();
+                        ruleString[1] = ruleString[1].replace("  .", "EPSILON").trim();
                         rule.setRule_RHS(ruleString[1]);
                     } else {
                         rule.setRule_RHS(ruleString[1].substring(0, ruleString[1].lastIndexOf(".") - 1));
                     }
+
                     // match rule ID with the ones in parsing table
                     String ruleId = rule.getRule_LHS() + "_" + rule.getRule_RHS().trim().replaceAll(" ", "_");
                     ruleId = ruleId.replaceAll("_sa-\\d*", "");
                     rule.setRule_id(ruleId);
-//                    System.out.println(rule.toString());
                     rules_attribute.put(rule.getRule_id(), rule);
                 }
             }
@@ -319,112 +305,102 @@ public class Grammar {
         }
     }
 
-    public void generateGrammarEx() {
-        createSymbolsEx();
-        createRulesWithAttributeEx();
-        createParsingTableEx();
-        createSemanticActionsEx();
-    }
 
+//    public void generateGrammarEx() {
+//        createSymbolsEx();
+//        createRulesWithAttributeEx();
+//        createParsingTableEx();
+//        createSemanticActionsEx();
+//    }
+//
+//
+//    // example symbols
+//    public void createSymbolsEx() {
+//        terminal_list = new ArrayList<>(Arrays.asList("id", "(", ")", "plus", "mult", "$"));
+//        nonTerminal_list = new ArrayList<>(Arrays.asList("E", "E'", "T", "T'", "F"));
+//        semantic_actions_list = new ArrayList<>(Arrays.asList("sa_A", "sa_B", "sa_C", "sa_D", "sa_E", "sa_F", "sa_G", "sa_H", "sa_I", "sa_J", "sa_K", "sa_L"));
+//    }
+//
+//    // example rules
+//    public void createRulesEx() {
+//        rules = new HashMap<>();
+//        rules.put("r1", new Rule("r1", "E", " T E' "));
+//        rules.put("r2", new Rule("r2", "E'", " plus T E' "));
+//        rules.put("r3", new Rule("r3", "E'", "EPSILON"));
+//        rules.put("r4", new Rule("r4", "T", " F T' "));
+//        rules.put("r5", new Rule("r5", "T'", " mult F T' "));
+//        rules.put("r6", new Rule("r6", "T'", "EPSILON"));
+//        rules.put("r7", new Rule("r7", "F", " id "));
+//        rules.put("r8", new Rule("r8", "F", " ( E ) "));
+//    }
+//
+//    // example parsing table
+//    public void createParsingTableEx() {
+//        parsing_table = new HashMap<>();
+//        addToParsingRow("E", new String[]{"r1", "r1", "error", "error", "error", "error"});
+//        addToParsingRow("E'", new String[]{"error", "error", "r3", "r2", "error", "r3"});
+//        addToParsingRow("T", new String[]{"r4", "r4", "error", "error", "error", "error"});
+//        addToParsingRow("T'", new String[]{"error", "error", "r6", "r6", "r5", "r6"});
+//        addToParsingRow("F", new String[]{"r7", "r8", "error", "error", "error", "error"});
+//    }
+//
+//    public void createSemanticActionsEx() {
+//        semantic_actions = new HashMap<>();
+//        semantic_actions.put("sa_A", new SemanticAction("sa_A", "E'_i", "T_s"));
+//        semantic_actions.put("sa_B", new SemanticAction("sa_B", "E_s", "E'_s"));
+//        semantic_actions.put("sa_C", new SemanticAction("sa_C", "E'_i", "makeFamily(plus, E'_i, T_s)"));
+//        semantic_actions.put("sa_D", new SemanticAction("sa_D", "E'_s", "E'_s"));
+//        semantic_actions.put("sa_E", new SemanticAction("sa_E", "E'_s", "E'_i"));
+//        semantic_actions.put("sa_F", new SemanticAction("sa_F", "T'_i", "F_s"));
+//        semantic_actions.put("sa_G", new SemanticAction("sa_G", "T_s", "T'_s"));
+//        semantic_actions.put("sa_H", new SemanticAction("sa_H", "T'_i", "makeFamily(mult,T'_i,F_s)"));
+//        semantic_actions.put("sa_I", new SemanticAction("sa_I", "T'_s", "T'_s"));
+//        semantic_actions.put("sa_J", new SemanticAction("sa_J", "T'_s", "T'_i"));
+//        semantic_actions.put("sa_K", new SemanticAction("sa_K", "F_s", "makeNode(id)"));
+//        semantic_actions.put("sa_L", new SemanticAction("sa_L", "F_s", "E_s"));
+//    }
+//
+//    public void createRulesWithAttributeEx() {
+//        rules_attribute = new HashMap<>();
+//        rules_attribute.put("r1", new Rule("r1", "E", " T sa_A E' sa_B "));
+//        rules_attribute.put("r2", new Rule("r2", "E'", " plus T sa_C E' sa_D "));
+//        rules_attribute.put("r3", new Rule("r3", "E'", "EPSILON sa_E"));
+//        rules_attribute.put("r4", new Rule("r4", "T", " F sa_F T' sa_G"));
+//        rules_attribute.put("r5", new Rule("r5", "T'", " mult F sa_H T' sa_I "));
+//        rules_attribute.put("r6", new Rule("r6", "T'", "EPSILON sa_J"));
+//        rules_attribute.put("r7", new Rule("r7", "F", " id sa_K"));
+//        rules_attribute.put("r8", new Rule("r8", "F", " ( E ) sa_L"));
+//    }
 
-    // example symbols
-    public void createSymbolsEx() {
-        terminal_list = new ArrayList<>(Arrays.asList("id", "(", ")", "plus", "mult", "$"));
-        nonTerminal_list = new ArrayList<>(Arrays.asList("E", "E'", "T", "T'", "F"));
-        semantic_actions_list = new ArrayList<>(Arrays.asList("sa_A", "sa_B", "sa_C", "sa_D", "sa_E", "sa_F", "sa_G", "sa_H", "sa_I", "sa_J", "sa_K", "sa_L"));
-    }
-
-    // example rules
-    public void createRulesEx() {
-        rules = new HashMap<>();
-        rules.put("r1", new Rule("r1", "E", " T E' "));
-        rules.put("r2", new Rule("r2", "E'", " plus T E' "));
-        rules.put("r3", new Rule("r3", "E'", "EPSILON"));
-        rules.put("r4", new Rule("r4", "T", " F T' "));
-        rules.put("r5", new Rule("r5", "T'", " mult F T' "));
-        rules.put("r6", new Rule("r6", "T'", "EPSILON"));
-        rules.put("r7", new Rule("r7", "F", " id "));
-        rules.put("r8", new Rule("r8", "F", " ( E ) "));
-    }
-
-    // example parsing table
-    public void createParsingTableEx() {
-        parsing_table = new HashMap<>();
-        addToParsingRow("E", new String[]{"r1", "r1", "error", "error", "error", "error"});
-        addToParsingRow("E'", new String[]{"error", "error", "r3", "r2", "error", "r3"});
-        addToParsingRow("T", new String[]{"r4", "r4", "error", "error", "error", "error"});
-        addToParsingRow("T'", new String[]{"error", "error", "r6", "r6", "r5", "r6"});
-        addToParsingRow("F", new String[]{"r7", "r8", "error", "error", "error", "error"});
-    }
-
-    public void createSemanticActionsEx() {
-        semantic_actions = new HashMap<>();
-        semantic_actions.put("sa_A", new SemanticAction("sa_A", "E'_i", "T_s"));
-        semantic_actions.put("sa_B", new SemanticAction("sa_B", "E_s", "E'_s"));
-        semantic_actions.put("sa_C", new SemanticAction("sa_C", "E'_i", "makeFamily(plus, E'_i, T_s)"));
-        semantic_actions.put("sa_D", new SemanticAction("sa_D", "E'_s", "E'_s"));
-        semantic_actions.put("sa_E", new SemanticAction("sa_E", "E'_s", "E'_i"));
-        semantic_actions.put("sa_F", new SemanticAction("sa_F", "T'_i", "F_s"));
-        semantic_actions.put("sa_G", new SemanticAction("sa_G", "T_s", "T'_s"));
-        semantic_actions.put("sa_H", new SemanticAction("sa_H", "T'_i", "makeFamily(mult,T'_i,F_s)"));
-        semantic_actions.put("sa_I", new SemanticAction("sa_I", "T'_s", "T'_s"));
-        semantic_actions.put("sa_J", new SemanticAction("sa_J", "T'_s", "T'_i"));
-        semantic_actions.put("sa_K", new SemanticAction("sa_K", "F_s", "makeNode(id)"));
-        semantic_actions.put("sa_L", new SemanticAction("sa_L", "F_s", "E_s"));
-    }
-
-    public void createRulesWithAttributeEx() {
-        rules_attribute = new HashMap<>();
-        rules_attribute.put("r1", new Rule("r1", "E", " T sa_A E' sa_B "));
-        rules_attribute.put("r2", new Rule("r2", "E'", " plus T sa_C E' sa_D "));
-        rules_attribute.put("r3", new Rule("r3", "E'", "EPSILON sa_E"));
-        rules_attribute.put("r4", new Rule("r4", "T", " F sa_F T' sa_G"));
-        rules_attribute.put("r5", new Rule("r5", "T'", " mult F sa_H T' sa_I "));
-        rules_attribute.put("r6", new Rule("r6", "T'", "EPSILON sa_J"));
-        rules_attribute.put("r7", new Rule("r7", "F", " id sa_K"));
-        rules_attribute.put("r8", new Rule("r8", "F", " ( E ) sa_L"));
-    }
-
-    private void addToParsingRow(String nonTerminal, String[] rulesInRow) {
-        Map<String, String> parsingTable_row = new HashMap<>(); // <terminal, rule>
-        String[] terminalArray = terminal_list.toArray(new String[0]);
-        for (int i = 0; i < terminalArray.length; i++) {
-            parsingTable_row.put(terminalArray[i], rulesInRow[i]);
-        }
-        parsing_table.put(nonTerminal, parsingTable_row);
-    }
+//    private void addToParsingRow(String nonTerminal, String[] rulesInRow) {
+//        Map<String, String> parsingTable_row = new HashMap<>(); // <terminal, rule>
+//        String[] terminalArray = terminal_list.toArray(new String[0]);
+//        for (int i = 0; i < terminalArray.length; i++) {
+//            parsingTable_row.put(terminalArray[i], rulesInRow[i]);
+//        }
+//        parsing_table.put(nonTerminal, parsingTable_row);
+//    }
 
     public ArrayList<String> getTerminal_list() {
         return terminal_list;
     }
 
-    public void setTerminal_list(ArrayList<String> terminal_list) {
-        this.terminal_list = terminal_list;
-    }
 
     public ArrayList<String> getNonTerminal_list() {
         return nonTerminal_list;
     }
 
-    public void setNonTerminal_list(ArrayList<String> nonTerminal_list) {
-        this.nonTerminal_list = nonTerminal_list;
-    }
 
-    public Map<String, Rule> getRules() {
-        return rules;
-    }
 
-    public void setRules(Map<String, Rule> rules) {
-        this.rules = rules;
-    }
+//    public Map<String, Rule> getRules() {
+//        return rules;
+//    }
+
 
     public Map<String, Map<String, String>> getParsing_table() {
         return parsing_table;
     }
 
-    public void setParsing_table(Map<String, Map<String, String>> parsing_table) {
-        this.parsing_table = parsing_table;
-    }
 
     public Map<String, ArrayList<String>> getFollow_sets() {
         return follow_sets;
@@ -438,31 +414,20 @@ public class Grammar {
         return semantic_actions_list;
     }
 
-    public void setSemantic_actions_list(ArrayList<String> semantic_actions_list) {
-        this.semantic_actions_list = semantic_actions_list;
-    }
 
     public Map<String, SemanticAction> getSemantic_actions() {
         return semantic_actions;
     }
 
-    public void setSemantic_actions(Map<String, SemanticAction> semantic_actions) {
-        this.semantic_actions = semantic_actions;
-    }
 
     public Map<String, Rule> getRules_attribute() {
         return rules_attribute;
     }
 
-    public void setRules_attribute(Map<String, Rule> rules_attribute) {
-        this.rules_attribute = rules_attribute;
-    }
 
     public Map<String, String> getSymbol_map() {
         return symbol_map;
     }
 
-    public void setSymbol_map(Map<String, String> symbol_map) {
-        this.symbol_map = symbol_map;
-    }
+
 }

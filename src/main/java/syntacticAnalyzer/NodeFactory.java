@@ -8,7 +8,7 @@ public class NodeFactory {
 
         switch (type) {
             case "Num":
-                return new NumNode(lexeme,line);
+                return new NumNode(lexeme, line);
             case "Id":
                 return new IdNode(lexeme, line);
             case "AddOp":
@@ -34,21 +34,21 @@ public class NodeFactory {
             case "VarDecl":
                 return new VarDeclNode();
             case "MembList":
-                return  new MembListNode();
+                return new MembListNode();
             case "FParam":
                 return new FParamNode();
             case "FParamList":
                 return new FParamListNode();
             case "Type":
-                if(lexeme.equals("Type"))
+                if (lexeme.equals("Type"))
                     return new TypeNode("");
                 else
                     return new TypeNode(lexeme, line);
             case "DimList":
                 return new DimListNode();
-            case  "Dim":
-                return new DimNode("["+lexeme+"]");
-            case  "DimNull":
+            case "Dim":
+                return new DimNode("[" + lexeme + "]");
+            case "DimNull":
                 return new DimNode("[]");
             case "FuncDef":
                 return new FuncDefNode();
