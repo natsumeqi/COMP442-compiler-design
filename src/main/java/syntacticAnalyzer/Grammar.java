@@ -1,5 +1,8 @@
 package syntacticAnalyzer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,8 +16,8 @@ import java.util.stream.Stream;
 
 public class Grammar {
 
-    private final ArrayList<String> terminal_list;
-    private final ArrayList<String> nonTerminal_list;
+    private ArrayList<String> terminal_list;
+    private ArrayList<String> nonTerminal_list;
     private final ArrayList<String> semantic_actions_list;
     private Map<String, String> symbol_map;
 
@@ -22,13 +25,13 @@ public class Grammar {
     private Map<String, SemanticAction> semantic_actions;
     private final Map<String, Rule> rules_attribute;
 
-    private final Map<String, ArrayList<String>> follow_sets;
-    private final Map<String, ArrayList<String>> first_sets;
-    private final Map<String, Map<String, String>> parsing_table;
+    private Map<String, ArrayList<String>> follow_sets;
+    private Map<String, ArrayList<String>> first_sets;
+    private Map<String, Map<String, String>> parsing_table;
 
 
     public Grammar() {
-        terminal_list = new ArrayList<>();
+//        terminal_list = new ArrayList<>();
         nonTerminal_list = new ArrayList<>();
         semantic_actions_list = new ArrayList<>();
         rules_attribute = new HashMap<>();
@@ -40,43 +43,41 @@ public class Grammar {
 
     public void createSymbols() {
 
-        symbol_map = Stream.of(new String[][]{
-                {"dot", "."},
-                {"semi", ";"},
-                {"rpar", ")"},
-                {"lpar", "("},
-                {"rcurbr", "}"},
-                {"lcurbr", "{"},
-                {"minus", "-"},
-                {"plus", "+"},
-                {"geq", ">="},
-                {"leq", "<="},
-                {"gt", ">"},
-                {"lt", "<"},
-                {"neq", "<>"},
-                {"eq", "=="},
-                {"comma", ","},
-                {"div", "/"},
-                {"mult", "*"},
-                {"rsqbr", "]"},
-                {"lsqbr", "["},
-                {"colon", ":"},
-                {"qm", "?"},
-                {"not", "!"},
-                {"sr", "::"},
-                {"assign", "="},
-                {"or", "|"}
+        symbol_map = Stream.of(new String[][]{{"dot", "."}, {"semi", ";"}, {"rpar", ")"}, {"lpar", "("},
+                {"rcurbr", "}"}, {"lcurbr", "{"}, {"minus", "-"}, {"plus", "+"}, {"geq", ">="},
+                {"leq", "<="}, {"gt", ">"}, {"lt", "<"}, {"neq", "<>"}, {"eq", "=="}, {"comma", ","},
+                {"div", "/"}, {"mult", "*"}, {"rsqbr", "]"}, {"lsqbr", "["}, {"colon", ":"}, {"qm", "?"},
+                {"not", "!"}, {"sr", "::"}, {"assign", "="}, {"or", "|"}
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
+
+        terminal_list = new ArrayList<>(Arrays.asList("$", "private", "public", "id", "dot", "semi", "string", "float", "integer", "continue",
+                "break", "rpar", "lpar", "return", "write", "read", "while", "else", "then", "if", "rcurbr",
+                "lcurbr", "minus", "plus", "geq", "leq", "gt", "lt", "neq", "eq", "main", "comma", "and", "div", "mult", "var",
+                "intnum", "inherits", "rsqbr", "lsqbr", "colon", "func", "void", "qm", "not", "stringlit", "floatnum", "sr", "class", "assign", "or"));
+
+
+        nonTerminal_list = new ArrayList<>(Arrays.asList(
+                "START", "ADDOP", "APARAMS", "APARAMSTAIL", "ARITHEXPR", "ARITHEXPRTAIL", "ARRAYSIZEREPT",
+                "ASSIGNOP", "ASSIGNSTATTAIL", "CLASSDECL", "CLASSDECLBODY", "CLASSMETHOD", "EXPR", "EXPRTAIL",
+                "FACTOR", "FPARAMS", "FPARAMSTAIL", "FUNCBODY", "FUNCDECL", "FUNCDECLTAIL", "FUNCDEF",
+                "FUNCHEAD", "FUNCORASSIGNSTAT", "FUNCORASSIGNSTATIDNEST", "FUNCORASSIGNSTATIDNESTFUNCTAIL",
+                "FUNCORASSIGNSTATIDNESTVARTAIL", "FUNCORVAR", "FUNCORVARIDNEST", "FUNCORVARIDNESTTAIL",
+                "FUNCSTATTAIL", "FUNCSTATTAILIDNEST", "FUNCTION", "INDICEREP", "INHERIT", "INTNUM",
+                "MEMBERDECL", "METHODBODYVAR", "MULTOP", "NESTEDID", "PROG", "RELOP", "SIGN",
+                "STATBLOCK", "STATEMENT", "STATEMENTLIST", "TERM", "TERMTAIL", "TYPE", "VARDECL",
+                "VARDECLREP", "VARIABLE", "VARIABLEIDNEST", "VARIABLEIDNESTTAIL", "VISIBILITY"));
     }
 
 
     public void generateGrammarProject() {
         createSymbols();
         importRules();
-        importParsingTable();
-        importFirstFollowSets();
         importSemanticActions();
+        importFromJsonFiles();
+//        importParsingTable();
+//        importFirstFollowSets();
+//        writeToFileTwoSets();
     }
 
     private void importSemanticActions() {
@@ -159,7 +160,7 @@ public class Grammar {
      */
     public void importFirstFollowSets() {
 
-        String file_name = "/firstFollowSets.html";
+        String file_name = "/exclude/firstFollowSets.html";
         InputStream in = getClass().getResourceAsStream(file_name);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
@@ -220,11 +221,62 @@ public class Grammar {
 
 
     /**
+     * write map object into JSON file
+     */
+    private void writeToJSONFiles() {
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.writeValue(new File("./src/main/resources/firstSets.json"), first_sets);
+            mapper.writeValue(new File("./src/main/resources/followSets.json"), follow_sets);
+            mapper.writeValue(new File("./src/main/resources/parsingTable.json"), parsing_table);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * import FIRST and FOLLOW sets, parsing table from JSON files
+     */
+    private void importFromJsonFiles() {
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String file_name = "/firstSets.json";
+            System.out.println("[Grammar] Importing FIRST sets from file: " + file_name);
+            InputStream in = getClass().getResourceAsStream(file_name);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            first_sets = mapper.readValue(reader, new TypeReference<Map<String, ArrayList<String>>>() {
+            });
+
+            file_name = "/followSets.json";
+            System.out.println("[Grammar] Importing FOLLOW sets from file: " + file_name);
+            in = getClass().getResourceAsStream(file_name);
+            reader = new BufferedReader(new InputStreamReader(in));
+            follow_sets = mapper.readValue(reader, new TypeReference<Map<String, ArrayList<String>>>() {
+            });
+
+            file_name = "/parsingTable.json";
+            System.out.println("[Grammar] Importing parsing table from file: " + file_name);
+            in = getClass().getResourceAsStream(file_name);
+            reader = new BufferedReader(new InputStreamReader(in));
+            parsing_table = mapper.readValue(reader, new TypeReference<Map<String, Map<String, String>>>() {
+            });
+
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
      * Parsing HTML file to get parsing table using JSOUP; also terminal list and nonTerminal list
      */
     public void importParsingTable() {
 
-        String file_name = "/parsingTable.html";
+        String file_name = "/exclude/parsingTable.html";
         System.out.println("[Grammar] Importing parsing table from file: " + file_name);
         InputStream in = getClass().getResourceAsStream(file_name);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -383,7 +435,6 @@ public class Grammar {
     public ArrayList<String> getNonTerminal_list() {
         return nonTerminal_list;
     }
-
 
 
 //    public Map<String, Rule> getRules() {

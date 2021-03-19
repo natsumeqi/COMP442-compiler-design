@@ -48,6 +48,8 @@ public class SyntacticAnalyzer {
         grammar = new Grammar();
 //        grammar.generateGrammarEx();
         grammar.generateGrammarProject();
+
+
     }
 
 
@@ -123,7 +125,6 @@ public class SyntacticAnalyzer {
 
 
         while (!parsing_stack.peek().equals("$")) {
-
             top_of_stack = parsing_stack.peek();
 
             // the top of parsing stack is a terminal symbol
@@ -510,6 +511,7 @@ public class SyntacticAnalyzer {
 
     /**
      * looking up result of the parsing table
+     *
      * @param top_of_stack non terminal symbols on the top of stack
      * @param lookahead    token
      * @return result in the parsing table
@@ -643,6 +645,7 @@ public class SyntacticAnalyzer {
 
     /**
      * match the token type to the forms of rules defined
+     *
      * @param lookahead_type type of the token
      * @return corresponding to grammar rules
      */
