@@ -29,7 +29,6 @@ public class LexicalAnalyzer {
 
     /**
      * set up the reader and writer
-     *
      * @param file_path the path of .src files
      */
     public void IOFileSetup(String file_path) {

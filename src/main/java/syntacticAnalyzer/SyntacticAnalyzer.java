@@ -27,12 +27,14 @@ public class SyntacticAnalyzer {
     private String derivation;              // record Derivation output
     private int index_terminal_derivation;  // keep updated index of the terminal symbol in derivation
     private String top_of_stack;
+    private Node progNode;
 
     // output to files
     private PrintWriter writer_derivation;
     private PrintWriter writer_err_report;
     private PrintWriter writer_DOT;
     private PrintStream writer_AST;
+
 
 
     /**
@@ -43,12 +45,9 @@ public class SyntacticAnalyzer {
         parsing_stack = new Stack<>();
         semantic_stack = new Stack<>();
         nodeFactory = new NodeFactory();
-
-        // import grammar
         grammar = new Grammar();
 //        grammar.generateGrammarEx();
         grammar.generateGrammarProject();
-
 
     }
 
@@ -58,7 +57,8 @@ public class SyntacticAnalyzer {
      *
      * @param src_file_path input file
      */
-    public void parserSetup(String src_file_path) {
+    public void parserLexicalSetup(String src_file_path) {
+
         lexical_analyzer.createTable();
         lexical_analyzer.IOFileSetup(src_file_path);
     }
@@ -103,6 +103,11 @@ public class SyntacticAnalyzer {
         writer_DOT.close();
         writer_AST.flush();
         writer_AST.close();
+    }
+
+
+    public Node getProgNode() {
+        return progNode;
     }
 
 
@@ -178,7 +183,7 @@ public class SyntacticAnalyzer {
 
 
         // print the node to console and file
-        semantic_stack.peek().print();
+//        semantic_stack.peek().print();
 
         PrintStream console = System.out;
         System.setOut(writer_AST);
@@ -186,6 +191,7 @@ public class SyntacticAnalyzer {
         System.setOut(console);
 
         printToDot(semantic_stack.peek());
+        progNode = semantic_stack.peek();
 
 
         if (!lookahead.equals("$") && !error) {
@@ -271,7 +277,7 @@ public class SyntacticAnalyzer {
         parsing_stack.pop();
         String left_sem_act = semantic_action.getSem_act_LHS();
         String right_sem_act = semantic_action.getSem_act_RHS();
-        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
+//        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
         Node node_to_push;
         Node node_on_top = null;
         if (!semantic_stack.empty()) {
