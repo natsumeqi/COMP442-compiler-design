@@ -1,5 +1,7 @@
 package AST;
 
+import visitors.Visitor;
+
 public class FactorNode extends Node {
     public FactorNode() {
         super("");
@@ -9,4 +11,9 @@ public class FactorNode extends Node {
         super("", p_parent);
     }
 
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }

@@ -1,12 +1,19 @@
 package AST;
 
-public class VariableNode extends Node{
-    public VariableNode(){
+import visitors.Visitor;
+
+public class VariableNode extends Node {
+    public VariableNode() {
         super("");
     }
 
-    public VariableNode(Node p_parent){
+    public VariableNode(Node p_parent) {
         super("", p_parent);
     }
 
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }

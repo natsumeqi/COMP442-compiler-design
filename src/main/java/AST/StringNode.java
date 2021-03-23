@@ -1,5 +1,7 @@
 package AST;
 
+import visitors.Visitor;
+
 public class StringNode extends Node {
 
     public StringNode(String p_data, int line) {
@@ -8,6 +10,10 @@ public class StringNode extends Node {
 
     public StringNode(String p_data, Node p_parent) {
         super(p_data, p_parent);
+    }
+
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
 }

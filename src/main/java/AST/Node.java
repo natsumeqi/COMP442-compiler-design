@@ -1,25 +1,52 @@
 package AST;
 
+import symbolTable.SymTab;
+import symbolTable.SymTabEntry;
+import visitors.Visitor;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 public abstract class Node {
 
+    // Original data members of the class
+    // that are not related to the introduction of
+    // the visitors
     public String m_sa_name = null;
     public int m_line;
 
     private List<Node> m_children = new ArrayList<Node>();
     private Node m_parent = null;
     public String m_data = null;
-    public static int m_nodelevel = 0;
+    public static int m_nodeLevel = 0;
     public int m_nodeId = 0;
     public static int m_curNodeId = 0;
     private Node r_sibling = null;
     private Node lm_sibling = null;
     private Node lm_child = null;
 
+
+    // The following data members have been added
+    // during the implementation of the visitors
+    // These could be added using a decorator pattern
+    // triggered by a visitor
+
+    // introduced by type checking visitor
     public String m_type = null;
+
+    // introduced by the construct assignment and expression string visitor
+    public String m_subtreeString = new String();
+
+    // introduced by symbol table creation visitor
+    public SymTab m_symTab = null;
+    public SymTabEntry m_symTabEntry = null;
+
+//    // introduced by code generation visitors
+//    public  String      m_localRegister      = new String();
+//    public  String      m_leftChildRegister  = new String();
+//    public  String      m_rightChildRegister = new String();
+//    public  String      m_moonVarName        = new String();
 
     public Node() {
 
@@ -133,22 +160,22 @@ public abstract class Node {
     }
 
     public void printSubtree() {
-        for (int i = 0; i < Node.m_nodelevel; i++)
+        for (int i = 0; i < Node.m_nodeLevel; i++)
             System.out.print("  ");
 
         String toprint = String.format("%-75s", this.getClass().getName());
-        for (int i = 0; i < Node.m_nodelevel; i++)
+        for (int i = 0; i < Node.m_nodeLevel; i++)
             toprint = toprint.substring(0, toprint.length() - 2);
         toprint += String.format("%-22s", (this.getData() == null || this.getData().isEmpty()) ? " | " : " | " + this.getData());
         toprint += String.format("%-25s", (this.getM_line() == 0 ? " | " : " | " + this.getM_line()));
         System.out.println(toprint);
 
-        Node.m_nodelevel++;
+        Node.m_nodeLevel++;
         List<Node> children = this.getChildren();
         for (int i = 0; i < children.size(); i++) {
             children.get(i).printSubtree();
         }
-        Node.m_nodelevel--;
+        Node.m_nodeLevel--;
     }
 
 
@@ -210,5 +237,9 @@ public abstract class Node {
         return this;
     }
 
+
+    public void accept(Visitor p_visitor) {
+        p_visitor.visit(this);
+    }
 
 }

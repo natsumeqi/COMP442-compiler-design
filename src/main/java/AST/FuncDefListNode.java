@@ -1,5 +1,5 @@
 package AST;
-import lexicalAnalyzer.Token;
+import visitors.Visitor;
 
 import java.util.List;
 
@@ -10,11 +10,6 @@ public class FuncDefListNode extends Node {
 		super("");
 	}
 
-//	@Override
-//	Node makeNode(Token token) {
-//		return null;
-//	}
-
 	public FuncDefListNode(Node p_parent){
 		super("", p_parent);
 	}
@@ -24,6 +19,10 @@ public class FuncDefListNode extends Node {
 		for (Node child : p_listOfFuncDefNodes)
 			this.addChild(child);
 	}
-	
 
+	public void accept(Visitor visitor) {
+		for (Node child : this.getChildren())
+			child.accept(visitor);
+		visitor.visit(this);
+	}
 }

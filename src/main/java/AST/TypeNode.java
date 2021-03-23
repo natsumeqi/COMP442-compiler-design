@@ -1,6 +1,6 @@
 package AST;
 
-import lexicalAnalyzer.Token;
+import visitors.Visitor;
 
 public class TypeNode extends Node {
 
@@ -16,4 +16,9 @@ public class TypeNode extends Node {
         super(p_data, p_parent);
     }
 
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }

@@ -1,6 +1,8 @@
 package AST;
 
-public class FuncOrVarNode extends Node{
+import visitors.Visitor;
+
+public class FuncOrVarNode extends Node {
     public FuncOrVarNode() {
         super("");
     }
@@ -9,4 +11,9 @@ public class FuncOrVarNode extends Node{
         super("", p_parent);
     }
 
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }

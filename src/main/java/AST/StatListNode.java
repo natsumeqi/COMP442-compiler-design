@@ -1,13 +1,20 @@
 package AST;
 
-public class StatListNode extends Node{
+import visitors.Visitor;
 
-    public StatListNode(String p_data){
+public class StatListNode extends Node {
+
+    public StatListNode(String p_data) {
         super(p_data);
     }
 
-    public StatListNode(String p_data, Node p_parent){
+    public StatListNode(String p_data, Node p_parent) {
         super(p_data, p_parent);
     }
 
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }

@@ -1,6 +1,6 @@
 package AST;
 
-import lexicalAnalyzer.Token;
+import visitors.Visitor;
 
 public class MultOpNode extends Node {
 
@@ -19,5 +19,9 @@ public class MultOpNode extends Node {
         this.addChild(p_rightChild);
     }
 
-
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }

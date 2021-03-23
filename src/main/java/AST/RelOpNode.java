@@ -1,5 +1,7 @@
 package AST;
 
+import visitors.Visitor;
+
 public class RelOpNode extends Node {
     public RelOpNode(String p_data, int line) {
         super(p_data, line);
@@ -7,5 +9,11 @@ public class RelOpNode extends Node {
 
     public RelOpNode(String p_data, Node p_parent) {
         super(p_data, p_parent);
+    }
+
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
     }
 }

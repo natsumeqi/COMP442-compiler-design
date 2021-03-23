@@ -1,36 +1,36 @@
 package AST;
 
-import lexicalAnalyzer.Token;
+import visitors.Visitor;
 
 public class VarDeclNode extends Node {
 
-	public VarDeclNode(){
-		super("");
-	}
+    public VarDeclNode() {
+        super("");
+    }
 
-//	@Override
-//	Node makeNode(Token token) {
-//		return null;
-//	}
 
-	public VarDeclNode(Node p_parent){
-		super("", p_parent);
-	}
-	
-	public VarDeclNode(Node p_type, Node p_id, Node p_dimList){
-		super(""); 
-		this.addChild(p_type);
-		this.addChild(p_id);
-		this.addChild(p_dimList);		
-	}
-	
-	public VarDeclNode(Node p_type, Node p_id){
-		super(""); 
-		this.addChild(p_type);
-		this.addChild(p_id);
-		this.addChild(new DimListNode());		
-	}
-	
+    public VarDeclNode(Node p_parent) {
+        super("", p_parent);
+    }
 
-	
+    public VarDeclNode(Node p_type, Node p_id, Node p_dimList) {
+        super("");
+        this.addChild(p_type);
+        this.addChild(p_id);
+        this.addChild(p_dimList);
+    }
+
+    public VarDeclNode(Node p_type, Node p_id) {
+        super("");
+        this.addChild(p_type);
+        this.addChild(p_id);
+        this.addChild(new DimListNode());
+    }
+
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
+
 }

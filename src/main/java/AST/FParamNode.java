@@ -1,14 +1,21 @@
 package AST;
 
-public class FParamNode extends Node{
+import visitors.Visitor;
 
-    public FParamNode(){
+public class FParamNode extends Node {
+
+    public FParamNode() {
         super("");
     }
 
 
-    public FParamNode(Node p_parent){
+    public FParamNode(Node p_parent) {
         super("", p_parent);
     }
 
+    public void accept(Visitor visitor) {
+        for (Node child : this.getChildren())
+            child.accept(visitor);
+        visitor.visit(this);
+    }
 }
