@@ -1,5 +1,7 @@
 package symbolTable;
 
+
+
 public class ClassEntry extends SymTabEntry {
 
     public ClassEntry(String p_name, SymTab p_subtable){

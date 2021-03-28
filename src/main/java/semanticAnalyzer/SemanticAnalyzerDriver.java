@@ -40,16 +40,15 @@ public class SemanticAnalyzerDriver {
             // do semantic analysis
             SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
             semanticAnalyzer.setProgNode(syntacticAnalyzer.getProgNode());
-            syntacticAnalyzer.getProgNode().print();
+            semanticAnalyzer.createSymTables();
+            semanticAnalyzer.writeToFiles(file_path);
+            semanticAnalyzer.closeFiles();
 
 
         } else {
             System.out.println("The program has syntax error(s).");
         }
         syntacticAnalyzer.parserIOFileClose();
-
-
-
 
 
 

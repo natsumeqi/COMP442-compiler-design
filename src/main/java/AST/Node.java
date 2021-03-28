@@ -139,6 +139,10 @@ public abstract class Node {
         this.m_line = m_line;
     }
 
+    public Node getLm_sibling() {
+        return lm_sibling;
+    }
+
     public boolean isLeaf() {
         if (this.m_children.size() == 0)
             return true;

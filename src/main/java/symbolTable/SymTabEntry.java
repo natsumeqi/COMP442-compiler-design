@@ -9,7 +9,10 @@ public class SymTabEntry {
     public int             m_size       = 0;
     public int             m_offset     = 0;
     public SymTab          m_subtable   = null;
-    public Vector<Integer> m_dims       = new Vector<Integer>();
+    public Vector<String> m_dims       = new Vector<>();
+    public Vector<String> m_fParam  = new Vector<String>();
+
+    public String m_visibility  = null;
 
     public SymTabEntry() {}
 

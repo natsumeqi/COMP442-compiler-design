@@ -100,9 +100,9 @@ public class Grammar {
         semantic_actions.put("sa-14", new SemanticAction("sa-14", "DimList_s", "makeFamily(DimList, Dim_s, n)"));
         semantic_actions.put("sa-15", new SemanticAction("sa-15", "Dim_s", "makeNode(Dim)"));
         semantic_actions.put("sa-16", new SemanticAction("sa-16", "FParam_s", "makeFamily(FParam, Type_s, Id_s, DimList_s)"));
-        semantic_actions.put("sa-17", new SemanticAction("sa-17", "FuncDef_s", "makeFamily(FuncDef, Id_s, Scope_s, FParamList_s, Type_s, FuncBody_s)"));
+        semantic_actions.put("sa-17", new SemanticAction("sa-17", "FuncDef_s", "makeFamily(FuncDef, Scope_s, Id_s, FParamList_s, Type_s, FuncBody_s)"));
         semantic_actions.put("sa-18", new SemanticAction("sa-18", "FuncBody_s", "makeFamily(FuncBody, MethVar_s, StatBlock_s)"));
-        semantic_actions.put("sa-19", new SemanticAction("sa-19", "Scope_s", "makeFamily(Scope, Id_s)"));
+        semantic_actions.put("sa-19", new SemanticAction("sa-19", "Scope_s", "makeFamily(Scope_s, Scope_s, Id_s, reuse)"));
         semantic_actions.put("sa-20", new SemanticAction("sa-20", "MethVar_s", "makeFamily(MethVar, VarDecl_s, n)"));
         semantic_actions.put("sa-21", new SemanticAction("sa-21", "StatBlock_s", "makeFamily(StatBlock, VarDecl_s, IfStat_s, WhileStat_s, ReadStat_s, WriteStat_s, ReturnStat_s, BreakStat_s, ContiStat_s, FuncCallStat_s, AssignStat_s, n)"));
         semantic_actions.put("sa-22", new SemanticAction("sa-22", "IfStat_s", "makeFamily(IfStat, Expr_s, StatBlock_s, StatBlock_s)"));
@@ -143,6 +143,7 @@ public class Grammar {
         semantic_actions.put("sa-57", new SemanticAction("sa-57", "InherList_s", "makeNode(InherList)"));
         semantic_actions.put("sa-58", new SemanticAction("sa-58", "Dim_s", "makeNode(DimNull)"));
         semantic_actions.put("sa-59", new SemanticAction("sa-59", "Scope_s", "makeNode(Scope)"));
+//        semantic_actions.put("sa-61", new SemanticAction("sa-61", "Scope_s", "Scope_i"));
 
         semantic_actions.put("sa-60", new SemanticAction("sa-60", "FuncCallStat_s", "makeFamily(FuncCallStat, FuncCall_s, DataMem_s, n)"));
 
