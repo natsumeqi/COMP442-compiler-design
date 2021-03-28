@@ -114,6 +114,8 @@ public class NodeFactory {
                 return new VisibilityNode(lexeme, line);
             case "VisibilityDefault":
                 return new VisibilityNode();
+            case "Dot":
+                return new DotNode();
 
         }
 

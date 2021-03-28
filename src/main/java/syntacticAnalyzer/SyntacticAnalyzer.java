@@ -36,7 +36,6 @@ public class SyntacticAnalyzer {
     private PrintStream writer_AST;
 
 
-
     /**
      * constructor
      */
@@ -183,7 +182,7 @@ public class SyntacticAnalyzer {
 
 
         // print the node to console and file
-//        semantic_stack.peek().print();
+        semantic_stack.peek().print();
 
         PrintStream console = System.out;
         System.setOut(writer_AST);
@@ -273,11 +272,14 @@ public class SyntacticAnalyzer {
      * when the top of parsing stack is a semantic action, do the following (create nodes or migrate nodes)
      */
     private void semanticActionOnStack() {
+
+        boolean skip = false;
+
         SemanticAction semantic_action = grammar.getSemantic_actions().get(top_of_stack);
         parsing_stack.pop();
         String left_sem_act = semantic_action.getSem_act_LHS();
         String right_sem_act = semantic_action.getSem_act_RHS();
-//        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
+        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
         Node node_to_push;
         Node node_on_top = null;
         if (!semantic_stack.empty()) {
@@ -289,7 +291,7 @@ public class SyntacticAnalyzer {
             String node_type = right_sem_act.substring(right_sem_act.indexOf("(") + 1, right_sem_act.indexOf(")"));
             String node_lexeme = terminal_suc_token.getLexeme();
             int node_line = terminal_suc_token.getLocation();
-//            System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + node_type);
+            System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + node_type);
             node_to_push = nodeFactory.makeNode(node_type, node_lexeme, node_line);
 
             assert node_to_push != null;
@@ -300,7 +302,7 @@ public class SyntacticAnalyzer {
 
             // generate AST subtree
             if (right_sem_act.contains("makeFamily(")) {
-//                System.out.println("[make family branch] begin: " + right_sem_act);
+                System.out.println("[make family branch] begin: " + right_sem_act);
                 String parameter = right_sem_act.substring(right_sem_act.indexOf("makeFamily(") + 11, right_sem_act.indexOf(")"));
                 String[] parameters = parameter.split(",");
                 String op = parameters[0];
@@ -341,81 +343,139 @@ public class SyntacticAnalyzer {
 
                 } else {
 
-                    // any one of kids can make a family (one type is enough)
-                    if (parameters[parameters.length - 1].trim().equals("any")) {
+                    // for special case makeFamily(Dot, DataMem_s, DataMem_s, keepOrSkip)
+                    if (parameters[parameters.length - 1].trim().equals("keepOrSkip")) {
 
-                        // only 2 kids can be interchangeable. Special case for makeFamily(MembDecl, Visibility_s, VarDecl_s, FuncDecl_s, 2, any).
-                        if (parameters[parameters.length - 2].trim().equals("2")) {
+
+                        if (!semantic_stack.isEmpty()) {
                             node_on_top = semantic_stack.peek();
-
-                            // real kid
-                            int index_kid = parameters.length - 3;
-                            ArrayList<String> string_kids = new ArrayList<>();
-                            string_kids.add(parameters[index_kid].trim());
-                            string_kids.add(parameters[index_kid - 1].trim());
-                            String name_node_on_top = node_on_top.m_sa_name;
-                            if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
-                                Node node_to_pop = semantic_stack.pop();
-                                para_nodes.add(node_to_pop);
-                            }
-
-                            for (int i = parameters.length - 5; i > 0; i--) {
-                                if (!semantic_stack.isEmpty()) {
-                                    node_on_top = semantic_stack.peek();
-                                    if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
-                                        Node node_to_pop = semantic_stack.pop();
-                                        para_nodes.add(node_to_pop);
-                                    }
-                                }
-                            }
-
-                        } else {
-
-                            // any one of kids can make a family (general case). Ex: makeFamily(ArithExpr, Term_s, AddOp_s, any)
-                            node_on_top = semantic_stack.peek();
-                            int num_kids = parameters.length - 2;
-                            ArrayList<String> string_kids = new ArrayList<>();
-                            for (int i = 1; i <= num_kids; i++) {
-                                string_kids.add(parameters[i].trim());
-                            }
-                            String name_node_on_top = node_on_top.m_sa_name;
-                            if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                            if (parameters[1].trim().equals(node_on_top.m_sa_name)) {
                                 Node node_to_pop = semantic_stack.pop();
                                 para_nodes.add(node_to_pop);
                             }
                         }
 
+                        if (!semantic_stack.isEmpty()) {
+                            node_on_top = semantic_stack.peek();
+                            if (parameters[1].trim().equals(node_on_top.m_sa_name)) {
+                                Node node_to_pop = semantic_stack.pop();
+                                para_nodes.add(node_to_pop);
+                            } else {
+                                skip = true;
+                            }
+                        }
+
+
                     } else {
 
-                        // first create a parent node, then reuse the node to make a family. Ex: makeFamily(Sign_i, Factor_s, reuse)
-                        if (parameters[parameters.length - 1].trim().equals("reuse")) {
-                            String op_name = parameters[0];
-                            for (int i = parameters.length - 2; i >= 0; i--) {
+
+                        // any one of kids can make a family (one type is enough)
+                        if (parameters[parameters.length - 1].trim().equals("any")) {
+
+                            // only the first 2 kids can be interchangeable. Special case for makeFamily(FuncCall, Id_s, Dot_s, AParams_s, first2, any).
+                            if (parameters[parameters.length - 2].trim().equals("first2")) {
+
+                                System.out.println("[first2] node on top: " + node_on_top);
+
+
                                 if (!semantic_stack.isEmpty()) {
                                     node_on_top = semantic_stack.peek();
-                                    if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
+                                    if (parameters[3].trim().equals(node_on_top.m_sa_name)) {
+                                        Node node_to_pop = semantic_stack.pop();
+                                        para_nodes.add(node_to_pop);
+                                    }
+                                }
 
-                                        // reserve the node for opNode
-                                        if (node_on_top.m_sa_name.equals(op_name)) {
-                                            opNode_backup = semantic_stack.pop();
-                                        } else {
-                                            Node node_to_pop = semantic_stack.pop();
-                                            para_nodes.add(node_to_pop);
+                                node_on_top = semantic_stack.peek();
+                                System.out.println("[first2] para1 " + parameters[1].trim());
+                                // real kid first 2 (any one is enough)
+                                ArrayList<String> string_kids = new ArrayList<>();
+                                string_kids.add(parameters[1].trim());
+                                string_kids.add(parameters[2].trim());
+                                String name_node_on_top = node_on_top.m_sa_name;
+                                if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                    Node node_to_pop = semantic_stack.pop();
+                                    para_nodes.add(node_to_pop);
+                                }
+
+                                System.out.println("[first2] para size " + para_nodes.size());
+
+                            } else {
+
+
+                                // only 2 kids can be interchangeable. Special case for makeFamily(MembDecl, Visibility_s, VarDecl_s, FuncDecl_s, 2, any).
+                                if (parameters[parameters.length - 2].trim().equals("2")) {
+                                    node_on_top = semantic_stack.peek();
+
+                                    // real kid
+                                    int index_kid = parameters.length - 3;
+                                    ArrayList<String> string_kids = new ArrayList<>();
+                                    string_kids.add(parameters[index_kid].trim());
+                                    string_kids.add(parameters[index_kid - 1].trim());
+                                    String name_node_on_top = node_on_top.m_sa_name;
+                                    if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                        Node node_to_pop = semantic_stack.pop();
+                                        para_nodes.add(node_to_pop);
+                                    }
+
+                                    for (int i = parameters.length - 5; i > 0; i--) {
+                                        if (!semantic_stack.isEmpty()) {
+                                            node_on_top = semantic_stack.peek();
+                                            if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
+                                                Node node_to_pop = semantic_stack.pop();
+                                                para_nodes.add(node_to_pop);
+                                            }
                                         }
+                                    }
+
+                                } else {
+
+                                    // any one of kids can make a family (general case). Ex: makeFamily(ArithExpr, Term_s, AddOp_s, any)
+                                    node_on_top = semantic_stack.peek();
+                                    int num_kids = parameters.length - 2;
+                                    ArrayList<String> string_kids = new ArrayList<>();
+                                    for (int i = 1; i <= num_kids; i++) {
+                                        string_kids.add(parameters[i].trim());
+                                    }
+                                    String name_node_on_top = node_on_top.m_sa_name;
+                                    if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                        Node node_to_pop = semantic_stack.pop();
+                                        para_nodes.add(node_to_pop);
                                     }
                                 }
                             }
-
-
                         } else {
 
-                            // fixed number of children. Ex: makeFamily(Prog, ClassList_s, FuncDefList_s, MainBlock_s)
-                            for (int i = parameters.length - 1; i > 0; i--) {
-                                if (!semantic_stack.isEmpty()) {
-                                    node_on_top = semantic_stack.peek();
-                                    if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
-                                        Node node_to_pop = semantic_stack.pop();
-                                        para_nodes.add(node_to_pop);
+                            // first create a parent node, then reuse the node to make a family. Ex: makeFamily(Sign_i, Factor_s, reuse)
+                            if (parameters[parameters.length - 1].trim().equals("reuse")) {
+                                String op_name = parameters[0];
+                                for (int i = parameters.length - 2; i >= 0; i--) {
+                                    if (!semantic_stack.isEmpty()) {
+                                        node_on_top = semantic_stack.peek();
+                                        if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
+
+                                            // reserve the node for opNode
+                                            if (node_on_top.m_sa_name.equals(op_name)) {
+                                                opNode_backup = semantic_stack.pop();
+                                            } else {
+                                                Node node_to_pop = semantic_stack.pop();
+                                                para_nodes.add(node_to_pop);
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                            } else {
+
+                                // fixed number of children. Ex: makeFamily(Prog, ClassList_s, FuncDefList_s, MainBlock_s)
+                                for (int i = parameters.length - 1; i > 0; i--) {
+                                    if (!semantic_stack.isEmpty()) {
+                                        node_on_top = semantic_stack.peek();
+                                        if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
+                                            Node node_to_pop = semantic_stack.pop();
+                                            para_nodes.add(node_to_pop);
+                                        }
                                     }
                                 }
                             }
@@ -426,22 +486,27 @@ public class SyntacticAnalyzer {
 
                 Node opNode;
 
-                // keep the arraylist consistent with the following call of makeFamily
-                if (parameters[parameters.length - 1].trim().equals("reuse")) {
-                    opNode = opNode_backup;
+                if (skip) {
+                    semantic_stack.push(para_nodes.get(0));
                 } else {
-                    opNode = nodeFactory.makeNode(op, op, node_line);
+
+                    // keep the arraylist consistent with the following call of makeFamily
+                    if (parameters[parameters.length - 1].trim().equals("reuse")) {
+                        opNode = opNode_backup;
+                    } else {
+                        opNode = nodeFactory.makeNode(op, op, node_line);
+                    }
+
+                    node_to_push = makeFamily(opNode, para_nodes);
+                    node_to_push.print();
+
+                    semantic_stack.push(node_to_push);
+
+                    // migrate makeFamily node
+                    Node temp = semantic_stack.pop();
+                    temp.setName(left_sem_act);
+                    semantic_stack.push(temp);
                 }
-
-                node_to_push = makeFamily(opNode, para_nodes);
-//                node_to_push.print();
-
-                semantic_stack.push(node_to_push);
-
-                // migrate makeFamily node
-                Node temp = semantic_stack.pop();
-                temp.setName(left_sem_act);
-                semantic_stack.push(temp);
             } else {
 
                 // migrate operation
@@ -534,7 +599,7 @@ public class SyntacticAnalyzer {
      * @param rule grammar in the parsing table
      */
     private void inverseRHSMultiplePush(String LHS, String rule) {
-//        System.out.println("rule: " + rule);
+        System.out.println("rule: " + rule);
         String RHS_in_rule = grammar.getRules_attribute().get(rule).getRule_RHS().trim();
         if (!RHS_in_rule.equals("EPSILON")) {
 
