@@ -147,6 +147,7 @@ public class Grammar {
         semantic_actions.put("sa-61", new SemanticAction("sa-61", "Dot_s", "makeFamily(Dot, DataMem_s, Dot_s, DataMem_s, 2, any)"));
         semantic_actions.put("sa-62", new SemanticAction("sa-62", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, n)"));
         semantic_actions.put("sa-63", new SemanticAction("sa-63", "Dot_s", "makeFamily(Dot, DataMem_s, DataMem_s, keepOrSkip)"));   // maybe a dot or just a dataMem
+        semantic_actions.put("sa-64", new SemanticAction("sa-64", "FuncCall_s", "makeFamily(FuncCall, DataMem_s, FuncCall_s, keepOrSkip)"));   // maybe a dot or just a dataMem
 
 
         // initialize semantic actions list

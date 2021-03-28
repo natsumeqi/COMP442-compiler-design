@@ -349,7 +349,7 @@ public class SyntacticAnalyzer {
 
                         if (!semantic_stack.isEmpty()) {
                             node_on_top = semantic_stack.peek();
-                            if (parameters[1].trim().equals(node_on_top.m_sa_name)) {
+                            if (parameters[2].trim().equals(node_on_top.m_sa_name)) {
                                 Node node_to_pop = semantic_stack.pop();
                                 para_nodes.add(node_to_pop);
                             }
