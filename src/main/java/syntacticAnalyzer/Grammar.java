@@ -145,9 +145,10 @@ public class Grammar {
         semantic_actions.put("sa-59", new SemanticAction("sa-59", "Scope_s", "makeNode(Scope)"));
         semantic_actions.put("sa-60", new SemanticAction("sa-60", "FuncCallStat_s", "makeFamily(FuncCallStat, FuncCall_s, n)"));
         semantic_actions.put("sa-61", new SemanticAction("sa-61", "Dot_s", "makeFamily(Dot, DataMem_s, Dot_s, DataMem_s, 2, any)"));
-        semantic_actions.put("sa-62", new SemanticAction("sa-62", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, n)"));
-        semantic_actions.put("sa-63", new SemanticAction("sa-63", "Dot_s", "makeFamily(Dot, DataMem_s, DataMem_s, keepOrSkip)"));   // maybe a dot or just a dataMem
-        semantic_actions.put("sa-64", new SemanticAction("sa-64", "FuncCall_s", "makeFamily(FuncCall, DataMem_s, FuncCall_s, keepOrSkip)"));   // maybe a dot or just a dataMem
+        semantic_actions.put("sa-62", new SemanticAction("sa-62", "Dot_s", "makeFamily(Dot, DataMem_s, Id_s, keepOrSkip)"));    // if not DataMem, skip; if DataMem, combine
+        semantic_actions.put("sa-63", new SemanticAction("sa-63", "Dot_s", "makeFamily(Dot, DataMem_s, Dot_s, DataMem_s, keepOrSkip, first2, any)"));   // maybe a dot or just a dataMem special case
+        semantic_actions.put("sa-64", new SemanticAction("sa-64", "FuncCall_s", "makeFamily(FuncCall, Dot_s, DataMem_s, FuncCall_s, keepOrSkip, first2, any)"));    // if not DataMem, just skip; if DataMem, combine
+        semantic_actions.put("sa-65", new SemanticAction("sa-65", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, skipAll, keepOrSkip)"));
 
 
         // initialize semantic actions list

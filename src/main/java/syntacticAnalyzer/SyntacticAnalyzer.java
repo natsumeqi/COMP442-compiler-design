@@ -274,6 +274,7 @@ public class SyntacticAnalyzer {
     private void semanticActionOnStack() {
 
         boolean skip = false;
+        boolean skipAll = false;
 
         SemanticAction semantic_action = grammar.getSemantic_actions().get(top_of_stack);
         parsing_stack.pop();
@@ -355,13 +356,19 @@ public class SyntacticAnalyzer {
                             }
                         }
 
+
                         if (!semantic_stack.isEmpty()) {
                             node_on_top = semantic_stack.peek();
                             if (parameters[1].trim().equals(node_on_top.m_sa_name)) {
                                 Node node_to_pop = semantic_stack.pop();
                                 para_nodes.add(node_to_pop);
                             } else {
-                                skip = true;
+                                if (parameters[parameters.length - 2].trim().equals("skipAll")) {
+                                    skipAll = true;
+                                } else {
+                                    skip = true;
+
+                                }
                             }
                         }
 
@@ -386,6 +393,7 @@ public class SyntacticAnalyzer {
                                     }
                                 }
 
+
                                 node_on_top = semantic_stack.peek();
                                 System.out.println("[first2] para1 " + parameters[1].trim());
                                 // real kid first 2 (any one is enough)
@@ -398,6 +406,14 @@ public class SyntacticAnalyzer {
                                     para_nodes.add(node_to_pop);
                                 }
 
+//---------------------------------------------------------special case for makeFamily(Dot, DataMem_s, Dot_s, DataMem_s, keepOrSkip, first2, any)-------------------------------------
+                                if (parameters[parameters.length - 3].trim().equals("keepOrSkip")) {
+                                    if (para_nodes.size() == 1) {
+                                        skip = true;
+                                    }
+                                }
+
+//---------------------------------------------------------special case -----------------------------------
                                 System.out.println("[first2] para size " + para_nodes.size());
 
                             } else {
@@ -489,23 +505,25 @@ public class SyntacticAnalyzer {
                 if (skip) {
                     semantic_stack.push(para_nodes.get(0));
                 } else {
+                    if (!skipAll) {
 
-                    // keep the arraylist consistent with the following call of makeFamily
-                    if (parameters[parameters.length - 1].trim().equals("reuse")) {
-                        opNode = opNode_backup;
-                    } else {
-                        opNode = nodeFactory.makeNode(op, op, node_line);
+                        // keep the arraylist consistent with the following call of makeFamily
+                        if (parameters[parameters.length - 1].trim().equals("reuse")) {
+                            opNode = opNode_backup;
+                        } else {
+                            opNode = nodeFactory.makeNode(op, op, node_line);
+                        }
+
+                        node_to_push = makeFamily(opNode, para_nodes);
+                        node_to_push.print();
+
+                        semantic_stack.push(node_to_push);
+
+                        // migrate makeFamily node
+                        Node temp = semantic_stack.pop();
+                        temp.setName(left_sem_act);
+                        semantic_stack.push(temp);
                     }
-
-                    node_to_push = makeFamily(opNode, para_nodes);
-                    node_to_push.print();
-
-                    semantic_stack.push(node_to_push);
-
-                    // migrate makeFamily node
-                    Node temp = semantic_stack.pop();
-                    temp.setName(left_sem_act);
-                    semantic_stack.push(temp);
                 }
             } else {
 
