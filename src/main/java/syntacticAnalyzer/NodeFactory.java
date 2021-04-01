@@ -4,11 +4,14 @@ import AST.*;
 
 public class NodeFactory {
 
-    public Node makeNode(String type, String lexeme, int line) {
+
+    public Node makeNode(String type, String lexeme, int line, String token_type) {
 
         switch (type) {
+            case"Null":
+                return new NullNode() ;
             case "Num":
-                return new NumNode(lexeme, line);
+                return new NumNode(lexeme, line, token_type);
             case "Id":
                 return new IdNode(lexeme, line);
             case "AddOp":

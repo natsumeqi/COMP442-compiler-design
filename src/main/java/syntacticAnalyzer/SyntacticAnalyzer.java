@@ -274,7 +274,7 @@ public class SyntacticAnalyzer {
     private void semanticActionOnStack() {
 
         boolean skip = false;
-        boolean skipAll = false;
+//        boolean skipAll = false;
 
         SemanticAction semantic_action = grammar.getSemantic_actions().get(top_of_stack);
         parsing_stack.pop();
@@ -289,11 +289,12 @@ public class SyntacticAnalyzer {
 
         // leaf node
         if (right_sem_act.contains("makeNode(")) {
-            String node_type = right_sem_act.substring(right_sem_act.indexOf("(") + 1, right_sem_act.indexOf(")"));
+            String type = right_sem_act.substring(right_sem_act.indexOf("(") + 1, right_sem_act.indexOf(")"));
             String node_lexeme = terminal_suc_token.getLexeme();
             int node_line = terminal_suc_token.getLocation();
-            System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + node_type);
-            node_to_push = nodeFactory.makeNode(node_type, node_lexeme, node_line);
+            String token_type = terminal_suc_token.getType();
+            System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + type);
+            node_to_push = nodeFactory.makeNode(type, node_lexeme, node_line, token_type);
 
             assert node_to_push != null;
             node_to_push.setName(left_sem_act);
@@ -308,10 +309,13 @@ public class SyntacticAnalyzer {
                 String[] parameters = parameter.split(",");
                 String op = parameters[0];
                 int node_line;
+                String token_type;
                 if (terminal_suc_token != null) {
                     node_line = terminal_suc_token.getLocation();
+                    token_type = terminal_suc_token.getType();
                 } else {
                     node_line = lookahead_token.getLocation();
+                    token_type = lookahead_token.getType();
                 }
 
 
@@ -363,15 +367,15 @@ public class SyntacticAnalyzer {
                                 Node node_to_pop = semantic_stack.pop();
                                 para_nodes.add(node_to_pop);
                             } else {
-                                if (parameters[parameters.length - 2].trim().equals("skipAll")) {
-                                    skipAll = true;
-                                } else {
+//                                if (parameters[parameters.length - 2].trim().equals("skipAll")) {
+//                                    skipAll = true;
+//                                } else {
                                     skip = true;
-
-                                }
+//
+//                                }
                             }
                         }
-
+                        System.out.println("[keepOrskip] para_nodes size : " + para_nodes.size());
 
                     } else {
 
@@ -401,7 +405,9 @@ public class SyntacticAnalyzer {
                                 string_kids.add(parameters[1].trim());
                                 string_kids.add(parameters[2].trim());
                                 String name_node_on_top = node_on_top.m_sa_name;
+                                System.out.println("[first2] name_node_on_top: " + name_node_on_top);
                                 if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                    System.out.println("[first2] add to para_nodes: ");
                                     Node node_to_pop = semantic_stack.pop();
                                     para_nodes.add(node_to_pop);
                                 }
@@ -503,20 +509,25 @@ public class SyntacticAnalyzer {
                 Node opNode;
 
                 if (skip) {
-                    semantic_stack.push(para_nodes.get(0));
+
+                    if(!para_nodes.isEmpty()){
+                        System.out.println("after make family: skip node to push "+para_nodes.get(0));
+                        semantic_stack.push(para_nodes.get(0));
+                    }
+
                 } else {
-                    if (!skipAll) {
+//                    if (!skipAll) {
 
                         // keep the arraylist consistent with the following call of makeFamily
                         if (parameters[parameters.length - 1].trim().equals("reuse")) {
                             opNode = opNode_backup;
                         } else {
-                            opNode = nodeFactory.makeNode(op, op, node_line);
+                            opNode = nodeFactory.makeNode(op, op, node_line, token_type);
                         }
 
                         node_to_push = makeFamily(opNode, para_nodes);
                         node_to_push.print();
-
+                        System.out.println("after make family: node to push "+node_to_push);
                         semantic_stack.push(node_to_push);
 
                         // migrate makeFamily node
@@ -524,7 +535,7 @@ public class SyntacticAnalyzer {
                         temp.setName(left_sem_act);
                         semantic_stack.push(temp);
                     }
-                }
+//                }
             } else {
 
                 // migrate operation

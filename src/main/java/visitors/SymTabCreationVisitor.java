@@ -26,6 +26,8 @@ public class SymTabCreationVisitor extends Visitor {
 
     public StringBuilder m_errors = new StringBuilder();
 
+    public SymTabCreationVisitor() {
+    }
 
     public void visit(ProgNode p_node) {
         p_node.m_symTab = new SymTab(0, "global", null);
@@ -82,16 +84,15 @@ public class SymTabCreationVisitor extends Visitor {
 
         // check multiply declared classes
         if (p_node.getParent().getParent() != null) {
-              SymTabEntry class_entry =  p_node.getParent().getParent().m_symTab.lookupName(class_name);
-              if (class_entry.m_name!=null){
-                  m_errors.append("[8.1] Multiple undeclared class: \t").
-                          append(class_name).append("\r\n");
-              }else{
-                  p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-                  p_node.m_symTab = local_table;
-              }
+            SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(class_name);
+            if (class_entry.m_name != null) {
+                m_errors.append("[8.1] Multiple undeclared class: \t").
+                        append(class_name).append("\r\n");
+            } else {
+                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                p_node.m_symTab = local_table;
+            }
         }
-
 
 
         // propagate accepting the same visitor to all the children
@@ -207,11 +208,11 @@ public class SymTabCreationVisitor extends Visitor {
             p_node.m_symTabEntry = new VarEntry("local", var_type, var_id, dim_list);
 
             // check multiple declared identifier in function
-            SymTabEntry var_entry =  p_node.m_symTab.lookupName(var_id);
-            if(var_entry.m_name!=null){
+            SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
+            if (var_entry.m_name != null) {
                 m_errors.append("[8.4] Multiple declared identifier in function: \t").append("'").
                         append(var_id).append("' in the function ").append(p_node.m_symTab.m_name).append("\r\n");
-            }else{
+            } else {
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
             }
 
@@ -221,11 +222,11 @@ public class SymTabCreationVisitor extends Visitor {
                 p_node.m_symTabEntry = new VarEntry("data", var_type, var_id, var_visibility, dim_list);
 
                 // check multiple declared identifier in class
-                SymTabEntry var_entry =  p_node.m_symTab.lookupName(var_id);
-                if(var_entry.m_name!=null){
+                SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
+                if (var_entry.m_name != null) {
                     m_errors.append("[8.3] Multiple declared identifier in class: \t").append("'").
                             append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
-                }else{
+                } else {
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                 }
             }
@@ -298,7 +299,7 @@ public class SymTabCreationVisitor extends Visitor {
 //                            System.out.println("ici");
                             if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
 
-                                if ( func_decl.m_fParam.toString().equals(fParam_list.toString())) {
+                                if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
                                     System.out.println("matched member function");
                                     func_decl.m_subtable = local_table;
                                     p_node.m_symTab = local_table;
@@ -315,15 +316,15 @@ public class SymTabCreationVisitor extends Visitor {
 
             // check multiply declared classes
             if (p_node.getParent().getParent() != null) {
-                SymTabEntry func_entry =  p_node.getParent().getParent().m_symTab.lookupName(func_name);
-                if (func_entry.m_name!=null){
+                SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
+                if (func_entry.m_name != null) {
 
-                    if(func_entry.m_type.equals(func_type) && func_entry.m_fParam.toString().equals(fParam_list.toString())) {
+                    if (func_entry.m_type.equals(func_type) && func_entry.m_fParam.toString().equals(fParam_list.toString())) {
 
                         m_errors.append("[8.2] Multiple defined free function: \t").
                                 append(func_name).append("\r\n");
                     }
-                }else{
+                } else {
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                     p_node.m_symTab = local_table;
 
@@ -372,6 +373,61 @@ public class SymTabCreationVisitor extends Visitor {
             child.accept(this);
         }
     }
+
+
+    public void visit(AddOpNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(MultOpNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(ArithExprNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(TermNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(FactorNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(FuncOrVarNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(DataMemNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(IdNode p_node) {
+
+    }
+
 
 
 }

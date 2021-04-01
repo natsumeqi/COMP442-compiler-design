@@ -112,7 +112,7 @@ public class Grammar {
         semantic_actions.put("sa-26", new SemanticAction("sa-26", "ReturnStat_s", "makeFamily(ReturnStat, Expr_s)"));
         semantic_actions.put("sa-27", new SemanticAction("sa-27", "BreakStat_s", "makeNode(BreakStat)"));
         semantic_actions.put("sa-28", new SemanticAction("sa-28", "ContiStat_s", "makeNode(ContiStat)"));
-//        semantic_actions.put("sa-29", new SemanticAction("sa-29", "FuncCallStat_s", "makeFamily(FuncCallStat, FuncCall_s)"));
+        semantic_actions.put("sa-29", new SemanticAction("sa-29", "Null_s", "makeNode(Null)"));   // as a EPSILON
         semantic_actions.put("sa-30", new SemanticAction("sa-30", "Expr_s", "makeFamily(Expr, ArithExpr_s, RelExpr_s, any)"));
         semantic_actions.put("sa-31", new SemanticAction("sa-31", "Variable_s", "makeFamily(Variable, DataMem_s, Dot_s, any)"));
         semantic_actions.put("sa-32", new SemanticAction("sa-32", "AssignStat_s", "makeFamily(AssignStat, Variable_s, Expr_s)"));
@@ -133,7 +133,7 @@ public class Grammar {
         semantic_actions.put("sa-47", new SemanticAction("sa-47", "AddOp_i", "makeNode(AddOp)"));
         semantic_actions.put("sa-48", new SemanticAction("sa-48", "MultOp_i", "makeNode(MultOp)"));
         semantic_actions.put("sa-49", new SemanticAction("sa-49", "FuncCall_s", "makeFamily(FuncCall, Id_s, Dot_s, AParams_s, first2, any)"));
-        semantic_actions.put("sa-50", new SemanticAction("sa-50", "AParams_s", "makeFamily(AParams, Expr_s, n)"));
+        semantic_actions.put("sa-50", new SemanticAction("sa-50", "AParams_s", "makeFamily(AParams, Null_s, Expr_s, n)"));
         semantic_actions.put("sa-51", new SemanticAction("sa-51", "Indice_s", "makeFamily(Indice, Expr_s, n)"));
         semantic_actions.put("sa-52", new SemanticAction("sa-52", "DataMem_s", "makeFamily(DataMem, Id_s, Indice_s)"));
         semantic_actions.put("sa-53", new SemanticAction("sa-53", "Type_s", "makeFamily(Type, Id_s)"));
@@ -148,7 +148,8 @@ public class Grammar {
         semantic_actions.put("sa-62", new SemanticAction("sa-62", "Dot_s", "makeFamily(Dot, DataMem_s, Id_s, keepOrSkip)"));    // if not DataMem, skip; if DataMem, combine
         semantic_actions.put("sa-63", new SemanticAction("sa-63", "Dot_s", "makeFamily(Dot, DataMem_s, Dot_s, DataMem_s, keepOrSkip, first2, any)"));   // maybe a dot or just a dataMem special case
         semantic_actions.put("sa-64", new SemanticAction("sa-64", "FuncCall_s", "makeFamily(FuncCall, Dot_s, DataMem_s, FuncCall_s, keepOrSkip, first2, any)"));    // if not DataMem, just skip; if DataMem, combine
-        semantic_actions.put("sa-65", new SemanticAction("sa-65", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, skipAll, keepOrSkip)"));
+        semantic_actions.put("sa-65", new SemanticAction("sa-65", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, keepOrSkip)"));
+        semantic_actions.put("sa-65", new SemanticAction("sa-65", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, keepOrSkip)"));
 
 
         // initialize semantic actions list
