@@ -325,23 +325,56 @@ public class SyntacticAnalyzer {
 
                 // variable number of children, any type can be a kid. Ex: makeFamily(FuncOrVar, DataMem_s, FuncCall_s, n)
                 if (parameters[parameters.length - 1].trim().equals("n")) {
-                    assert semantic_stack.peek() != null;
-                    if (!semantic_stack.isEmpty()) {
-                        node_on_top = semantic_stack.peek();
-                        int num_kids = parameters.length - 2;
-                        ArrayList<String> string_kids = new ArrayList<>();
-                        for (int i = 1; i <= num_kids; i++) {
-                            string_kids.add(parameters[i].trim());
+
+                    // for the case makeFamily(AParams, Null_s, Expr_s, n)
+                    if (parameters[1].trim().equals("Null_s")) {
+                        assert semantic_stack.peek() != null;
+                        if (!semantic_stack.isEmpty()) {
+                            node_on_top = semantic_stack.peek();
+                            int num_kids = parameters.length - 2;
+                            ArrayList<String> string_kids = new ArrayList<>();
+                            for (int i = 2; i <= num_kids; i++) {
+                                string_kids.add(parameters[i].trim());
+                            }
+                            String name_node_on_top = node_on_top.m_sa_name;
+                            while (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                Node node_to_pop = semantic_stack.pop();
+                                para_nodes.add(node_to_pop);
+                                if (!semantic_stack.isEmpty()) {
+                                    node_on_top = semantic_stack.peek();
+                                    name_node_on_top = node_on_top.m_sa_name;
+                                } else {
+                                    break;
+                                }
+                            }
+                            if(node_on_top.m_sa_name.equals("Null_s")){
+                                semantic_stack.pop();
+                            }
+
                         }
-                        String name_node_on_top = node_on_top.m_sa_name;
-                        while (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
-                            Node node_to_pop = semantic_stack.pop();
-                            para_nodes.add(node_to_pop);
-                            if (!semantic_stack.isEmpty()) {
-                                node_on_top = semantic_stack.peek();
-                                name_node_on_top = node_on_top.m_sa_name;
-                            } else {
-                                break;
+
+
+                    } else {
+
+
+                        assert semantic_stack.peek() != null;
+                        if (!semantic_stack.isEmpty()) {
+                            node_on_top = semantic_stack.peek();
+                            int num_kids = parameters.length - 2;
+                            ArrayList<String> string_kids = new ArrayList<>();
+                            for (int i = 1; i <= num_kids; i++) {
+                                string_kids.add(parameters[i].trim());
+                            }
+                            String name_node_on_top = node_on_top.m_sa_name;
+                            while (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
+                                Node node_to_pop = semantic_stack.pop();
+                                para_nodes.add(node_to_pop);
+                                if (!semantic_stack.isEmpty()) {
+                                    node_on_top = semantic_stack.peek();
+                                    name_node_on_top = node_on_top.m_sa_name;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -370,7 +403,7 @@ public class SyntacticAnalyzer {
 //                                if (parameters[parameters.length - 2].trim().equals("skipAll")) {
 //                                    skipAll = true;
 //                                } else {
-                                    skip = true;
+                                skip = true;
 //
 //                                }
                             }
@@ -510,31 +543,31 @@ public class SyntacticAnalyzer {
 
                 if (skip) {
 
-                    if(!para_nodes.isEmpty()){
-                        System.out.println("after make family: skip node to push "+para_nodes.get(0));
+                    if (!para_nodes.isEmpty()) {
+                        System.out.println("after make family: skip node to push " + para_nodes.get(0));
                         semantic_stack.push(para_nodes.get(0));
                     }
 
                 } else {
 //                    if (!skipAll) {
 
-                        // keep the arraylist consistent with the following call of makeFamily
-                        if (parameters[parameters.length - 1].trim().equals("reuse")) {
-                            opNode = opNode_backup;
-                        } else {
-                            opNode = nodeFactory.makeNode(op, op, node_line, token_type);
-                        }
-
-                        node_to_push = makeFamily(opNode, para_nodes);
-                        node_to_push.print();
-                        System.out.println("after make family: node to push "+node_to_push);
-                        semantic_stack.push(node_to_push);
-
-                        // migrate makeFamily node
-                        Node temp = semantic_stack.pop();
-                        temp.setName(left_sem_act);
-                        semantic_stack.push(temp);
+                    // keep the arraylist consistent with the following call of makeFamily
+                    if (parameters[parameters.length - 1].trim().equals("reuse")) {
+                        opNode = opNode_backup;
+                    } else {
+                        opNode = nodeFactory.makeNode(op, op, node_line, token_type);
                     }
+
+                    node_to_push = makeFamily(opNode, para_nodes);
+                    node_to_push.print();
+                    System.out.println("after make family: node to push " + node_to_push);
+                    semantic_stack.push(node_to_push);
+
+                    // migrate makeFamily node
+                    Node temp = semantic_stack.pop();
+                    temp.setName(left_sem_act);
+                    semantic_stack.push(temp);
+                }
 //                }
             } else {
 
