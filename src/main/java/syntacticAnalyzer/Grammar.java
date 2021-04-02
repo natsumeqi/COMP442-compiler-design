@@ -119,7 +119,7 @@ public class Grammar {
         semantic_actions.put("sa-33", new SemanticAction("sa-33", "ArithExpr_s", "makeFamily(ArithExpr, Term_s, AddOp_s, any)"));
         semantic_actions.put("sa-34", new SemanticAction("sa-34", "RelExpr_s", "makeFamily(RelExpr, Expr_s, RelOp_s, Expr_s)"));
         semantic_actions.put("sa-35", new SemanticAction("sa-35", "Term_s", "makeFamily(Term, Factor_s, MultOp_s, any)"));
-        semantic_actions.put("sa-36", new SemanticAction("sa-36", "Factor_s", "makeFamily(Factor, Num_s, String_s, FuncOrVar_s, Expr_s, Not_s, Sign_s, InlineIf_s, any)"));
+        semantic_actions.put("sa-36", new SemanticAction("sa-36", "Factor_s", "makeFamily(Factor, Num_s, Float_s, String_s, FuncOrVar_s, Expr_s, Not_s, Sign_s, InlineIf_s, any)"));
         semantic_actions.put("sa-37", new SemanticAction("sa-37", "AddOp_s", "makeFamily(AddOp_i, ArithExpr_s, AddOp_i, Term_s, reuse)"));
         semantic_actions.put("sa-38", new SemanticAction("sa-38", "MultOp_s", "makeFamily(MultOp_i, Term_s, MultOp_i, Factor_s, reuse)"));
         semantic_actions.put("sa-39", new SemanticAction("sa-39", "Num_s", "makeNode(Num)"));
@@ -149,7 +149,7 @@ public class Grammar {
         semantic_actions.put("sa-63", new SemanticAction("sa-63", "Dot_s", "makeFamily(Dot, DataMem_s, Dot_s, DataMem_s, keepOrSkip, first2, any)"));   // maybe a dot or just a dataMem special case
         semantic_actions.put("sa-64", new SemanticAction("sa-64", "FuncCall_s", "makeFamily(FuncCall, Dot_s, DataMem_s, FuncCall_s, keepOrSkip, first2, any)"));    // if not DataMem, just skip; if DataMem, combine
         semantic_actions.put("sa-65", new SemanticAction("sa-65", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, keepOrSkip)"));
-        semantic_actions.put("sa-65", new SemanticAction("sa-65", "Dot_s", "makeFamily(Dot, FuncCall_s, DataMem_s, keepOrSkip)"));
+        semantic_actions.put("sa-66", new SemanticAction("sa-66", "Float_s", "makeNode(Float)"));
 
 
         // initialize semantic actions list

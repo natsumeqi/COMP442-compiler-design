@@ -5,19 +5,40 @@ import AST.*;
 public class NodeFactory {
 
 
-    public Node makeNode(String type, String lexeme, int line, String token_type) {
+    public Node makeNode(String type, String lexeme, int line) {
 
         switch (type) {
             case"Null":
                 return new NullNode() ;
             case "Num":
-                return new NumNode(lexeme, line, token_type);
+                return new NumNode(lexeme, line);
+            case "Float":
+                return new FloatNode(lexeme, line);
             case "Id":
                 return new IdNode(lexeme, line);
+            case "String":
+                return new StringNode(lexeme, line);
             case "AddOp":
                 return new AddOpNode(lexeme, line);
             case "MultOp":
                 return new MultOpNode(lexeme, line);
+            case "RelOp":
+                return new RelOpNode(lexeme, line);
+            case "Sign":
+                return new SignNode(lexeme, line);
+            case "Type":
+                if (lexeme.equals("Type"))
+                    return new TypeNode("");
+                else
+                    return new TypeNode(lexeme, line);
+            case "Dim":
+                return new DimNode("[" + lexeme + "]");
+            case "DimNull":
+                return new DimNode("[]");
+            case "Visibility":
+                return new VisibilityNode(lexeme, line);
+            case "VisibilityDefault":
+                return new VisibilityNode();
             case "Prog":
                 return new ProgNode();
             case "ClassList":
@@ -42,17 +63,8 @@ public class NodeFactory {
                 return new FParamNode();
             case "FParamList":
                 return new FParamListNode();
-            case "Type":
-                if (lexeme.equals("Type"))
-                    return new TypeNode("");
-                else
-                    return new TypeNode(lexeme, line);
             case "DimList":
                 return new DimListNode();
-            case "Dim":
-                return new DimNode("[" + lexeme + "]");
-            case "DimNull":
-                return new DimNode("[]");
             case "FuncDef":
                 return new FuncDefNode();
             case "Scope":
@@ -87,16 +99,10 @@ public class NodeFactory {
                 return new ArithExprNode();
             case "RelExpr":
                 return new RelExprNode();
-            case "RelOp":
-                return new RelOpNode(lexeme, line);
             case "Term":
                 return new TermNode();
-            case "String":
-                return new StringNode(lexeme, line);
             case "Not":
                 return new NotNode();
-            case "Sign":
-                return new SignNode(lexeme, line);
             case "InlineIf":
                 return new InlineIfNode();
             case "FuncOrVar":
@@ -113,10 +119,6 @@ public class NodeFactory {
                 return new DataMemNode();
             case "MembDecl":
                 return new MembDeclNode();
-            case "Visibility":
-                return new VisibilityNode(lexeme, line);
-            case "VisibilityDefault":
-                return new VisibilityNode();
             case "Dot":
                 return new DotNode();
 

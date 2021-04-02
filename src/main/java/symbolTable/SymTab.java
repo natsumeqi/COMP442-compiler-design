@@ -33,6 +33,8 @@ public class SymTab {
         SymTabEntry returnvalue = new SymTabEntry();
         boolean found = false;
         for (SymTabEntry rec : m_symList) {
+            System.out.println("rec.m_name: "+rec.m_name);
+            System.out.println("p_toLookup: "+p_toLookup);
             if (rec.m_name.equals(p_toLookup)) {
                 returnvalue = rec;
                 found = true;
@@ -40,6 +42,7 @@ public class SymTab {
         }
         if (!found) {
             if (m_upperTable != null) {
+                System.out.println("go to upper table for: "+p_toLookup);
                 returnvalue = m_upperTable.lookupName(p_toLookup);
             }
         }

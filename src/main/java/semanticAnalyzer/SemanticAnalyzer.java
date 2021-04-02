@@ -3,6 +3,7 @@ package semanticAnalyzer;
 import AST.Node;
 import syntacticAnalyzer.SyntacticAnalyzer;
 import visitors.SymTabCreationVisitor;
+import visitors.TypeCheckingVisitor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,6 +16,7 @@ public class SemanticAnalyzer {
     private Node progNode;
 
     private SymTabCreationVisitor STCVisitor = new SymTabCreationVisitor();
+    private TypeCheckingVisitor TCVisitor = new TypeCheckingVisitor();
 
     private PrintStream writer_symTab;
 
@@ -30,6 +32,7 @@ public class SemanticAnalyzer {
 
     public void createSymTables(){
         progNode.accept(STCVisitor);
+        progNode.accept(TCVisitor);
 //            System.out.println(progNode.m_symTab);
     }
 

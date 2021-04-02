@@ -231,6 +231,10 @@ public class SymTabCreationVisitor extends Visitor {
                 }
             }
         }
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
     }
 
 
@@ -300,7 +304,8 @@ public class SymTabCreationVisitor extends Visitor {
                             if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
 
                                 if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
-                                    System.out.println("matched member function");
+//                                    System.out.println("matched member function");
+                                    local_table.m_upperTable = class_entry.m_subtable;  // make class table be the upper table of member function table
                                     func_decl.m_subtable = local_table;
                                     p_node.m_symTab = local_table;
                                     matched = true;
@@ -396,6 +401,13 @@ public class SymTabCreationVisitor extends Visitor {
         }
     }
 
+    public void visit(ExprNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
     public void visit(TermNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
@@ -430,4 +442,120 @@ public class SymTabCreationVisitor extends Visitor {
 
 
 
+
+    public void visit(ScopeNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(FParamListNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(FParamNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(DimListNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+
+    public void visit(StatBlockNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+
+
+    public void visit(IfStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(WhileStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(ReadStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+
+    public void visit(WriteStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(ReturnStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(BreakStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(ContiStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(FuncCallStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(VariableNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(AssignStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(TypeNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
 }

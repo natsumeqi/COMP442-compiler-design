@@ -182,7 +182,7 @@ public class SyntacticAnalyzer {
 
 
         // print the node to console and file
-        semantic_stack.peek().print();
+//        semantic_stack.peek().print();
 
         PrintStream console = System.out;
         System.setOut(writer_AST);
@@ -292,9 +292,9 @@ public class SyntacticAnalyzer {
             String type = right_sem_act.substring(right_sem_act.indexOf("(") + 1, right_sem_act.indexOf(")"));
             String node_lexeme = terminal_suc_token.getLexeme();
             int node_line = terminal_suc_token.getLocation();
-            String token_type = terminal_suc_token.getType();
+
             System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + type);
-            node_to_push = nodeFactory.makeNode(type, node_lexeme, node_line, token_type);
+            node_to_push = nodeFactory.makeNode(type, node_lexeme, node_line);
 
             assert node_to_push != null;
             node_to_push.setName(left_sem_act);
@@ -555,11 +555,11 @@ public class SyntacticAnalyzer {
                     if (parameters[parameters.length - 1].trim().equals("reuse")) {
                         opNode = opNode_backup;
                     } else {
-                        opNode = nodeFactory.makeNode(op, op, node_line, token_type);
+                        opNode = nodeFactory.makeNode(op, op, node_line);
                     }
 
                     node_to_push = makeFamily(opNode, para_nodes);
-                    node_to_push.print();
+//                    node_to_push.print();
                     System.out.println("after make family: node to push " + node_to_push);
                     semantic_stack.push(node_to_push);
 
@@ -605,11 +605,11 @@ public class SyntacticAnalyzer {
                 return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
                         kids.get(2).equals(name_node) || kids.get(3).equals(name_node) ||
                         kids.get(4).equals(name_node) || kids.get(5).equals(name_node);
-            case 7:
+            case 8:
                 return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
                         kids.get(2).equals(name_node) || kids.get(3).equals(name_node) ||
                         kids.get(4).equals(name_node) || kids.get(5).equals(name_node) ||
-                        kids.get(6).equals(name_node);
+                        kids.get(6).equals(name_node) || kids.get(7).equals(name_node);
             case 10:
                 return kids.get(0).equals(name_node) || kids.get(1).equals(name_node) ||
                         kids.get(2).equals(name_node) || kids.get(3).equals(name_node) ||
