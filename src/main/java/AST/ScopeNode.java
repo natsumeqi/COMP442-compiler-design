@@ -13,8 +13,6 @@ public class ScopeNode extends Node {
     }
 
     public void accept(Visitor visitor) {
-        for (Node child : this.getChildren())
-            child.accept(visitor);
         visitor.visit(this);
     }
 }

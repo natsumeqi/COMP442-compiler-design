@@ -143,6 +143,14 @@ public abstract class Node {
         return lm_sibling;
     }
 
+    public String getSubtreeString() {
+        return m_subtreeString;
+    }
+
+    public void setSubtreeString(String p_data) {
+        this.m_subtreeString = p_data;
+    }
+
     public boolean isLeaf() {
         if (this.m_children.size() == 0)
             return true;

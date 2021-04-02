@@ -26,8 +26,10 @@ public class Visitor {
     public void visit(DataMemNode       p_node){};
     public void visit(DimListNode       p_node){};
     public void visit(DimNode           p_node){};
+    public void visit(DotNode           p_node){};
     public void visit(ExprNode          p_node){};
     public void visit(FactorNode        p_node){};
+    public void visit(FloatNode         p_node){};
     public void visit(FParamListNode    p_node){};
     public void visit(FParamNode        p_node){};
     public void visit(FuncBodyNode      p_node){};
@@ -50,7 +52,6 @@ public class Visitor {
     public void visit(Node              p_node){};
     public void visit(NotNode           p_node){};
     public void visit(NumNode           p_node){};
-    public void visit(ParamListNode     p_node){};
     public void visit(ProgNode          p_node){};
     public void visit(ReadStatNode      p_node){};
     public void visit(RelExprNode       p_node){};

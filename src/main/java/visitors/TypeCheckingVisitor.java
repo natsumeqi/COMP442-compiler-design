@@ -117,15 +117,6 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
     }
 
-    public void visit(BreakStatNode p_node) {
-        for (Node child : p_node.getChildren())
-            child.accept(this);
-    }
-
-    public void visit(ContiStatNode p_node) {
-        for (Node child : p_node.getChildren())
-            child.accept(this);
-    }
 
     public void visit(AssignStatNode p_node) {
         for (Node child : p_node.getChildren())

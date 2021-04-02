@@ -2,6 +2,7 @@ package semanticAnalyzer;
 
 import AST.Node;
 import syntacticAnalyzer.SyntacticAnalyzer;
+import visitors.ReconstructSourceProgramVisitor;
 import visitors.SymTabCreationVisitor;
 import visitors.TypeCheckingVisitor;
 
@@ -17,6 +18,7 @@ public class SemanticAnalyzer {
 
     private SymTabCreationVisitor STCVisitor = new SymTabCreationVisitor();
     private TypeCheckingVisitor TCVisitor = new TypeCheckingVisitor();
+    private ReconstructSourceProgramVisitor RSPVisitor = new ReconstructSourceProgramVisitor   ();
 
     private PrintStream writer_symTab;
 
@@ -33,6 +35,7 @@ public class SemanticAnalyzer {
     public void createSymTables(){
         progNode.accept(STCVisitor);
         progNode.accept(TCVisitor);
+        progNode.accept(RSPVisitor);
 //            System.out.println(progNode.m_symTab);
     }
 

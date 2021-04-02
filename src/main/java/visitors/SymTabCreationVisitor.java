@@ -379,6 +379,12 @@ public class SymTabCreationVisitor extends Visitor {
         }
     }
 
+    public void visit(DotNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
 
     public void visit(AddOpNode p_node) {
         for (Node child : p_node.getChildren()) {
@@ -511,20 +517,6 @@ public class SymTabCreationVisitor extends Visitor {
     }
 
     public void visit(ReturnStatNode p_node) {
-        for (Node child : p_node.getChildren()) {
-            child.m_symTab = p_node.m_symTab;
-            child.accept(this);
-        }
-    }
-
-    public void visit(BreakStatNode p_node) {
-        for (Node child : p_node.getChildren()) {
-            child.m_symTab = p_node.m_symTab;
-            child.accept(this);
-        }
-    }
-
-    public void visit(ContiStatNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
