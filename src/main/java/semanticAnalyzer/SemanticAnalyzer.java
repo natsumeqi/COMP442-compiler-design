@@ -34,8 +34,8 @@ public class SemanticAnalyzer {
 
     public void createSymTables(){
         progNode.accept(STCVisitor);
-        progNode.accept(TCVisitor);
         progNode.accept(RSPVisitor);
+        progNode.accept(TCVisitor);
 //            System.out.println(progNode.m_symTab);
     }
 

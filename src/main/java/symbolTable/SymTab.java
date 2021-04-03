@@ -33,6 +33,7 @@ public class SymTab {
         SymTabEntry returnvalue = new SymTabEntry();
         boolean found = false;
         for (SymTabEntry rec : m_symList) {
+            System.out.println("lookup name for: "+ p_toLookup);
 //            System.out.println("rec.m_name: "+rec.m_name);
 //            System.out.println("p_toLookup: "+p_toLookup);
             if (rec.m_name.equals(p_toLookup)) {

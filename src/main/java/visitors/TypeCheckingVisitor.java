@@ -4,6 +4,7 @@ import AST.*;
 import symbolTable.SymTabEntry;
 
 import java.util.HashSet;
+import java.util.Locale;
 
 
 /**
@@ -115,12 +116,55 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(ReturnStatNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+        String return_stat_type = p_node.getChildren().get(0).getType();
+        String func_name = p_node.m_symTab.m_name;
+        String lookup_func_name = func_name.substring(func_name.indexOf("::") + 2);
+        String func_return_type = p_node.m_symTab.lookupName(lookup_func_name).m_type;
+        if (return_stat_type.equals(func_return_type)) {
+            p_node.setType(return_stat_type);
+            System.out.println("ReturnStatNode type: " + return_stat_type);
+        } else {
+            p_node.setType("typeerror");
+            this.m_errors += "[10.3][semantic error] Type error in return statement:  "
+                    + p_node.getChildren().get(0).getSubtreeString()
+                    + "(" + p_node.getChildren().get(0).getType() + ")"
+                    + " and "
+                    + func_name
+                    + "(" + func_return_type + ")"
+                    + "\n";
+        }
     }
 
 
     public void visit(AssignStatNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+
+        String left_operand_type = p_node.getChildren().get(0).getType();
+        String right_operand_type = p_node.getChildren().get(1).getType();
+        if (left_operand_type == null) {
+
+
+        } else {
+
+            if (left_operand_type.equals(right_operand_type)) {
+                p_node.setType(left_operand_type);
+                System.out.println("AssignStatNode type: " + left_operand_type);
+            } else {
+                p_node.setType("typeerror");
+                // add only once in error set
+//            String error_info = p_node.m_line + "MultOpNode";
+//            if (!error_set.contains(error_info)) {
+                this.m_errors += "[10.2][semantic error] Type error in assignment statement:  "
+                        + p_node.getChildren().get(0).getSubtreeString()
+                        + "(" + p_node.getChildren().get(0).getType() + ")"
+                        + " and "
+                        + p_node.getChildren().get(1).getSubtreeString()
+                        + "(" + p_node.getChildren().get(1).getType() + ")"
+                        + "\n";
+//            }
+            }
+        }
     }
 
     public void visit(FuncCallStatNode p_node) {
@@ -136,22 +180,22 @@ public class TypeCheckingVisitor extends Visitor {
         String right_operand_type = p_node.getChildren().get(1).getType();
         if (left_operand_type.equals(right_operand_type)) {
             p_node.setType(left_operand_type);
-            System.out.println("AddOpNode type: " + left_operand_type);
+//            System.out.println("AddOpNode type: " + left_operand_type);
         } else {
             p_node.setType("typeerror");
-            String error_info = p_node.m_line + "AddOpNode";
-            if (!error_set.contains(error_info)) {
-                this.m_errors += "AddOpNode type error:  "
-                        + p_node.getChildren().get(0).getData()
-                        + "(" + p_node.getChildren().get(0).getType() + ")"
-                        + " and "
-                        + p_node.getChildren().get(1).getData()
-                        + "(" + p_node.getChildren().get(1).getType() + ")"
-                        + " in line: " + p_node.m_line
-                        + "\n";
-                error_set.add(p_node.m_line + "AddOpNode");
-            }
+//            String error_info = "AddOpNode"+p_node.m_line;
+//            if (!error_set.contains(error_info)) {
+            this.m_errors += "[10.1][semantic error] Type error in AddOpNode:  "
+                    + p_node.getChildren().get(0).getData()
+                    + "(" + p_node.getChildren().get(0).getType() + ")"
+                    + " and "
+                    + p_node.getChildren().get(1).getData()
+                    + "(" + p_node.getChildren().get(1).getType() + ")"
+                    + " in line " + p_node.m_line
+                    + "\n";
+//                error_set.add("AddOpNode" + p_node.m_line);
         }
+//        }
     }
 
 
@@ -168,18 +212,18 @@ public class TypeCheckingVisitor extends Visitor {
         } else {
             p_node.setType("typeerror");
             // add only once in error set
-            String error_info = p_node.m_line + "MultOpNode";
-            if (!error_set.contains(error_info)) {
-                this.m_errors += "MultOpNode type error:  "
-                        + p_node.getChildren().get(0).getData()
-                        + "(" + p_node.getChildren().get(0).getType() + ")"
-                        + " and "
-                        + p_node.getChildren().get(1).getData()
-                        + "(" + p_node.getChildren().get(1).getType() + ")"
-                        + " in line: " + p_node.m_line
-                        + "\n";
-                error_set.add(p_node.m_line + "MultOpNode");
-            }
+//            String error_info = p_node.m_line + "MultOpNode";
+//            if (!error_set.contains(error_info)) {
+            this.m_errors += "[10.1][semantic error] Type error in MultOpNode:  "
+                    + p_node.getChildren().get(0).getData()
+                    + "(" + p_node.getChildren().get(0).getType() + ")"
+                    + " and "
+                    + p_node.getChildren().get(1).getData()
+                    + "(" + p_node.getChildren().get(1).getType() + ")"
+                    + " in line " + p_node.m_line
+                    + "\n";
+//                error_set.add("MultOpNode" + p_node.m_line);
+//            }
         }
     }
 
@@ -196,10 +240,14 @@ public class TypeCheckingVisitor extends Visitor {
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
         if (p_node.m_type != null) {
-            if(p_node.m_type.equals("typeerror")){
-                this.m_errors += "Type error in expression:  ";
+            if (p_node.m_type.equals("typeerror")) {
+//                if (!error_set.contains("ExprNode" + p_node.m_subtreeString)) {
+                this.m_errors += "[10.1][semantic error][line:"+p_node.m_line+ "] Type error in expression: '" + p_node.m_subtreeString + "'\n";
+//                    error_set.add("ExprNode" + p_node.m_subtreeString);
+//                }
             }
         }
+        System.out.println("ExprNode type: " + p_node.m_type);
     }
 
     public void visit(TermNode p_node) {
@@ -278,10 +326,25 @@ public class TypeCheckingVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
-        if (p_node.getChildren().isEmpty()) {
+        if (p_node.isLeaf()) {
             p_node.m_type = p_node.m_data;
         } else {
             p_node.m_type = p_node.getChildren().get(0).getType();
+
+            // check if the type is undeclared
+            System.out.println("[11.5] m_type: " + p_node.m_type + " line: " + p_node.getChildren().get(0).m_line);
+            System.out.println("[11.5]type node: " + p_node.m_symTab.lookupName(p_node.m_type).m_name);
+            if (p_node.m_type == null) {
+                String undeclared_type = p_node.getChildren().get(0).getData();
+
+                // check if uppercase is good
+                SymTabEntry class_entry = p_node.m_symTab.lookupName(undeclared_type.toUpperCase());
+                if (class_entry.m_name != null) {
+                    p_node.m_type = class_entry.m_name;
+                } else {
+                    this.m_errors += "[11.5][semantic error] Use of undeclared class:  '" + undeclared_type + "' in line " + p_node.getChildren().get(0).getM_line() + "\n";
+                }
+            }
         }
 
     }
@@ -289,8 +352,12 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(IdNode p_node) {
         // get type from symbol table
         // maybe has null todo
+        System.out.println("IdNode upper upper symtab : " + p_node.getParent().getParent().m_sa_name);
+        System.out.println("IdNode upper upper symtab : " + p_node.getParent().getParent().m_symTab);
+        System.out.println("IdNode upper symtab : " + p_node.getParent().m_symTab);
         System.out.println("IdNode symtab: " + p_node.m_symTab);
         System.out.println("IdNode data: " + p_node.m_data);
+        System.out.println("IdNode line: " + p_node.m_line);
 
         // search variable in symbol table
         SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
@@ -299,8 +366,6 @@ public class TypeCheckingVisitor extends Visitor {
             System.out.println("IdNode type: " + p_node.m_type + " for " + p_node.m_data);
         } else {
             // search variable in class symbol table
-
-
         }
 
 
@@ -318,13 +383,8 @@ public class TypeCheckingVisitor extends Visitor {
         String var_or_func_type;
         if (p_node.getChildren().get(1).getType() != null) {
             var_or_func_type = p_node.getChildren().get(1).getType();
+            p_node.setType(var_or_func_type);
         } else {
-
-//            // goto global symbol table
-//            SymTab global = p_node.m_symTab;
-//            while(global.m_upperTable!=null){
-//                global = global.m_upperTable;
-//            }
 
             String func_name = p_node.getChildren().get(1).getData();   // get id from IdNode
             SymTabEntry class_entry = p_node.m_symTab.lookupName(var_class_type);
@@ -338,19 +398,6 @@ public class TypeCheckingVisitor extends Visitor {
 
         }
 
-
-//        if (var_class_type.equals(var_or_func_type))
-//            p_node.setType(var_class_type);
-//        else {
-//            p_node.setType("typeerror");
-//            this.m_errors += "DotNode type error:  "
-//                    + p_node.getChildren().get(0).getData()
-//                    + "(" + p_node.getChildren().get(0).getType() + ")"
-//                    + " and "
-//                    + p_node.getChildren().get(1).getData()
-//                    + "(" + p_node.getChildren().get(1).getType() + ")"
-//                    + "\n";
-//        }
     }
 
     public void visit(FuncCallNode p_node) {
@@ -367,6 +414,12 @@ public class TypeCheckingVisitor extends Visitor {
             }
         }
 
+    }
+
+    public void visit(MainBlockNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.accept(this);
+        }
     }
 
 

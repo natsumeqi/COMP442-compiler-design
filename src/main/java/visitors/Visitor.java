@@ -60,7 +60,6 @@ public class Visitor {
     public void visit(ScopeNode         p_node){};
     public void visit(SignNode          p_node){};
     public void visit(StatBlockNode     p_node){};
-    public void visit(StatListNode      p_node){};
     public void visit(StringNode        p_node){};
     public void visit(TermNode          p_node){};
     public void visit(TypeNode          p_node){};

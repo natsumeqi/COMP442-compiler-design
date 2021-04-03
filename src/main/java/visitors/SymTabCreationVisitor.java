@@ -49,7 +49,7 @@ public class SymTabCreationVisitor extends Visitor {
             ArrayList<SymTabEntry> funcDecl_entries = class_entry.m_subtable.lookupKind("function");
             for (SymTabEntry funcDecl_entry : funcDecl_entries) {
                 if (funcDecl_entry.m_subtable == null) {
-                    this.m_errors.append("[6.2] No definition for declared member function: \t");
+                    this.m_errors.append("[6.2][semantic error] No definition for declared member function: \t");
                     this.m_errors.append(class_entry.m_name).append(": ").append(funcDecl_entry.m_name).append("\r\n");
                 }
             }
@@ -86,7 +86,7 @@ public class SymTabCreationVisitor extends Visitor {
         if (p_node.getParent().getParent() != null) {
             SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(class_name);
             if (class_entry.m_name != null) {
-                m_errors.append("[8.1] Multiple undeclared class: \t").
+                m_errors.append("[8.1][semantic error] Multiple undeclared class: \t").
                         append(class_name).append("\r\n");
             } else {
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -210,7 +210,7 @@ public class SymTabCreationVisitor extends Visitor {
             // check multiple declared identifier in function
             SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
             if (var_entry.m_name != null) {
-                m_errors.append("[8.4] Multiple declared identifier in function: \t").append("'").
+                m_errors.append("[8.4][semantic error] Multiple declared identifier in function: \t").append("'").
                         append(var_id).append("' in the function ").append(p_node.m_symTab.m_name).append("\r\n");
             } else {
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -224,7 +224,7 @@ public class SymTabCreationVisitor extends Visitor {
                 // check multiple declared identifier in class
                 SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
                 if (var_entry.m_name != null) {
-                    m_errors.append("[8.3] Multiple declared identifier in class: \t").append("'").
+                    m_errors.append("[8.3][semantic error] Multiple declared identifier in class: \t").append("'").
                             append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
                 } else {
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -256,7 +256,7 @@ public class SymTabCreationVisitor extends Visitor {
         SymTab local_table;
 
         // when it is a member function, add scope into the name
-        if (!p_node.getChildren().get(0).getChildren().isEmpty()) {
+        if (!p_node.getChildren().get(0).isLeaf()) {
             func_scope = p_node.getChildren().get(0).getChildren().get(0).getData();
 //            System.out.println("func_scope: "+func_scope);
             local_table = new SymTab(2, func_scope + "::" + func_name, p_node.m_symTab);
@@ -288,7 +288,7 @@ public class SymTabCreationVisitor extends Visitor {
 
         boolean matched = false;
         // for member function, check if function header is matched with function declaration in class
-        if (!p_node.getChildren().get(0).getChildren().isEmpty()) {
+        if (!p_node.getChildren().get(0).isLeaf()) {
             if (p_node.getParent().getParent() != null) {
                 SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
                 if (class_entry.m_subtable != null) {
@@ -326,10 +326,11 @@ public class SymTabCreationVisitor extends Visitor {
 
                     if (func_entry.m_type.equals(func_type) && func_entry.m_fParam.toString().equals(fParam_list.toString())) {
 
-                        m_errors.append("[8.2] Multiple defined free function: \t").
+                        m_errors.append("[8.2][semantic error] Multiple defined free function: \t").
                                 append(func_name).append("\r\n");
                     }
                 } else {
+
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                     p_node.m_symTab = local_table;
 
@@ -340,8 +341,30 @@ public class SymTabCreationVisitor extends Visitor {
 
 
         if (!matched) {
-            m_errors.append("[6.1] Definition provided for undeclared member function: \t").
+            m_errors.append("[6.1][semantic error] Definition provided for undeclared member function: \t").
                     append(func_scope).append(":").append(func_name).append("\r\n");
+
+            // make this unmatched member function still exist in the symbol table
+            if (!p_node.getChildren().get(0).isLeaf()) {
+                if (p_node.getParent().getParent() != null) {
+                    SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
+                    // make class table be the upper table of member function table
+                    local_table.m_upperTable = class_entry.m_subtable;
+                    // create a new funcDecl entry
+                    p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, "");
+                    p_node.m_symTabEntry.m_subtable = local_table;
+                    class_entry.m_subtable.addEntry(p_node.m_symTabEntry);
+                    p_node.m_symTab = local_table;
+                }
+            }
+
+//            Node root = p_node;
+//            while(!root.isRoot()){
+//                root = root.getParent();
+//            }
+//            local_table.m_upperTable = root.m_symTab;
+//            root.m_symTab.addEntry(p_node.m_symTabEntry);
+//            p_node.m_symTab = local_table;
         }
 
 
@@ -369,6 +392,7 @@ public class SymTabCreationVisitor extends Visitor {
 
     public void visit(MainBlockNode p_node) {
         SymTab local_table = new SymTab(1, "main", p_node.m_symTab);
+
         p_node.m_symTabEntry = new FuncEntry("", "main", new Vector<>(), local_table);
         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
         p_node.m_symTab = local_table;
@@ -377,6 +401,7 @@ public class SymTabCreationVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
+
     }
 
     public void visit(DotNode p_node) {
@@ -550,4 +575,52 @@ public class SymTabCreationVisitor extends Visitor {
             child.accept(this);
         }
     }
+
+    public void visit(FuncCallNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+
+    public void visit(AParamsNode       p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(BreakStatNode     p_node){
+    }
+    public void visit(ContiStatNode     p_node){}
+    public void visit(DimNode           p_node){}
+    public void visit(FloatNode         p_node){}
+    public void visit(IndiceNode        p_node){}
+    public void visit(InlineIfNode      p_node){
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(NotNode           p_node){
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    };
+    public void visit(NumNode           p_node){};
+
+    public void visit(RelExprNode       p_node){
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+    public void visit(RelOpNode         p_node){}
+    public void visit(SignNode          p_node){}
+    public void visit(StringNode        p_node){}
+    public void visit(VisibilityNode    p_node){}
+
 }
