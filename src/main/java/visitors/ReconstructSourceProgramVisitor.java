@@ -292,8 +292,9 @@ public class ReconstructSourceProgramVisitor extends Visitor {
     public void visit(IndiceNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
-        for (Node child : p_node.getChildren())
+        for (Node child : p_node.getChildren()){
             p_node.m_subtreeString += "["+child.m_subtreeString+"]";
+        p_node.m_line=child.m_line;}
     }
 
     public void visit(NumNode p_node) {

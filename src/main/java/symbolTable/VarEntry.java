@@ -20,7 +20,7 @@ public class VarEntry extends SymTabEntry {
     public String toString() {
         String dim_print;
         if (m_dims != null) {
-             dim_print = m_dims.toString().substring(1, m_dims.toString().length() - 1);
+             dim_print = m_dims.toString().substring(1, m_dims.toString().length() - 1).replace(", ","");
         }else{
             dim_print="";
         }

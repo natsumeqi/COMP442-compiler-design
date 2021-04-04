@@ -316,6 +316,22 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
+//        System.out.println("[13.1]" + p_node.m_type);
+
+        // check array dimensions when the first child is DataMemNode
+        if (p_node.getChildren().get(0).m_sa_name.equals("DataMem_s")) {
+            Node dataMem_temp = p_node.getChildren().get(0);
+            int size_dimList = dataMem_temp.getChildren().get(1).getChildren().size();
+            SymTabEntry var_entry = p_node.m_symTab.lookupName(dataMem_temp.m_data);
+            if (var_entry.m_name != null) {
+                if (size_dimList != var_entry.m_dims.size()) {
+                    this.m_errors += "[13.1][semantic error][line:" + p_node.m_line + "] Use of array with wrong number of dimensions:  '" + p_node.m_subtreeString + "'\n";
+
+                }
+            }
+        }
+
+
     }
 
     public void visit(DataMemNode p_node) {
@@ -324,9 +340,8 @@ public class TypeCheckingVisitor extends Visitor {
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
         p_node.m_data = p_node.getChildren().get(0).getData();
-//        if (p_node.m_type == null) {
-//            this.m_errors += "[11.1][semantic error][line:" + p_node.m_line + "] Undeclared local variable:  '" + p_node.m_data + "'\n";
-//        }
+
+
         System.out.println("DataMemNode type: " + p_node.m_type);
     }
 
@@ -415,10 +430,10 @@ public class TypeCheckingVisitor extends Visitor {
         if (class_entry.m_name != null) {
             System.out.println("[dot] find the class: " + var_class_type);
             System.out.println("[dot] going to look up func : " + var_func_name);
-            SymTabEntry func_entry = class_entry.m_subtable.lookupNameInOneTable(var_func_name);
-            if (func_entry.m_name != null) {
-                System.out.println("func_entry: " + func_entry.m_name);
-                var_or_func_type = func_entry.m_type;
+            SymTabEntry func_var_entry = class_entry.m_subtable.lookupNameInOneTable(var_func_name);
+            if (func_var_entry.m_name != null) {
+                System.out.println("func_entry: " + func_var_entry.m_name);
+                var_or_func_type = func_var_entry.m_type;
                 p_node.setType(var_or_func_type);
                 System.out.println("if 2 from : " + var_or_func_type);
 
@@ -429,6 +444,22 @@ public class TypeCheckingVisitor extends Visitor {
 
 
                     }
+
+
+                } else {// check variable array dimensions  test todo
+                    if (p_node.getChildren().get(1).m_sa_name.equals("DataMem_s")) {
+
+                        Node dataMem_temp = p_node.getChildren().get(1);
+                        int size_dimList = dataMem_temp.getChildren().get(1).getChildren().size();
+                        SymTabEntry var_entry = p_node.m_symTab.lookupName(dataMem_temp.m_data);
+                        if (var_entry.m_name != null) {
+                            if (size_dimList != var_entry.m_dims.size()) {
+                                this.m_errors += "[13.1][semantic error][line:" + p_node.m_line + "] Use of array with wrong number of dimensions:  '" + p_node.m_subtreeString + "'\n";
+
+                            }
+                        }
+                    }
+
                 }
 
 
@@ -497,34 +528,74 @@ public class TypeCheckingVisitor extends Visitor {
 
                 // check type and number of parameters in function calls
                 String funcCall_name = p_node.getChildren().get(0).m_subtreeString;
-                String func_paras = p_node.getChildren().get(1).m_type;
+                String func_paras_type = p_node.getChildren().get(1).m_type;
+
+                String func_paras_ids = p_node.getChildren().get(1).m_subtreeString;
+                func_paras_ids = func_paras_ids.substring(1, func_paras_ids.length()-1).replace(" ","");
 
                 System.out.println("[12.1]" + p_node.m_type);
                 System.out.println("[12.1]" + funcCall_name);
-                System.out.println("[12.1]" + func_paras);
-                ArrayList<SymTabEntry> func_entries = p_node.m_symTab.lookupFunction(funcCall_name);
+                System.out.println("[12.1]" + func_paras_type);
+                System.out.println("[12.1]" + func_paras_ids);
+
+                ArrayList<SymTabEntry> decl_func_entries = p_node.m_symTab.lookupFunction(funcCall_name);
 //                ArrayList<String> func_paras_list = new ArrayList<>();
-                String[] func_paras_list = func_paras.split(",");
+                String[] func_paras_type_list = func_paras_type.split(",");
+                String[] func_paras_ids_list = func_paras_ids.split(",");
 //                int size_paras = p_node.getChildren().get(1).getChildren().size();
-                int size_paras = func_paras_list.length;
-                boolean paras_size_match    =false;
-                for (SymTabEntry func_entry : func_entries) {
-                    if (func_entry.m_fParam.size() == size_paras) {
+                int size_paras = func_paras_type_list.length;
+                boolean paras_size_match = false;
+
+
+                for (SymTabEntry decl_func_entry : decl_func_entries) {
+                    if (decl_func_entry.m_fParam.size() == size_paras) {
                         paras_size_match = true;
                         for (int i = 0; i < size_paras; i++) {
-                            if (!func_entry.m_fParam.get(i).equals(func_paras_list[i])) {
+                            // first check type
+                            String type_para;
+                            if(decl_func_entry.m_fParam.get(i).contains("[")) {
+                                type_para = decl_func_entry.m_fParam.get(i).substring(0, decl_func_entry.m_fParam.get(i).indexOf("["));
+                            }else{
+                                type_para = decl_func_entry.m_fParam.get(i);
+                            }
+                            System.out.println(type_para);
+                            System.out.println("[12.2]" + decl_func_entry.m_fParam.get(i));
+                            System.out.println("[12.2]" + func_paras_type_list[i]);
+                            if (!type_para.equals(func_paras_type_list[i])) {
                                 if (!error_set.contains(p_node.m_line)) {
                                     this.m_errors += "[12.2][semantic error][line:" + p_node.m_line + "] Function call with wrong type of parameters:  '" + p_node.m_subtreeString + "'\n";
                                     error_set.add(p_node.m_line);
                                     break;
                                 }
+                            } else {
+                                // then check dimensionality
+                                int size_dims = decl_func_entry.m_fParam.get(i).length()-decl_func_entry.m_fParam.get(i).replace("[","").length();
+
+                                // find variable declaration of parameter id
+                                    SymTabEntry var_entry = p_node.m_symTab.lookupName(func_paras_ids_list[i]);
+                                    if(var_entry.m_name!=null){
+                                        if(var_entry.m_dims.size()!=size_dims){
+                                            if (!error_set.contains(p_node.m_line)) {
+                                                this.m_errors += "[13.3][semantic error][line:" + p_node.m_line + "] Array parameter using wrong number of dimensions:  '" + p_node.m_subtreeString + "'\n";
+                                                error_set.add(p_node.m_line);
+                                                break;
+                                            }
+                                        }
+                                    }
+
+
+
+//                                if (size_dims!=) {
+//   
+//
+//                                }
                             }
                         }
 
                     }
 
                 }
-                if(!paras_size_match){
+                if (!paras_size_match) {
                     if (!error_set.contains(p_node.m_line)) {
                         this.m_errors += "[12.1][semantic error][line:" + p_node.m_line + "] Function call with wrong number of parameters:  '" + p_node.m_subtreeString + "'\n";
                         error_set.add(p_node.m_line);
@@ -574,6 +645,20 @@ public class TypeCheckingVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
+    }
+
+    public void visit(IndiceNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.accept(this);
+        }
+
+        for (Node child : p_node.getChildren()) {
+            if (!child.m_type.equals("integer")) {
+                this.m_errors += "[13.2][semantic error][line:" + p_node.m_line + "] Array index is not an integer:  '" + child.m_subtreeString + "'\n";
+            }
+        }
+        p_node.m_type = "[" + p_node.getChildren().size() + "]";
+        System.out.println("[13.2]" + p_node.m_type);
     }
 
 
