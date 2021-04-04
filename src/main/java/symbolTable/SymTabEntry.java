@@ -1,5 +1,6 @@
 package symbolTable;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 public class SymTabEntry {
@@ -11,6 +12,7 @@ public class SymTabEntry {
     public SymTab          m_subtable   = null;
     public Vector<String> m_dims       = new Vector<>();
     public Vector<String> m_fParam  = new Vector<String>();
+//    public HashMap<String, SymTab> inherit_list = new HashMap<>();
 
     public String m_visibility  = null;
 
@@ -22,4 +24,8 @@ public class SymTabEntry {
         m_name = p_name;
         m_subtable = p_subtable;
     }
+
+//    public void setInherit_list(HashMap<String, SymTab> inherit_list) {
+//        this.inherit_list = inherit_list;
+//    }
 }

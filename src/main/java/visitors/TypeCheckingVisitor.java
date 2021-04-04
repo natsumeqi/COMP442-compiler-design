@@ -3,8 +3,10 @@ package visitors;
 import AST.*;
 import symbolTable.SymTabEntry;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Vector;
 
 
 /**
@@ -17,7 +19,7 @@ import java.util.Locale;
 public class TypeCheckingVisitor extends Visitor {
 
     public String m_errors = "";
-    private HashSet<String> error_set = new HashSet<>();
+    private HashSet<Integer> error_set = new HashSet<>();
 
     public TypeCheckingVisitor() {
     }
@@ -60,6 +62,8 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(FParamListNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+
+
     }
 
     public void visit(FParamNode p_node) {
@@ -125,7 +129,7 @@ public class TypeCheckingVisitor extends Visitor {
             System.out.println("ReturnStatNode type: " + return_stat_type);
         } else {
             p_node.setType("typeerror");
-            this.m_errors += "[10.3][semantic error] Type error in return statement:  "
+            this.m_errors += "[10.3][semantic error][line:" + p_node.m_line + "] Type error in return statement:  "
                     + p_node.getChildren().get(0).getSubtreeString()
                     + "(" + p_node.getChildren().get(0).getType() + ")"
                     + " and "
@@ -154,15 +158,16 @@ public class TypeCheckingVisitor extends Visitor {
                 p_node.setType("typeerror");
                 // add only once in error set
 //            String error_info = p_node.m_line + "MultOpNode";
-//            if (!error_set.contains(error_info)) {
-                this.m_errors += "[10.2][semantic error] Type error in assignment statement:  "
-                        + p_node.getChildren().get(0).getSubtreeString()
-                        + "(" + p_node.getChildren().get(0).getType() + ")"
-                        + " and "
-                        + p_node.getChildren().get(1).getSubtreeString()
-                        + "(" + p_node.getChildren().get(1).getType() + ")"
-                        + "\n";
-//            }
+                if (!error_set.contains(p_node.m_line)) {
+                    this.m_errors += "[10.2][semantic error][line:" + p_node.m_line + "] Type error in assignment statement:  "
+                            + p_node.getChildren().get(0).getSubtreeString()
+                            + "(" + p_node.getChildren().get(0).getType() + ")"
+                            + " and "
+                            + p_node.getChildren().get(1).getSubtreeString()
+                            + "(" + p_node.getChildren().get(1).getType() + ")"
+                            + "\n";
+                    error_set.add(p_node.m_line);
+                }
             }
         }
     }
@@ -184,18 +189,18 @@ public class TypeCheckingVisitor extends Visitor {
         } else {
             p_node.setType("typeerror");
 //            String error_info = "AddOpNode"+p_node.m_line;
-//            if (!error_set.contains(error_info)) {
-            this.m_errors += "[10.1][semantic error] Type error in AddOpNode:  "
-                    + p_node.getChildren().get(0).getData()
-                    + "(" + p_node.getChildren().get(0).getType() + ")"
-                    + " and "
-                    + p_node.getChildren().get(1).getData()
-                    + "(" + p_node.getChildren().get(1).getType() + ")"
-                    + " in line " + p_node.m_line
-                    + "\n";
-//                error_set.add("AddOpNode" + p_node.m_line);
+            if (!error_set.contains(p_node.m_line)) {
+                this.m_errors += "[10.1][semantic error][line:" + p_node.m_line + "] Type error in AddOpNode:  "
+                        + p_node.getChildren().get(0).getData()
+                        + "(" + p_node.getChildren().get(0).getType() + ")"
+                        + " and "
+                        + p_node.getChildren().get(1).getData()
+                        + "(" + p_node.getChildren().get(1).getType() + ")"
+                        + "\n";
+                error_set.add(p_node.m_line);
+
+            }
         }
-//        }
     }
 
 
@@ -213,17 +218,16 @@ public class TypeCheckingVisitor extends Visitor {
             p_node.setType("typeerror");
             // add only once in error set
 //            String error_info = p_node.m_line + "MultOpNode";
-//            if (!error_set.contains(error_info)) {
-            this.m_errors += "[10.1][semantic error] Type error in MultOpNode:  "
-                    + p_node.getChildren().get(0).getData()
-                    + "(" + p_node.getChildren().get(0).getType() + ")"
-                    + " and "
-                    + p_node.getChildren().get(1).getData()
-                    + "(" + p_node.getChildren().get(1).getType() + ")"
-                    + " in line " + p_node.m_line
-                    + "\n";
-//                error_set.add("MultOpNode" + p_node.m_line);
-//            }
+            if (!error_set.contains(p_node.m_line)) {
+                this.m_errors += "[10.1][semantic error][line:" + p_node.m_line + "] Type error in MultOpNode:  "
+                        + p_node.getChildren().get(0).getData()
+                        + "(" + p_node.getChildren().get(0).getType() + ")"
+                        + " and "
+                        + p_node.getChildren().get(1).getData()
+                        + "(" + p_node.getChildren().get(1).getType() + ")"
+                        + "\n";
+                error_set.add(p_node.m_line);
+            }
         }
     }
 
@@ -241,10 +245,11 @@ public class TypeCheckingVisitor extends Visitor {
         p_node.m_type = p_node.getChildren().get(0).getType();
         if (p_node.m_type != null) {
             if (p_node.m_type.equals("typeerror")) {
-//                if (!error_set.contains("ExprNode" + p_node.m_subtreeString)) {
-                this.m_errors += "[10.1][semantic error][line:"+p_node.m_line+ "] Type error in expression: '" + p_node.m_subtreeString + "'\n";
+                if (!error_set.contains(p_node.m_line)) {
+                    this.m_errors += "[10.1][semantic error][line:" + p_node.m_line + "] Type error in expression: '" + p_node.m_subtreeString + "'\n";
 //                    error_set.add("ExprNode" + p_node.m_subtreeString);
-//                }
+                    error_set.add(p_node.m_line);
+                }
             }
         }
         System.out.println("ExprNode type: " + p_node.m_type);
@@ -319,6 +324,9 @@ public class TypeCheckingVisitor extends Visitor {
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
         p_node.m_data = p_node.getChildren().get(0).getData();
+//        if (p_node.m_type == null) {
+//            this.m_errors += "[11.1][semantic error][line:" + p_node.m_line + "] Undeclared local variable:  '" + p_node.m_data + "'\n";
+//        }
         System.out.println("DataMemNode type: " + p_node.m_type);
     }
 
@@ -326,9 +334,11 @@ public class TypeCheckingVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
+        // primitive type
         if (p_node.isLeaf()) {
             p_node.m_type = p_node.m_data;
         } else {
+            // class type
             p_node.m_type = p_node.getChildren().get(0).getType();
 
             // check if the type is undeclared
@@ -342,7 +352,7 @@ public class TypeCheckingVisitor extends Visitor {
                 if (class_entry.m_name != null) {
                     p_node.m_type = class_entry.m_name;
                 } else {
-                    this.m_errors += "[11.5][semantic error] Use of undeclared class:  '" + undeclared_type + "' in line " + p_node.getChildren().get(0).getM_line() + "\n";
+                    this.m_errors += "[11.5][semantic error][line:" + p_node.m_line + "] Use of undeclared class:  '" + undeclared_type + "'\n";
                 }
             }
         }
@@ -352,22 +362,34 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(IdNode p_node) {
         // get type from symbol table
         // maybe has null todo
-        System.out.println("IdNode upper upper symtab : " + p_node.getParent().getParent().m_sa_name);
-        System.out.println("IdNode upper upper symtab : " + p_node.getParent().getParent().m_symTab);
-        System.out.println("IdNode upper symtab : " + p_node.getParent().m_symTab);
-        System.out.println("IdNode symtab: " + p_node.m_symTab);
-        System.out.println("IdNode data: " + p_node.m_data);
-        System.out.println("IdNode line: " + p_node.m_line);
+        System.out.println("[IdNode] upper upper symtab : " + p_node.getParent().getParent().m_sa_name);
+        System.out.println("[IdNode] upper upper symtab : " + p_node.getParent().getParent().m_symTab);
+        System.out.println("[IdNode] upper symtab : " + p_node.getParent().m_symTab);
+        System.out.println("[IdNode] symtab: " + p_node.m_symTab);
+        System.out.println("[IdNode] data: " + p_node.m_data);
+        System.out.println("[IdNode] line: " + p_node.m_line);
 
-        // search variable in symbol table
+//         search variable in symbol table; for cases in Dot, the type is not right, will check in the Dot node
         SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
         if (entry.m_name != null) {
             p_node.m_type = entry.m_type;
-            System.out.println("IdNode type: " + p_node.m_type + " for " + p_node.m_data);
+            System.out.println("[IdNode] entry:" + entry.m_name);
+            System.out.println("[IdNode] type: " + p_node.m_type + " for " + p_node.m_data);
         } else {
-            // search variable in class symbol table
+
+
+            if (p_node.getParent().m_sa_name.equals("DataMem_s") && p_node.getParent().getParent().m_sa_name.equals("FuncOrVar_s")) {
+
+                this.m_errors += "[11.1][semantic error][line:" + p_node.m_line + "] Undeclared local variable:  '" + p_node.m_data + "'\n";
+                error_set.add(p_node.m_line);
+            }
+
         }
 
+
+        //        if (p_node.m_type == null) {
+//            this.m_errors += "[11.1][semantic error][line:" + p_node.m_line + "] Undeclared local variable:  '" + p_node.m_data + "'\n";
+//        }
 
     }
 
@@ -375,46 +397,178 @@ public class TypeCheckingVisitor extends Visitor {
 
     }
 
+
     public void visit(DotNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
-        String var_class_type = p_node.getChildren().get(0).getType();
+        String var_class_type = p_node.getChildren().get(0).getType().toUpperCase();
         String var_or_func_type;
-        if (p_node.getChildren().get(1).getType() != null) {
-            var_or_func_type = p_node.getChildren().get(1).getType();
-            p_node.setType(var_or_func_type);
-        } else {
 
-            String func_name = p_node.getChildren().get(1).getData();   // get id from IdNode
-            SymTabEntry class_entry = p_node.m_symTab.lookupName(var_class_type);
-            if (class_entry.m_name != null) {
-                SymTabEntry func_entry = class_entry.m_subtable.lookupName(func_name);
-                if (func_entry.m_name != null) {
-                    var_or_func_type = func_entry.m_type;
-                    p_node.setType(var_or_func_type);
+
+        // get from nodes rather than IdNode
+        String var_func_name = p_node.getChildren().get(1).m_subtreeString;
+        System.out.println("if 2 from func name : " + var_func_name);
+        SymTabEntry class_entry = p_node.m_symTab.lookupName(var_class_type);
+
+
+        if (class_entry.m_name != null) {
+            System.out.println("[dot] find the class: " + var_class_type);
+            System.out.println("[dot] going to look up func : " + var_func_name);
+            SymTabEntry func_entry = class_entry.m_subtable.lookupNameInOneTable(var_func_name);
+            if (func_entry.m_name != null) {
+                System.out.println("func_entry: " + func_entry.m_name);
+                var_or_func_type = func_entry.m_type;
+                p_node.setType(var_or_func_type);
+                System.out.println("if 2 from : " + var_or_func_type);
+
+
+                // check function call todo
+                if (p_node.getR_sibling() != null) {
+                    if (p_node.getR_sibling().m_sa_name.equals("AParams_s")) {
+
+
+                    }
                 }
+
+
+            } else {// function or variable is not declared in the class
+
+
             }
 
+        } else {// "." operator used on non-class type
+
+            if (!error_set.contains(p_node.m_line)) {
+                this.m_errors += "[15.1][semantic error][line:" + p_node.m_line + "] '.' operator used on non-class type:  '" + p_node.m_subtreeString + "'\n";
+                error_set.add(p_node.m_line);
+            }
+        }
+        System.out.println("[dot]var_class_type: " + var_class_type);
+//        System.out.println("var or func type: "+ var_or_func_type);
+        System.out.println("[dot]line " + p_node.m_line + " dot node type: " + p_node.m_type);
+
+
+        // semantic error
+        if (p_node.m_type == null) {
+            // for [15.1]
+            if (p_node.getR_sibling() != null) {
+                if (p_node.getR_sibling().m_sa_name.equals("AParams_s")) {            // undeclared member function
+                    if (!error_set.contains(p_node.m_line)) {
+                        this.m_errors += "[11.3][semantic error][line:" + p_node.m_line + "] Undeclared member function:  '" + var_func_name + "'\n";
+                        error_set.add(p_node.m_line);
+                    }
+                }
+
+
+                // undeclared data member
+            } else {
+                if (!error_set.contains(p_node.m_line)) {
+                    this.m_errors += "[11.2][semantic error][line:" + p_node.m_line + "] Undeclared data member:  '" + p_node.m_subtreeString + "'\n";
+                    error_set.add(p_node.m_line);
+                }
+            }
         }
 
+
     }
+
 
     public void visit(FuncCallNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
-        // get the type of function call
-        if (p_node.getChildren().get(0).m_sa_name.equals("IdNode") || p_node.getChildren().get(0).m_sa_name.equals("DataMemNode")) {
-            String func_name = p_node.getChildren().get(0).getData();
 
-            SymTabEntry func_entry = p_node.m_symTab.lookupName(func_name);
-            if (func_entry.m_name != null) {
-                p_node.setType(func_entry.m_type);
+
+        // get the type of function call
+        String func_name;
+
+        if (p_node.getChildren().get(0).m_sa_name.equals("Id_s")) {
+            // free function
+            func_name = p_node.getChildren().get(0).getData();
+            if (p_node.m_symTab.lookupName(func_name).m_name == null) {
+                if (!error_set.contains(p_node.m_line)) {
+                    this.m_errors += "[11.4][semantic error][line:" + p_node.m_line + "] Undeclared free function:  '" + p_node.m_subtreeString + "'\n";
+                    error_set.add(p_node.m_line);
+                }
+            } else {
+
+                p_node.m_type = p_node.getChildren().get(0).getType();
+
+                // check type and number of parameters in function calls
+                String funcCall_name = p_node.getChildren().get(0).m_subtreeString;
+                String func_paras = p_node.getChildren().get(1).m_type;
+
+                System.out.println("[12.1]" + p_node.m_type);
+                System.out.println("[12.1]" + funcCall_name);
+                System.out.println("[12.1]" + func_paras);
+                ArrayList<SymTabEntry> func_entries = p_node.m_symTab.lookupFunction(funcCall_name);
+//                ArrayList<String> func_paras_list = new ArrayList<>();
+                String[] func_paras_list = func_paras.split(",");
+//                int size_paras = p_node.getChildren().get(1).getChildren().size();
+                int size_paras = func_paras_list.length;
+                boolean paras_size_match    =false;
+                for (SymTabEntry func_entry : func_entries) {
+                    if (func_entry.m_fParam.size() == size_paras) {
+                        paras_size_match = true;
+                        for (int i = 0; i < size_paras; i++) {
+                            if (!func_entry.m_fParam.get(i).equals(func_paras_list[i])) {
+                                if (!error_set.contains(p_node.m_line)) {
+                                    this.m_errors += "[12.2][semantic error][line:" + p_node.m_line + "] Function call with wrong type of parameters:  '" + p_node.m_subtreeString + "'\n";
+                                    error_set.add(p_node.m_line);
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+                if(!paras_size_match){
+                    if (!error_set.contains(p_node.m_line)) {
+                        this.m_errors += "[12.1][semantic error][line:" + p_node.m_line + "] Function call with wrong number of parameters:  '" + p_node.m_subtreeString + "'\n";
+                        error_set.add(p_node.m_line);
+                    }
+                }
+//                System.out.println("[12.1] found!!!");
+
+
+            }
+
+
+        } else {
+            if (p_node.getChildren().get(0).m_sa_name.equals("DataMem_s")) {
+
+
+            } else {
+                if (p_node.getChildren().get(0).m_sa_name.equals("Dot_s")) {
+//                    func_name = p_node.getChildren().get(0).getSubtreeString();
+
+                }
             }
         }
+        p_node.m_type = p_node.getChildren().get(0).m_type;
 
     }
+
+
+    public void visit(AParamsNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.accept(this);
+        }
+        p_node.m_type = "";
+        boolean first = true;
+        for (Node child : p_node.getChildren()) {
+            if (first)
+                p_node.m_type += child.m_type;
+            else
+                p_node.m_type += "," + child.m_type;
+            first = false;
+        }
+        p_node.m_type += "";
+        System.out.println("[aparams]" + p_node.m_type);
+    }
+
 
     public void visit(MainBlockNode p_node) {
         for (Node child : p_node.getChildren()) {

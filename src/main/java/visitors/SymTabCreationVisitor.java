@@ -88,6 +88,13 @@ public class SymTabCreationVisitor extends Visitor {
             if (class_entry.m_name != null) {
                 m_errors.append("[8.1][semantic error] Multiple undeclared class: \t").
                         append(class_name).append("\r\n");
+                // still create table for multiple classes, but not add to global table
+                String class_name_duplicate = class_name + "_duplicate";
+                local_table = new SymTab(1, class_name_duplicate, p_node.m_symTab);
+                p_node.m_symTabEntry = new ClassEntry(class_name_duplicate, local_table);
+//                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                p_node.m_symTab = local_table;
+
             } else {
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                 p_node.m_symTab = local_table;
@@ -113,6 +120,7 @@ public class SymTabCreationVisitor extends Visitor {
                 String var_id = child.getData();
                 VarEntry varEntry = new VarEntry("inherit", "", var_id, null);
                 p_node.m_symTab.addEntry(varEntry);
+                p_node.m_symTab.addInherit(var_id, p_node.m_symTab.m_upperTable.lookupName(var_id).m_subtable);
             }
         }
     }
@@ -122,6 +130,49 @@ public class SymTabCreationVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
+
+//        // check overloading member functions
+//        for(Node child: p_node.getChildren()){
+//            child.getChildren().get(1).m_symTabEntry
+//
+//        }
+//
+//        SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
+//        if (func_entry.m_name != null) {
+//            // ignore  func_entry.m_type.equals(func_type) &
+//            if (func_entry.m_fParam.toString().equals(fParam_list.toString())) {
+//
+//                m_errors.append("[8.2][semantic error] Multiple defined free function: \t").
+//                        append(func_name).append("\r\n");
+//            } else {
+//
+//                // overloading free function
+//                m_errors.append("[9.1][semantic warning] Overloaded free function: \t").
+//                        append(func_name).append("\r\n");
+//                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+//                p_node.m_symTab = local_table;
+//            }
+//
+//
+//        if (p_node.getParent().getParent() != null) {
+//            SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(class_name);
+//            if (class_entry.m_name != null) {
+//                m_errors.append("[8.1][semantic error] Multiple undeclared class: \t").
+//                        append(class_name).append("\r\n");
+//                // still create table for multiple classes, but not add to global table
+//                String class_name_duplicate = class_name + "_duplicate";
+//                local_table = new SymTab(1, class_name_duplicate, p_node.m_symTab);
+//                p_node.m_symTabEntry = new ClassEntry(class_name_duplicate, local_table);
+////                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+//                p_node.m_symTab = local_table;
+//
+//            } else {
+//                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+//                p_node.m_symTab = local_table;
+//            }
+//        }
+
+
     }
 
     public void visit(MembDeclNode p_node) {
@@ -139,10 +190,10 @@ public class SymTabCreationVisitor extends Visitor {
      * @return data of type
      */
     private String returnTypeDate(Node p_node) {
-        if (p_node.getChildren().size() == 0) {
+        if (p_node.isLeaf()) {
             return p_node.getData();
         } else {
-            return p_node.getChildren().get(0).getData();
+            return p_node.getChildren().get(0).getData().toUpperCase();
         }
     }
 
@@ -180,8 +231,16 @@ public class SymTabCreationVisitor extends Visitor {
         p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, func_visibility);
 
 
-        // check if function header is matched with function declaration in class
-//        if (!p_node.getChildren().get(0).getChildren().isEmpty()) {
+        // check overloading member functions
+        SymTabEntry func_entry = p_node.m_symTab.lookupNameInOneTable(func_name);
+        if (func_entry.m_name != null) {
+            if (!func_entry.m_fParam.equals(fParam_list)) {
+                String class_name = p_node.m_symTab.m_name;
+                m_errors.append("[9.2][semantic warning] Overloaded member function: \t").
+                        append(func_name).append(" in the class: ").append(class_name).append("\r\n");
+            }
+
+        }
 
 
         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -321,14 +380,24 @@ public class SymTabCreationVisitor extends Visitor {
 
             // check multiply declared classes
             if (p_node.getParent().getParent() != null) {
+
+                // go to global table to check
                 SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
                 if (func_entry.m_name != null) {
-
-                    if (func_entry.m_type.equals(func_type) && func_entry.m_fParam.toString().equals(fParam_list.toString())) {
+                    // ignore  func_entry.m_type.equals(func_type) &
+                    if (func_entry.m_fParam.toString().equals(fParam_list.toString())) {
 
                         m_errors.append("[8.2][semantic error] Multiple defined free function: \t").
                                 append(func_name).append("\r\n");
+                    } else {
+
+                        // overloading free function
+                        m_errors.append("[9.1][semantic warning] Overloaded free function: \t").
+                                append(func_name).append("\r\n");
+                        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                        p_node.m_symTab = local_table;
                     }
+
                 } else {
 
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -472,8 +541,6 @@ public class SymTabCreationVisitor extends Visitor {
     }
 
 
-
-
     public void visit(ScopeNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
@@ -509,7 +576,6 @@ public class SymTabCreationVisitor extends Visitor {
             child.accept(this);
         }
     }
-
 
 
     public void visit(IfStatNode p_node) {
@@ -584,43 +650,66 @@ public class SymTabCreationVisitor extends Visitor {
     }
 
 
-    public void visit(AParamsNode       p_node) {
+    public void visit(AParamsNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
     }
 
-    public void visit(BreakStatNode     p_node){
+    public void visit(BreakStatNode p_node) {
     }
-    public void visit(ContiStatNode     p_node){}
-    public void visit(DimNode           p_node){}
-    public void visit(FloatNode         p_node){}
-    public void visit(IndiceNode        p_node){}
-    public void visit(InlineIfNode      p_node){
+
+    public void visit(ContiStatNode p_node) {
+    }
+
+    public void visit(DimNode p_node) {
+    }
+
+    public void visit(FloatNode p_node) {
+    }
+
+    public void visit(IndiceNode p_node) {
+    }
+
+    public void visit(InlineIfNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
     }
 
-    public void visit(NotNode           p_node){
-        for (Node child : p_node.getChildren()) {
-            child.m_symTab = p_node.m_symTab;
-            child.accept(this);
-        }
-    };
-    public void visit(NumNode           p_node){};
-
-    public void visit(RelExprNode       p_node){
+    public void visit(NotNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
     }
-    public void visit(RelOpNode         p_node){}
-    public void visit(SignNode          p_node){}
-    public void visit(StringNode        p_node){}
-    public void visit(VisibilityNode    p_node){}
+
+    ;
+
+    public void visit(NumNode p_node) {
+    }
+
+    ;
+
+    public void visit(RelExprNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+    }
+
+    public void visit(RelOpNode p_node) {
+    }
+
+    public void visit(SignNode p_node) {
+    }
+
+    public void visit(StringNode p_node) {
+    }
+
+    public void visit(VisibilityNode p_node) {
+    }
 
 }

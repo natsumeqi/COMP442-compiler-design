@@ -143,6 +143,10 @@ public abstract class Node {
         return lm_sibling;
     }
 
+    public Node getR_sibling() {
+        return r_sibling;
+    }
+
     public String getSubtreeString() {
         return m_subtreeString;
     }
