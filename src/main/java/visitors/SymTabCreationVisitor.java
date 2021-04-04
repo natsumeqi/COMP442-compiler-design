@@ -86,8 +86,8 @@ public class SymTabCreationVisitor extends Visitor {
         if (p_node.getParent().getParent() != null) {
             SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(class_name);
             if (class_entry.m_name != null) {
-                m_errors.append("[8.1][semantic error] Multiple undeclared class: \t").
-                        append(class_name).append("\r\n");
+                m_errors.append("[8.1][semantic error] Multiple undeclared class: \t'").
+                        append(class_name).append("'\r\n");
                 // still create table for multiple classes, but not add to global table
                 String class_name_duplicate = class_name + "_duplicate";
                 local_table = new SymTab(1, class_name_duplicate, p_node.m_symTab);
@@ -109,6 +109,11 @@ public class SymTabCreationVisitor extends Visitor {
             member.accept(this);
         }
 
+
+
+
+
+
     }
 
     public void visit(InherListNode p_node) {
@@ -120,7 +125,7 @@ public class SymTabCreationVisitor extends Visitor {
                 String var_id = child.getData();
                 VarEntry varEntry = new VarEntry("inherit", "", var_id, null);
                 p_node.m_symTab.addEntry(varEntry);
-                p_node.m_symTab.addInherit(var_id, p_node.m_symTab.m_upperTable.lookupName(var_id).m_subtable);
+                p_node.m_symTab.addInherit(p_node.m_symTab.m_upperTable.lookupName(var_id).m_subtable);
             }
         }
     }
@@ -231,16 +236,40 @@ public class SymTabCreationVisitor extends Visitor {
         p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, func_visibility);
 
 
-        // check overloading member functions
         SymTabEntry func_entry = p_node.m_symTab.lookupNameInOneTable(func_name);
         if (func_entry.m_name != null) {
-            if (!func_entry.m_fParam.equals(fParam_list)) {
+            // check overloading member functions
+            if (!func_entry.m_fParam.equals(fParam_list) || !func_entry.m_type.equals(func_type)) {
                 String class_name = p_node.m_symTab.m_name;
-                m_errors.append("[9.2][semantic warning] Overloaded member function: \t").
-                        append(func_name).append(" in the class: ").append(class_name).append("\r\n");
+                m_errors.append("[9.2][semantic warning] Overloaded member function: \t'").
+                        append(func_name).append("' in the class: ").append(class_name).append("\r\n");
+            } else {
+            // check multiple identifier of functions
+                m_errors.append("[8.3][semantic error] Multiple declared identifier in class: \t").append("'").
+                        append(func_name).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
             }
-
         }
+
+
+        // check overridden inherited member function
+        SymTabEntry func_entry_inherited = p_node.m_symTab.lookupFunctionInInherited(func_name);
+       if(func_entry_inherited.m_name!=null){
+
+           // check overloading member functions
+           System.out.println("[17.1]"+func_entry);
+           if (!func_entry_inherited.m_fParam.equals(fParam_list) || !func_entry_inherited.m_type.equals(func_type)) {
+               String class_name = p_node.m_symTab.m_name;
+               m_errors.append("[9.2][semantic warning] Overloaded member function: \t'").
+                       append(func_name).append("' in the class: ").append(class_name).append("\r\n");
+           }else{
+               // check overridden function
+               m_errors.append("[9.3][semantic error] Overridden inherited member function: \t").append("'").
+                       append(func_name).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
+           }
+           }
+
+
+
 
 
         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -263,6 +292,7 @@ public class SymTabCreationVisitor extends Visitor {
         // create the symbol table entry for this variable
         // it will be picked-up by another node above later
 
+        // variable in function
         if (p_node.getParent().getClass().getSimpleName().equals("MethVarNode")) {
             p_node.m_symTabEntry = new VarEntry("local", var_type, var_id, dim_list);
 
@@ -275,7 +305,7 @@ public class SymTabCreationVisitor extends Visitor {
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
             }
 
-        } else {
+        } else {    // data member in class
             if (p_node.getParent().getClass().getSimpleName().equals("MembDeclNode")) {
                 String var_visibility = p_node.getLm_sibling().m_data;
                 p_node.m_symTabEntry = new VarEntry("data", var_type, var_id, var_visibility, dim_list);
@@ -286,6 +316,16 @@ public class SymTabCreationVisitor extends Visitor {
                     m_errors.append("[8.3][semantic error] Multiple declared identifier in class: \t").append("'").
                             append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
                 } else {
+
+                    // check shadowed inherited member
+
+                    if (p_node.m_symTab.lookupInInherited(var_id)) {
+                        System.out.println("[8.5] found !!!");
+                        m_errors.append("[8.5][semantic warning] shadowed inherited data member: \t").append("'").
+                                append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
+                    }
+
+
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                 }
             }
@@ -387,13 +427,13 @@ public class SymTabCreationVisitor extends Visitor {
                     // ignore  func_entry.m_type.equals(func_type) &
                     if (func_entry.m_fParam.toString().equals(fParam_list.toString())) {
 
-                        m_errors.append("[8.2][semantic error] Multiple defined free function: \t").
-                                append(func_name).append("\r\n");
+                        m_errors.append("[8.2][semantic error] Multiple defined free function: \t'").
+                                append(func_name).append("'\r\n");
                     } else {
 
                         // overloading free function
-                        m_errors.append("[9.1][semantic warning] Overloaded free function: \t").
-                                append(func_name).append("\r\n");
+                        m_errors.append("[9.1][semantic warning] Overloaded free function: \t'").
+                                append(func_name).append("'\r\n");
                         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                         p_node.m_symTab = local_table;
                     }

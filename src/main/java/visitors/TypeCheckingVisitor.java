@@ -1,6 +1,7 @@
 package visitors;
 
 import AST.*;
+import symbolTable.SymTab;
 import symbolTable.SymTabEntry;
 
 import java.util.ArrayList;
@@ -41,6 +42,18 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(ClassDeclNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+
+
+
+        // check circular class dependencies through inheritance
+        String class_name = p_node.m_symTab.m_name;
+       if(p_node.m_symTab.checkCircular(class_name)){
+           this.m_errors += "[14.1][semantic error][line:" + p_node.m_line + "] Circular class dependency:  '" + class_name + "'\n";
+       }
+
+
+
+
     }
 
 
