@@ -69,6 +69,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         p_node.m_subtreeString += "class ";
         p_node.m_subtreeString += p_node.getChildren().get(0).getData() + p_node.getChildren().get(1).m_subtreeString + " {\n";
         p_node.m_subtreeString += p_node.getChildren().get(2).m_subtreeString + "};\n\n";
+        p_node.m_line = p_node.getChildren().get(0).m_line;
     }
 
     public void visit(InherListNode p_node) {
@@ -124,7 +125,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         for (Node child : p_node.getChildren())
             child.accept(this);
         p_node.m_subtreeString += "if(" + p_node.getChildren().get(0).m_subtreeString + ")";
-        p_node.m_subtreeString += "\nthen {" + p_node.getChildren().get(1).m_subtreeString+"} ";
+        p_node.m_subtreeString += "\nthen {" + p_node.getChildren().get(1).m_subtreeString + "} ";
         p_node.m_subtreeString += "else" + p_node.getChildren().get(2).m_subtreeString + ";";
     }
 
@@ -132,7 +133,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         for (Node child : p_node.getChildren())
             child.accept(this);
         p_node.m_subtreeString += "while(" + p_node.getChildren().get(0).m_subtreeString + ")";
-        p_node.m_subtreeString += "{\n"+p_node.getChildren().get(1).m_subtreeString + "};";
+        p_node.m_subtreeString += "{\n" + p_node.getChildren().get(1).m_subtreeString + "};";
     }
 
     public void visit(ReadStatNode p_node) {
@@ -167,7 +168,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         for (Node child : p_node.getChildren())
             child.accept(this);
         for (Node child : p_node.getChildren())
-            p_node.m_subtreeString += child.m_subtreeString+";";
+            p_node.m_subtreeString += child.m_subtreeString + ";";
     }
 
     public void visit(FuncDefNode p_node) {
@@ -199,10 +200,10 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         for (Node child : p_node.getChildren())
             child.accept(this);
         if (p_node.getChildren().get(0).isLeaf()) {
-            p_node.m_subtreeString += "{\n"+p_node.getChildren().get(1).m_subtreeString+"}";
+            p_node.m_subtreeString += "{\n" + p_node.getChildren().get(1).m_subtreeString + "}";
         } else {
             p_node.m_subtreeString += "{\n  var\n  {\n" + p_node.getChildren().get(0).m_subtreeString + "  }\n";
-            p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString+"}";
+            p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString + "}";
         }
     }
 
@@ -279,8 +280,9 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         for (Node child : p_node.getChildren())
             child.accept(this);
         for (Node child : p_node.getChildren()) {
-            p_node.m_subtreeString +=child.m_subtreeString;
+            p_node.m_subtreeString += child.m_subtreeString;
         }
+            p_node.m_line = p_node.getLm_sibling().m_line;
     }
 
     public void visit(IdNode p_node) {
@@ -292,20 +294,21 @@ public class ReconstructSourceProgramVisitor extends Visitor {
     public void visit(IndiceNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
-        for (Node child : p_node.getChildren()){
-            p_node.m_subtreeString += "["+child.m_subtreeString+"]";
-        p_node.m_line=child.m_line;}
+        for (Node child : p_node.getChildren()) {
+            p_node.m_subtreeString += "[" + child.m_subtreeString + "]";
+            p_node.m_line = child.m_line;
+        }
     }
 
     public void visit(NumNode p_node) {
         p_node.setSubtreeString(p_node.getData());
-        System.out.println("num node ; "+ p_node.m_subtreeString);
+        System.out.println("num node ; " + p_node.m_subtreeString);
     }
 
     public void visit(FloatNode p_node) {
         System.out.println("visiting FloatNode: ");
         p_node.setSubtreeString(p_node.getData());
-        System.out.println("float node ; "+ p_node.m_subtreeString);
+        System.out.println("float node ; " + p_node.m_subtreeString);
     }
 
     public void visit(StringNode p_node) {
@@ -319,7 +322,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
     public void visit(NotNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
-        p_node.m_subtreeString += "!"+p_node.getChildren().get(0).m_subtreeString;
+        p_node.m_subtreeString += "!" + p_node.getChildren().get(0).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
     }
 
@@ -361,7 +364,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
                 p_node.getData() +
                 p_node.getChildren().get(1).getSubtreeString() + ";");
         p_node.m_line = p_node.getChildren().get(0).m_line;
-        System.out.println("assign node: "+ p_node.m_subtreeString);
+        System.out.println("assign node: " + p_node.m_subtreeString);
     }
 
     public void visit(RelExprNode p_node) {
@@ -369,19 +372,19 @@ public class ReconstructSourceProgramVisitor extends Visitor {
             child.accept(this);
         p_node.setSubtreeString(p_node.getChildren().get(0).getSubtreeString() +
                 p_node.getChildren().get(1).getSubtreeString() +
-                p_node.getChildren().get(2).getSubtreeString() );
+                p_node.getChildren().get(2).getSubtreeString());
         p_node.m_line = p_node.getChildren().get(1).m_line;
-        System.out.println("relExpr node: "+ p_node.m_subtreeString);
+        System.out.println("relExpr node: " + p_node.m_subtreeString);
     }
 
     public void visit(InlineIfNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
         p_node.m_subtreeString += p_node.getChildren().get(0).m_subtreeString;
-        p_node.m_subtreeString += ":"+p_node.getChildren().get(1).m_subtreeString;
-        p_node.m_subtreeString += ":"+p_node.getChildren().get(2).m_subtreeString;
+        p_node.m_subtreeString += ":" + p_node.getChildren().get(1).m_subtreeString;
+        p_node.m_subtreeString += ":" + p_node.getChildren().get(2).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
-        System.out.println("InlineIf node: "+ p_node.m_subtreeString);
+        System.out.println("InlineIf node: " + p_node.m_subtreeString);
     }
 
     public void visit(VariableNode p_node) {
@@ -403,7 +406,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
     public void visit(DotNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
-        p_node.m_subtreeString += p_node.getChildren().get(0).m_subtreeString+".";
+        p_node.m_subtreeString += p_node.getChildren().get(0).m_subtreeString + ".";
         p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
     }
@@ -423,7 +426,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
             child.accept(this);
         p_node.m_subtreeString = p_node.getChildren().get(0).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
-        System.out.println("Expr node: "+ p_node.m_subtreeString);
+        System.out.println("Expr node: " + p_node.m_subtreeString);
     }
 
     public void visit(ArithExprNode p_node) {
@@ -432,7 +435,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
             child.accept(this);
         p_node.m_subtreeString = p_node.getChildren().get(0).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
-        System.out.println("arith Node : "+p_node.m_subtreeString);
+        System.out.println("arith Node : " + p_node.m_subtreeString);
     }
 
     public void visit(TermNode p_node) {
@@ -441,7 +444,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
             child.accept(this);
         p_node.m_subtreeString = p_node.getChildren().get(0).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
-        System.out.println("term Node : "+p_node.m_subtreeString);
+        System.out.println("term Node : " + p_node.m_subtreeString);
     }
 
     public void visit(FactorNode p_node) {
@@ -450,7 +453,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
             child.accept(this);
         p_node.m_subtreeString = p_node.getChildren().get(0).m_subtreeString;
         p_node.m_line = p_node.getChildren().get(0).m_line;
-        System.out.println("factorNode : "+p_node.m_subtreeString);
+        System.out.println("factorNode : " + p_node.m_subtreeString);
     }
 
     public void visit(DimNode p_node) {

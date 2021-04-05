@@ -1,6 +1,5 @@
 package semanticAnalyzer;
 
-import AST.Node;
 import syntacticAnalyzer.SyntacticAnalyzer;
 
 import java.io.File;
@@ -40,7 +39,7 @@ public class SemanticAnalyzerDriver {
             // do semantic analysis
             SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
             semanticAnalyzer.setProgNode(syntacticAnalyzer.getProgNode());
-            semanticAnalyzer.createSymTables();
+            semanticAnalyzer.createTableAndChecking();
             semanticAnalyzer.writeToFiles(file_path);
             semanticAnalyzer.closeFiles();
 

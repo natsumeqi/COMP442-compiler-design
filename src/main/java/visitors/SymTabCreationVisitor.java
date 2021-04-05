@@ -462,7 +462,11 @@ public class SymTabCreationVisitor extends Visitor {
                     // create a new funcDecl entry
                     p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, "");
                     p_node.m_symTabEntry.m_subtable = local_table;
-                    class_entry.m_subtable.addEntry(p_node.m_symTabEntry);
+                    System.out.println(class_entry.m_subtable);
+                    if(class_entry.m_subtable!=null){
+                        class_entry.m_subtable.addEntry(p_node.m_symTabEntry);
+
+                    }
                     p_node.m_symTab = local_table;
                 }
             }

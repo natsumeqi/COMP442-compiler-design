@@ -21,6 +21,7 @@ public class SemanticAnalyzer {
     private ReconstructSourceProgramVisitor RSPVisitor = new ReconstructSourceProgramVisitor   ();
 
     private PrintStream writer_symTab;
+    private PrintStream writer_semantic_error;
 
 
     public SemanticAnalyzer() {
@@ -32,7 +33,7 @@ public class SemanticAnalyzer {
         this.progNode = progNode;
     }
 
-    public void createSymTables(){
+    public void createTableAndChecking(){
         progNode.accept(RSPVisitor);
         progNode.accept(STCVisitor);
         progNode.accept(TCVisitor);
@@ -44,11 +45,17 @@ public class SemanticAnalyzer {
         try {
             String file_path_temp = src_file_path.substring(0, src_file_path.length() - 4);
             File outfile_symTab = new File(file_path_temp + ".outsymboltables");
+            File outfile_semantic_errors = new File(file_path_temp + ".outsemanticerrors");
             System.out.println("[Semantic] Writing to the file: " + outfile_symTab.getName());
+            System.out.println("[Semantic] Writing to the file: " + outfile_semantic_errors.getName());
             writer_symTab = new PrintStream(outfile_symTab);
+            writer_semantic_error = new PrintStream(outfile_semantic_errors);
             PrintStream console = System.out;
             System.setOut(writer_symTab);
             System.out.println(progNode.m_symTab);
+            System.setOut(writer_semantic_error);
+            System.out.print(STCVisitor.m_errors);
+            System.out.println(TCVisitor.m_errors);
             System.setOut(console);
 
         } catch (FileNotFoundException e) {
@@ -61,6 +68,8 @@ public class SemanticAnalyzer {
         System.out.println("[Semantic] Flushing & closing files. ");
         writer_symTab.flush();
         writer_symTab.close();
+        writer_semantic_error.flush();
+        writer_semantic_error.close();
     }
 
 

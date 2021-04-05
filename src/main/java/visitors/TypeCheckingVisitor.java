@@ -44,14 +44,11 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
 
 
-
         // check circular class dependencies through inheritance
         String class_name = p_node.m_symTab.m_name;
-       if(p_node.m_symTab.checkCircular(class_name)){
-           this.m_errors += "[14.1][semantic error][line:" + p_node.m_line + "] Circular class dependency:  '" + class_name + "'\n";
-       }
-
-
+        if (p_node.m_symTab.checkCircular(class_name)) {
+            this.m_errors += "[14.1][semantic error][line:" + p_node.m_line + "] Circular class dependency:  '" + class_name + "'\n";
+        }
 
 
     }
@@ -87,6 +84,15 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(DimListNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+        if (p_node.getChildren().size() >= 2) {
+            for (int i = 1; i < p_node.getChildren().size(); i++) {
+                System.out.println("[new]" + p_node.getChildren().get(i).m_data);
+                if (p_node.getChildren().get(i).m_data.equals("[]")) {
+
+                    this.m_errors += "[13.4][semantic error][line:" + p_node.m_line + "] Array dimension unknown:  '" + p_node.m_subtreeString + "'\n";
+                }
+            }
+        }
     }
 
     public void visit(MethVarNode p_node) {
@@ -137,18 +143,20 @@ public class TypeCheckingVisitor extends Visitor {
         String func_name = p_node.m_symTab.m_name;
         String lookup_func_name = func_name.substring(func_name.indexOf("::") + 2);
         String func_return_type = p_node.m_symTab.lookupName(lookup_func_name).m_type;
-        if (return_stat_type.equals(func_return_type)) {
-            p_node.setType(return_stat_type);
-            System.out.println("ReturnStatNode type: " + return_stat_type);
-        } else {
-            p_node.setType("typeerror");
-            this.m_errors += "[10.3][semantic error][line:" + p_node.m_line + "] Type error in return statement:  "
-                    + p_node.getChildren().get(0).getSubtreeString()
-                    + "(" + p_node.getChildren().get(0).getType() + ")"
-                    + " and "
-                    + func_name
-                    + "(" + func_return_type + ")"
-                    + "\n";
+        if (return_stat_type != null) {
+            if (return_stat_type.equals(func_return_type)) {
+                p_node.setType(return_stat_type);
+                System.out.println("ReturnStatNode type: " + return_stat_type);
+            } else {
+                p_node.setType("typeerror");
+                this.m_errors += "[10.3][semantic error][line:" + p_node.m_line + "] Type error in return statement:  "
+                        + p_node.getChildren().get(0).getSubtreeString()
+                        + "(" + p_node.getChildren().get(0).getType() + ")"
+                        + " and "
+                        + func_name
+                        + "(" + func_return_type + ")"
+                        + "\n";
+            }
         }
     }
 
@@ -196,22 +204,24 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
         String left_operand_type = p_node.getChildren().get(0).getType();
         String right_operand_type = p_node.getChildren().get(1).getType();
-        if (left_operand_type.equals(right_operand_type)) {
-            p_node.setType(left_operand_type);
+        if(left_operand_type!=null) {
+            if (left_operand_type.equals(right_operand_type)) {
+                p_node.setType(left_operand_type);
 //            System.out.println("AddOpNode type: " + left_operand_type);
-        } else {
-            p_node.setType("typeerror");
+            } else {
+                p_node.setType("typeerror");
 //            String error_info = "AddOpNode"+p_node.m_line;
-            if (!error_set.contains(p_node.m_line)) {
-                this.m_errors += "[10.1][semantic error][line:" + p_node.m_line + "] Type error in AddOpNode:  "
-                        + p_node.getChildren().get(0).getData()
-                        + "(" + p_node.getChildren().get(0).getType() + ")"
-                        + " and "
-                        + p_node.getChildren().get(1).getData()
-                        + "(" + p_node.getChildren().get(1).getType() + ")"
-                        + "\n";
-                error_set.add(p_node.m_line);
+                if (!error_set.contains(p_node.m_line)) {
+                    this.m_errors += "[10.1][semantic error][line:" + p_node.m_line + "] Type error in AddOpNode:  "
+                            + p_node.getChildren().get(0).getData()
+                            + "(" + p_node.getChildren().get(0).getType() + ")"
+                            + " and "
+                            + p_node.getChildren().get(1).getData()
+                            + "(" + p_node.getChildren().get(1).getType() + ")"
+                            + "\n";
+                    error_set.add(p_node.m_line);
 
+                }
             }
         }
     }
@@ -224,6 +234,7 @@ public class TypeCheckingVisitor extends Visitor {
         }
         String left_operand_type = p_node.getChildren().get(0).getType();
         String right_operand_type = p_node.getChildren().get(1).getType();
+        if(left_operand_type!=null){
         if (left_operand_type.equals(right_operand_type)) {
             p_node.setType(left_operand_type);
             System.out.println("MultOpNode type: " + left_operand_type);
@@ -241,7 +252,7 @@ public class TypeCheckingVisitor extends Visitor {
                         + "\n";
                 error_set.add(p_node.m_line);
             }
-        }
+        }}
     }
 
     public void visit(ArithExprNode p_node) {
@@ -289,19 +300,20 @@ public class TypeCheckingVisitor extends Visitor {
         }
         String else_expr_type = p_node.getChildren().get(1).getType();
         String then_expr_type = p_node.getChildren().get(2).getType();
-        if (else_expr_type.equals(then_expr_type))
-            p_node.setType(else_expr_type);
-        else {
-            p_node.setType("typeerror");
-            this.m_errors += "InlineIfNode type error:  "
-                    + p_node.getChildren().get(1).getData()
-                    + "(" + p_node.getChildren().get(1).getType() + ")"
-                    + " and "
-                    + p_node.getChildren().get(2).getData()
-                    + "(" + p_node.getChildren().get(2).getType() + ")"
-                    + "\n";
-        }
-    }
+        if(else_expr_type!=null) {
+            if (else_expr_type.equals(then_expr_type))
+                p_node.setType(else_expr_type);
+            else {
+                p_node.setType("typeerror");
+                this.m_errors += "InlineIfNode type error:  "
+                        + p_node.getChildren().get(1).getData()
+                        + "(" + p_node.getChildren().get(1).getType() + ")"
+                        + " and "
+                        + p_node.getChildren().get(2).getData()
+                        + "(" + p_node.getChildren().get(2).getType() + ")"
+                        + "\n";
+            }
+        }}
 
     public void visit(SignNode p_node) {
         for (Node child : p_node.getChildren()) {
@@ -398,20 +410,22 @@ public class TypeCheckingVisitor extends Visitor {
         System.out.println("[IdNode] line: " + p_node.m_line);
 
 //         search variable in symbol table; for cases in Dot, the type is not right, will check in the Dot node
-        SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
-        if (entry.m_name != null) {
-            p_node.m_type = entry.m_type;
-            System.out.println("[IdNode] entry:" + entry.m_name);
-            System.out.println("[IdNode] type: " + p_node.m_type + " for " + p_node.m_data);
-        } else {
+        if (p_node.m_symTab != null) {
+            SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
+            if (entry.m_name != null) {
+                p_node.m_type = entry.m_type;
+                System.out.println("[IdNode] entry:" + entry.m_name);
+                System.out.println("[IdNode] type: " + p_node.m_type + " for " + p_node.m_data);
+            } else {
 
 
-            if (p_node.getParent().m_sa_name.equals("DataMem_s") && p_node.getParent().getParent().m_sa_name.equals("FuncOrVar_s")) {
+                if (p_node.getParent().m_sa_name.equals("DataMem_s") && p_node.getParent().getParent().m_sa_name.equals("FuncOrVar_s")) {
 
-                this.m_errors += "[11.1][semantic error][line:" + p_node.m_line + "] Undeclared local variable:  '" + p_node.m_data + "'\n";
-                error_set.add(p_node.m_line);
+                    this.m_errors += "[11.1][semantic error][line:" + p_node.m_line + "] Undeclared local variable:  '" + p_node.m_data + "'\n";
+                    error_set.add(p_node.m_line);
+                }
+
             }
-
         }
 
 
@@ -430,7 +444,7 @@ public class TypeCheckingVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
-        String var_class_type = p_node.getChildren().get(0).getType().toUpperCase();
+        String var_class_type = p_node.getChildren().get(0).getType() == null ? null : p_node.getChildren().get(0).getType().toUpperCase();
         String var_or_func_type;
 
 
@@ -454,7 +468,10 @@ public class TypeCheckingVisitor extends Visitor {
                 // check function call todo
                 if (p_node.getR_sibling() != null) {
                     if (p_node.getR_sibling().m_sa_name.equals("AParams_s")) {
+                        // add aParam into type
 
+                        var_or_func_type = func_var_entry.m_fParam + ":" + func_var_entry.m_type;
+                        p_node.setType(var_or_func_type);
 
                     }
 
@@ -544,7 +561,7 @@ public class TypeCheckingVisitor extends Visitor {
                 String func_paras_type = p_node.getChildren().get(1).m_type;
 
                 String func_paras_ids = p_node.getChildren().get(1).m_subtreeString;
-                func_paras_ids = func_paras_ids.substring(1, func_paras_ids.length()-1).replace(" ","");
+                func_paras_ids = func_paras_ids.substring(1, func_paras_ids.length() - 1).replace(" ", "");
 
                 System.out.println("[12.1]" + p_node.m_type);
                 System.out.println("[12.1]" + funcCall_name);
@@ -566,9 +583,9 @@ public class TypeCheckingVisitor extends Visitor {
                         for (int i = 0; i < size_paras; i++) {
                             // first check type
                             String type_para;
-                            if(decl_func_entry.m_fParam.get(i).contains("[")) {
+                            if (decl_func_entry.m_fParam.get(i).contains("[")) {
                                 type_para = decl_func_entry.m_fParam.get(i).substring(0, decl_func_entry.m_fParam.get(i).indexOf("["));
-                            }else{
+                            } else {
                                 type_para = decl_func_entry.m_fParam.get(i);
                             }
                             System.out.println(type_para);
@@ -582,26 +599,20 @@ public class TypeCheckingVisitor extends Visitor {
                                 }
                             } else {
                                 // then check dimensionality
-                                int size_dims = decl_func_entry.m_fParam.get(i).length()-decl_func_entry.m_fParam.get(i).replace("[","").length();
+                                int size_dims = decl_func_entry.m_fParam.get(i).length() - decl_func_entry.m_fParam.get(i).replace("[", "").length();
 
                                 // find variable declaration of parameter id
-                                    SymTabEntry var_entry = p_node.m_symTab.lookupName(func_paras_ids_list[i]);
-                                    if(var_entry.m_name!=null){
-                                        if(var_entry.m_dims.size()!=size_dims){
-                                            if (!error_set.contains(p_node.m_line)) {
-                                                this.m_errors += "[13.3][semantic error][line:" + p_node.m_line + "] Array parameter using wrong number of dimensions:  '" + p_node.m_subtreeString + "'\n";
-                                                error_set.add(p_node.m_line);
-                                                break;
-                                            }
+                                SymTabEntry var_entry = p_node.m_symTab.lookupName(func_paras_ids_list[i]);
+                                if (var_entry.m_name != null) {
+                                    if (var_entry.m_dims.size() != size_dims) {
+                                        if (!error_set.contains(p_node.m_line)) {
+                                            this.m_errors += "[13.3][semantic error][line:" + p_node.m_line + "] Array parameter using wrong number of dimensions:  '" + p_node.m_subtreeString + "'\n";
+                                            error_set.add(p_node.m_line);
+                                            break;
                                         }
                                     }
+                                }
 
-
-
-//                                if (size_dims!=) {
-//   
-//
-//                                }
                             }
                         }
 
@@ -628,10 +639,86 @@ public class TypeCheckingVisitor extends Visitor {
                 if (p_node.getChildren().get(0).m_sa_name.equals("Dot_s")) {
 //                    func_name = p_node.getChildren().get(0).getSubtreeString();
 
+                    p_node.m_type = p_node.getChildren().get(0).getType();
+
+                    // check type and number of parameters in function calls
+                    String funcCall_name = p_node.getChildren().get(0).m_subtreeString;
+                    String func_paras_type = p_node.getChildren().get(1).m_type;
+
+                    String func_paras_ids = p_node.getChildren().get(1).m_subtreeString;
+                    func_paras_ids = func_paras_ids.substring(1, func_paras_ids.length() - 1).replace(" ", "");
+
+                    System.out.println("[12.1]" + p_node.m_type);
+                    System.out.println("[12.1]" + funcCall_name);
+                    System.out.println("[12.1]" + func_paras_type);
+                    System.out.println("[12.1]" + func_paras_ids);
+
+//                    ArrayList<SymTabEntry> decl_func_entries = p_node.m_symTab.lookupFunction(funcCall_name);
+//                ArrayList<String> func_paras_list = new ArrayList<>();
+                    String[] func_paras_type_list = func_paras_type.split(",");
+                    String[] func_paras_ids_list = func_paras_ids.split(",");
+//                int size_paras = p_node.getChildren().get(1).getChildren().size();
+                    int size_paras = func_paras_type_list.length;
+                    boolean paras_size_match_dot = false;
+                    if (p_node.m_type != null) {
+                        String[] decl_func_type_list = p_node.m_type.substring(1, p_node.m_type.indexOf("]")).replace(" ", "").split(",");
+
+//                    for (SymTabEntry decl_func_entry : decl_func_entries) {
+                        if (decl_func_type_list.length == size_paras) {
+                            paras_size_match_dot = true;
+                            for (int i = 0; i < size_paras; i++) {
+                                // first check type
+                                String decl_type_para = decl_func_type_list[i];
+
+                                System.out.println(decl_type_para);
+                                System.out.println("[12.2]" + decl_type_para);
+                                System.out.println("[12.2]" + func_paras_type_list[i]);
+                                if (!decl_type_para.equals(func_paras_type_list[i])) {
+                                    if (!error_set.contains(p_node.m_line)) {
+                                        this.m_errors += "[12.2][semantic error][line:" + p_node.m_line + "] Function call with wrong type of parameters:  '" + p_node.m_subtreeString + "'\n";
+                                        error_set.add(p_node.m_line);
+                                        break;
+                                    }
+                                } else {
+                                    // then check dimensionality
+                                    int size_dims = decl_type_para.length() - decl_type_para.replace("[", "").length();
+
+                                    // find variable declaration of parameter id
+                                    SymTabEntry var_entry = p_node.m_symTab.lookupName(func_paras_ids_list[i]);
+                                    if (var_entry.m_name != null) {
+                                        if (var_entry.m_dims.size() != size_dims) {
+                                            if (!error_set.contains(p_node.m_line)) {
+                                                this.m_errors += "[13.3][semantic error][line:" + p_node.m_line + "] Array parameter using wrong number of dimensions:  '" + p_node.m_subtreeString + "'\n";
+                                                error_set.add(p_node.m_line);
+                                                break;
+                                            }
+                                        }
+                                    }
+
+//                                }
+                                }
+
+
+                            }
+
+                        }
+                        if (!paras_size_match_dot) {
+                            if (!error_set.contains(p_node.m_line)) {
+                                this.m_errors += "[12.1][semantic error][line:" + p_node.m_line + "] Function call with wrong number of parameters:  '" + p_node.m_subtreeString + "'\n";
+                                error_set.add(p_node.m_line);
+                            }
+                        }
+//                System.out.println("[12.1] found!!!");
+
+                    }
+                    // restore the type of function call for following checking, i.e. assignment statement
+                    if (p_node.m_type != null) {
+                        p_node.m_type = p_node.m_type.substring(p_node.m_type.indexOf(":") + 1);
+                    }
                 }
             }
         }
-        p_node.m_type = p_node.getChildren().get(0).m_type;
+//        p_node.m_type = p_node.getChildren().get(0).m_type;
 
     }
 
@@ -661,18 +748,22 @@ public class TypeCheckingVisitor extends Visitor {
     }
 
     public void visit(IndiceNode p_node) {
-        for (Node child : p_node.getChildren()) {
-            child.accept(this);
+
+            for (Node child : p_node.getChildren()) {
+                child.accept(this);
+            }
+
+            for (Node child : p_node.getChildren()) {
+                if(child.m_type!=null) {
+                    if (!child.m_type.equals("integer")) {
+                        this.m_errors += "[13.2][semantic error][line:" + p_node.m_line + "] Array index is not an integer:  '" + child.m_subtreeString + "'\n";
+                    }
+                }
+            }
+            p_node.m_type = "[" + p_node.getChildren().size() + "]";
+            System.out.println("[13.2]" + p_node.m_type);
         }
 
-        for (Node child : p_node.getChildren()) {
-            if (!child.m_type.equals("integer")) {
-                this.m_errors += "[13.2][semantic error][line:" + p_node.m_line + "] Array index is not an integer:  '" + child.m_subtreeString + "'\n";
-            }
-        }
-        p_node.m_type = "[" + p_node.getChildren().size() + "]";
-        System.out.println("[13.2]" + p_node.m_type);
-    }
 
 
 }
