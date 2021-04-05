@@ -25,7 +25,7 @@ public class SemanticAnalyzerDriver {
         }
     }
 
-    // tokenizing single file
+    // processing single file
     static void semanticAnalyzerOneFile(String file_path) {
 
         // parse the src file
@@ -43,14 +43,9 @@ public class SemanticAnalyzerDriver {
             semanticAnalyzer.writeToFiles(file_path);
             semanticAnalyzer.closeFiles();
 
-
         } else {
             System.out.println("The program has syntax error(s).");
         }
         syntacticAnalyzer.parserIOFileClose();
-
-
-
-
     }
 }

@@ -55,10 +55,8 @@ public class SymTabCreationVisitor extends Visitor {
             }
         }
 
-
-        System.out.println(p_node.m_symTab);
-        System.out.println(this.m_errors);
-
+//        System.out.println(p_node.m_symTab);
+//        System.out.println(this.m_errors);
 
     }
 
@@ -108,10 +106,6 @@ public class SymTabCreationVisitor extends Visitor {
             member.m_symTab = p_node.m_symTab;
             member.accept(this);
         }
-
-
-
-
 
 
     }
@@ -208,7 +202,6 @@ public class SymTabCreationVisitor extends Visitor {
      * @param p_node of function declaration
      */
     public void visit(FuncDeclNode p_node) {
-//        System.out.println("visiting funcDeclNode");
         String func_visibility = "";
         if (p_node.getLm_sibling() != null) {
             func_visibility = p_node.getLm_sibling().getData();
@@ -244,7 +237,7 @@ public class SymTabCreationVisitor extends Visitor {
                 m_errors.append("[9.2][semantic warning] Overloaded member function: \t'").
                         append(func_name).append("' in the class: ").append(class_name).append("\r\n");
             } else {
-            // check multiple identifier of functions
+                // check multiple identifier of functions
                 m_errors.append("[8.3][semantic error] Multiple declared identifier in class: \t").append("'").
                         append(func_name).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
             }
@@ -253,23 +246,19 @@ public class SymTabCreationVisitor extends Visitor {
 
         // check overridden inherited member function
         SymTabEntry func_entry_inherited = p_node.m_symTab.lookupFunctionInInherited(func_name);
-       if(func_entry_inherited.m_name!=null){
+        if (func_entry_inherited.m_name != null) {
 
-           // check overloading member functions
-           System.out.println("[17.1]"+func_entry);
-           if (!func_entry_inherited.m_fParam.equals(fParam_list) || !func_entry_inherited.m_type.equals(func_type)) {
-               String class_name = p_node.m_symTab.m_name;
-               m_errors.append("[9.2][semantic warning] Overloaded member function: \t'").
-                       append(func_name).append("' in the class: ").append(class_name).append("\r\n");
-           }else{
-               // check overridden function
-               m_errors.append("[9.3][semantic error] Overridden inherited member function: \t").append("'").
-                       append(func_name).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
-           }
-           }
-
-
-
+            // check overloading member functions
+            if (!func_entry_inherited.m_fParam.equals(fParam_list) || !func_entry_inherited.m_type.equals(func_type)) {
+                String class_name = p_node.m_symTab.m_name;
+                m_errors.append("[9.2][semantic warning] Overloaded member function: \t'").
+                        append(func_name).append("' in the class: ").append(class_name).append("\r\n");
+            } else {
+                // check overridden function
+                m_errors.append("[9.3][semantic error] Overridden inherited member function: \t").append("'").
+                        append(func_name).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
+            }
+        }
 
 
         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
@@ -320,7 +309,6 @@ public class SymTabCreationVisitor extends Visitor {
                     // check shadowed inherited member
 
                     if (p_node.m_symTab.lookupInInherited(var_id)) {
-                        System.out.println("[8.5] found !!!");
                         m_errors.append("[8.5][semantic warning] shadowed inherited data member: \t").append("'").
                                 append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
                     }
@@ -338,7 +326,6 @@ public class SymTabCreationVisitor extends Visitor {
 
 
     public void visit(FuncDefListNode p_node) {
-//        System.out.println("Visiting FuncDefListNode");
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
@@ -357,7 +344,6 @@ public class SymTabCreationVisitor extends Visitor {
         // when it is a member function, add scope into the name
         if (!p_node.getChildren().get(0).isLeaf()) {
             func_scope = p_node.getChildren().get(0).getChildren().get(0).getData();
-//            System.out.println("func_scope: "+func_scope);
             local_table = new SymTab(2, func_scope + "::" + func_name, p_node.m_symTab);
         } else {
             local_table = new SymTab(1, func_name, p_node.m_symTab);
@@ -377,34 +363,24 @@ public class SymTabCreationVisitor extends Visitor {
 
             fParam = fParam_type + dim_string;
             fParam_list.add(fParam);
-//            System.out.println("para var in function table");
             local_table.addEntry(new VarEntry("param", fParam_type, fParam_name, dim_list));
         }
 
 
         // add local variables into the table
-
-
         boolean matched = false;
         // for member function, check if function header is matched with function declaration in class
         if (!p_node.getChildren().get(0).isLeaf()) {
             if (p_node.getParent().getParent() != null) {
                 SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
                 if (class_entry.m_subtable != null) {
-
                     SymTabEntry func_decl = class_entry.m_subtable.lookupName(func_name);
                     if (func_decl.m_name != null) {
-//                        System.out.println(func_decl.m_name);
-//                        System.out.println(func_name);
-//                        System.out.println(func_decl.m_type);
-//                        System.out.println(func_type);
                         if (func_decl.m_name.equals(func_name) && func_decl.m_type.equals(func_type)) {
-//                            System.out.println("ici");
                             if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
-
                                 if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
-//                                    System.out.println("matched member function");
-                                    local_table.m_upperTable = class_entry.m_subtable;  // make class table be the upper table of member function table
+                                    // make class table be the upper table of member function table
+                                    local_table.m_upperTable = class_entry.m_subtable;
                                     func_decl.m_subtable = local_table;
                                     p_node.m_symTab = local_table;
                                     matched = true;
@@ -424,13 +400,11 @@ public class SymTabCreationVisitor extends Visitor {
                 // go to global table to check
                 SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
                 if (func_entry.m_name != null) {
-                    // ignore  func_entry.m_type.equals(func_type) &
+                    // ignore  func_entry.m_type.equals(func_type)
                     if (func_entry.m_fParam.toString().equals(fParam_list.toString())) {
-
                         m_errors.append("[8.2][semantic error] Multiple defined free function: \t'").
                                 append(func_name).append("'\r\n");
                     } else {
-
                         // overloading free function
                         m_errors.append("[9.1][semantic warning] Overloaded free function: \t'").
                                 append(func_name).append("'\r\n");
@@ -439,10 +413,8 @@ public class SymTabCreationVisitor extends Visitor {
                     }
 
                 } else {
-
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                     p_node.m_symTab = local_table;
-
                 }
             }
             matched = true;
@@ -462,22 +434,13 @@ public class SymTabCreationVisitor extends Visitor {
                     // create a new funcDecl entry
                     p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, "");
                     p_node.m_symTabEntry.m_subtable = local_table;
-                    System.out.println(class_entry.m_subtable);
-                    if(class_entry.m_subtable!=null){
+                    if (class_entry.m_subtable != null) {
                         class_entry.m_subtable.addEntry(p_node.m_symTabEntry);
 
                     }
                     p_node.m_symTab = local_table;
                 }
             }
-
-//            Node root = p_node;
-//            while(!root.isRoot()){
-//                root = root.getParent();
-//            }
-//            local_table.m_upperTable = root.m_symTab;
-//            root.m_symTab.addEntry(p_node.m_symTabEntry);
-//            p_node.m_symTab = local_table;
         }
 
 

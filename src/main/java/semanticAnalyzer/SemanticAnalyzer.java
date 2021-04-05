@@ -1,7 +1,6 @@
 package semanticAnalyzer;
 
 import AST.Node;
-import syntacticAnalyzer.SyntacticAnalyzer;
 import visitors.ReconstructSourceProgramVisitor;
 import visitors.SymTabCreationVisitor;
 import visitors.TypeCheckingVisitor;
@@ -9,16 +8,15 @@ import visitors.TypeCheckingVisitor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 
 public class SemanticAnalyzer {
 
-    // import from other classes
+
     private Node progNode;
 
-    private SymTabCreationVisitor STCVisitor = new SymTabCreationVisitor();
-    private TypeCheckingVisitor TCVisitor = new TypeCheckingVisitor();
-    private ReconstructSourceProgramVisitor RSPVisitor = new ReconstructSourceProgramVisitor   ();
+    private final SymTabCreationVisitor STCVisitor = new SymTabCreationVisitor();
+    private final TypeCheckingVisitor TCVisitor = new TypeCheckingVisitor();
+    private final ReconstructSourceProgramVisitor RSPVisitor = new ReconstructSourceProgramVisitor   ();
 
     private PrintStream writer_symTab;
     private PrintStream writer_semantic_error;
@@ -37,7 +35,6 @@ public class SemanticAnalyzer {
         progNode.accept(RSPVisitor);
         progNode.accept(STCVisitor);
         progNode.accept(TCVisitor);
-//            System.out.println(progNode.m_symTab);
     }
 
 

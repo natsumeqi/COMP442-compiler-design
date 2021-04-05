@@ -280,7 +280,7 @@ public class SyntacticAnalyzer {
         parsing_stack.pop();
         String left_sem_act = semantic_action.getSem_act_LHS();
         String right_sem_act = semantic_action.getSem_act_RHS();
-        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
+//        System.out.println("[semantic stack] action begin: " + semantic_action.toString());
         Node node_to_push;
         Node node_on_top = null;
         if (!semantic_stack.empty()) {
@@ -293,7 +293,7 @@ public class SyntacticAnalyzer {
             String node_lexeme = terminal_suc_token.getLexeme();
             int node_line = terminal_suc_token.getLocation();
 
-            System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + type);
+//            System.out.println("[makeNode branch] token going to be made as a leaf: " + terminal_suc_token.toString() + " " + type);
             node_to_push = nodeFactory.makeNode(type, node_lexeme, node_line);
 
             assert node_to_push != null;
@@ -304,18 +304,15 @@ public class SyntacticAnalyzer {
 
             // generate AST subtree
             if (right_sem_act.contains("makeFamily(")) {
-                System.out.println("[make family branch] begin: " + right_sem_act);
+//                System.out.println("[make family branch] begin: " + right_sem_act);
                 String parameter = right_sem_act.substring(right_sem_act.indexOf("makeFamily(") + 11, right_sem_act.indexOf(")"));
                 String[] parameters = parameter.split(",");
                 String op = parameters[0];
                 int node_line;
-                String token_type;
                 if (terminal_suc_token != null) {
                     node_line = terminal_suc_token.getLocation();
-                    token_type = terminal_suc_token.getType();
                 } else {
                     node_line = lookahead_token.getLocation();
-                    token_type = lookahead_token.getType();
                 }
 
 
@@ -408,7 +405,7 @@ public class SyntacticAnalyzer {
 //                                }
                             }
                         }
-                        System.out.println("[keepOrskip] para_nodes size : " + para_nodes.size());
+//                        System.out.println("[keepOrskip] para_nodes size : " + para_nodes.size());
 
                     } else {
 
@@ -419,7 +416,7 @@ public class SyntacticAnalyzer {
                             // only the first 2 kids can be interchangeable. Special case for makeFamily(FuncCall, Id_s, Dot_s, AParams_s, first2, any).
                             if (parameters[parameters.length - 2].trim().equals("first2")) {
 
-                                System.out.println("[first2] node on top: " + node_on_top);
+//                                System.out.println("[first2] node on top: " + node_on_top);
 
 
                                 if (!semantic_stack.isEmpty()) {
@@ -432,15 +429,15 @@ public class SyntacticAnalyzer {
 
 
                                 node_on_top = semantic_stack.peek();
-                                System.out.println("[first2] para1 " + parameters[1].trim());
+//                                System.out.println("[first2] para1 " + parameters[1].trim());
                                 // real kid first 2 (any one is enough)
                                 ArrayList<String> string_kids = new ArrayList<>();
                                 string_kids.add(parameters[1].trim());
                                 string_kids.add(parameters[2].trim());
                                 String name_node_on_top = node_on_top.m_sa_name;
-                                System.out.println("[first2] name_node_on_top: " + name_node_on_top);
+//                                System.out.println("[first2] name_node_on_top: " + name_node_on_top);
                                 if (ifTheKidsInMakeFamily(string_kids, name_node_on_top)) {
-                                    System.out.println("[first2] add to para_nodes: ");
+//                                    System.out.println("[first2] add to para_nodes: ");
                                     Node node_to_pop = semantic_stack.pop();
                                     para_nodes.add(node_to_pop);
                                 }
@@ -453,7 +450,7 @@ public class SyntacticAnalyzer {
                                 }
 
 //---------------------------------------------------------special case -----------------------------------
-                                System.out.println("[first2] para size " + para_nodes.size());
+//                                System.out.println("[first2] para size " + para_nodes.size());
 
                             } else {
 
@@ -544,7 +541,7 @@ public class SyntacticAnalyzer {
                 if (skip) {
 
                     if (!para_nodes.isEmpty()) {
-                        System.out.println("after make family: skip node to push " + para_nodes.get(0));
+//                        System.out.println("after make family: skip node to push " + para_nodes.get(0));
                         semantic_stack.push(para_nodes.get(0));
                     }
 
@@ -560,7 +557,7 @@ public class SyntacticAnalyzer {
 
                     node_to_push = makeFamily(opNode, para_nodes);
 //                    node_to_push.print();
-                    System.out.println("after make family: node to push " + node_to_push);
+//                    System.out.println("after make family: node to push " + node_to_push);
                     semantic_stack.push(node_to_push);
 
                     // migrate makeFamily node
@@ -661,7 +658,7 @@ public class SyntacticAnalyzer {
      * @param rule grammar in the parsing table
      */
     private void inverseRHSMultiplePush(String LHS, String rule) {
-        System.out.println("rule: " + rule);
+//        System.out.println("rule: " + rule);
         String RHS_in_rule = grammar.getRules_attribute().get(rule).getRule_RHS().trim();
         if (!RHS_in_rule.equals("EPSILON")) {
 

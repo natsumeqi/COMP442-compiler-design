@@ -6,12 +6,6 @@ public class FuncEntry extends SymTabEntry {
 
 
 
-
-    public Vector<String> getM_fParam() {
-        return m_fParam;
-    }
-
-
     public FuncEntry(String p_type, String p_name, Vector<String> p_fParam, SymTab p_table){
         super("function", p_type, p_name, p_table);
         m_fParam = p_fParam;
