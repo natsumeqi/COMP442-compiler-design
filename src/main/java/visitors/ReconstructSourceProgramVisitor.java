@@ -101,6 +101,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         p_node.m_subtreeString += "func " + p_node.getChildren().get(0).m_subtreeString;
         p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString + ": ";
         p_node.m_subtreeString += p_node.getChildren().get(2).m_subtreeString + ";\n";
+        p_node.m_line = p_node.getChildren().get(0).m_line;
     }
 
     public void visit(VisibilityNode p_node) {
@@ -173,6 +174,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         p_node.m_subtreeString += p_node.getChildren().get(2).m_subtreeString + ": ";
         p_node.m_subtreeString += p_node.getChildren().get(3).m_subtreeString + "\n";
         p_node.m_subtreeString += p_node.getChildren().get(4).m_subtreeString + "\n\n";
+        p_node.m_line = p_node.getChildren().get(1).m_line;
     }
 
     public void visit(ScopeNode p_node) {
@@ -262,6 +264,7 @@ public class ReconstructSourceProgramVisitor extends Visitor {
         p_node.m_subtreeString += p_node.getChildren().get(0).m_subtreeString + " ";
         p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString;
         p_node.m_subtreeString += p_node.getChildren().get(2).m_subtreeString + ";\n";
+        p_node.m_line = p_node.getChildren().get(1).m_line;
     }
 
     public void visit(DimListNode p_node) {

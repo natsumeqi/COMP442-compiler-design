@@ -4,18 +4,19 @@ import java.util.Vector;
 
 public class FuncEntry extends SymTabEntry {
 
+    public int m_line;
 
-
-    public FuncEntry(String p_type, String p_name, Vector<String> p_fParam, SymTab p_table){
+    public FuncEntry(String p_type, String p_name, Vector<String> p_fParam, SymTab p_table, int p_line){
         super("function", p_type, p_name, p_table);
         m_fParam = p_fParam;
-
+        m_line = p_line;
     }
 
-    public FuncEntry(String p_type, String p_name,  Vector<String> p_fParam, String p_visibility){
+    public FuncEntry(String p_type, String p_name,  Vector<String> p_fParam, String p_visibility, int p_line){
         super("function", p_type, p_name, null);
         m_visibility = p_visibility;
         m_fParam = p_fParam;
+        m_line = p_line;
     }
 
     public String toString(){
@@ -39,6 +40,8 @@ public class FuncEntry extends SymTabEntry {
 //                String.format("%-8s"  , "| " + m_offset)
                     "|";
         }
-
     }
+
+
+
 }
