@@ -41,11 +41,12 @@ public class SemanticAnalyzerDriver {
             semanticAnalyzer.setProgNode(syntacticAnalyzer.getProgNode());
             semanticAnalyzer.createTableAndChecking();
             semanticAnalyzer.writeToFiles(file_path);
+            syntacticAnalyzer.parserIOFileClose();
             semanticAnalyzer.closeFiles();
 
         } else {
             System.out.println("The program has syntax error(s).");
         }
-        syntacticAnalyzer.parserIOFileClose();
+
     }
 }

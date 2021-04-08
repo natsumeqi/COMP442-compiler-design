@@ -1,12 +1,12 @@
 package syntacticAnalyzer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+//import com.fasterxml.jackson.core.type.TypeReference;
+//import com.fasterxml.jackson.databind.ObjectMapper;
+//
+//import org.jsoup.Jsoup;
+//import org.jsoup.nodes.Document;
+//import org.jsoup.nodes.Element;
+//import org.jsoup.select.Elements;
 
 
 import java.io.*;
@@ -31,7 +31,6 @@ public class Grammar {
 
 
     public Grammar() {
-//        terminal_list = new ArrayList<>();
         nonTerminal_list = new ArrayList<>();
         semantic_actions_list = new ArrayList<>();
         rules_attribute = new HashMap<>();
@@ -73,16 +72,18 @@ public class Grammar {
     public void generateGrammarProject() {
         createSymbols();
         importRules();
-        importSemanticActions();
-        importFromJsonFiles();
+        createSemanticActions();
+//        importFromJsonFiles();
 //        importParsingTable();
 //        importFirstFollowSets();
 //        writeToFileTwoSets();
+        createFirstSets();
+        createFollowSets();
+        createParsingTable();
+//        printStatements();
     }
 
-    private void importSemanticActions() {
-
-
+    private void createSemanticActions() {
         semantic_actions = new HashMap<>();
         semantic_actions.put("sa-01", new SemanticAction("sa-01", "ClassList_s", "makeFamily(ClassList, ClassDecl_s, n)"));
         semantic_actions.put("sa-02", new SemanticAction("sa-02", "MainBlock_s", "makeFamily(MainBlock, FuncBody_s)"));
@@ -165,63 +166,63 @@ public class Grammar {
      */
     public void importFirstFollowSets() {
 
-        String file_name = "/exclude/firstFollowSets.html";
-        InputStream in = getClass().getResourceAsStream(file_name);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
-
-        Element table = html_doc.select("table").get(2); //select table.
-        Elements rows = table.select("tr");
-        Elements first = rows.get(0).select("th,td");       //header of the table
-
-//        List<String> headers = new ArrayList<String>();
-//        for (Element header : first) {
-//            headers.add(header.text());
+//        String file_name = "/exclude/firstFollowSets.html";
+//        InputStream in = getClass().getResourceAsStream(file_name);
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//        Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
+//
+//        Element table = html_doc.select("table").get(2); //select table.
+//        Elements rows = table.select("tr");
+//        Elements first = rows.get(0).select("th,td");       //header of the table
+//
+////        List<String> headers = new ArrayList<String>();
+////        for (Element header : first) {
+////            headers.add(header.text());
+////        }
+//
+//        // parsing the table in HTML file
+//        for (int i = 1; i < rows.size(); i++) {
+//            Elements colVals = rows.get(i).select("th,td");
+//            ArrayList<String> first_set = new ArrayList<>(Arrays.asList(colVals.get(1).text().split(" ")));
+//            if (colVals.get(3).text().equals("yes")) {
+//                first_set.add("EPSILON");
+//            }
+//            ArrayList<String> follow_set = new ArrayList<>(Arrays.asList(colVals.get(2).text().split(" ")));
+//            String non_terminal = colVals.get(0).text();
+//            first_sets.put(non_terminal, first_set);
+//            follow_sets.put(non_terminal, follow_set);
 //        }
-
-        // parsing the table in HTML file
-        for (int i = 1; i < rows.size(); i++) {
-            Elements colVals = rows.get(i).select("th,td");
-            ArrayList<String> first_set = new ArrayList<>(Arrays.asList(colVals.get(1).text().split(" ")));
-            if (colVals.get(3).text().equals("yes")) {
-                first_set.add("EPSILON");
-            }
-            ArrayList<String> follow_set = new ArrayList<>(Arrays.asList(colVals.get(2).text().split(" ")));
-            String non_terminal = colVals.get(0).text();
-            first_sets.put(non_terminal, first_set);
-            follow_sets.put(non_terminal, follow_set);
-        }
-
-        // output first sets
-        for (Map.Entry<String, ArrayList<String>> entry : first_sets.entrySet()) {
-            StringBuilder first_set_print = new StringBuilder();
-            for (int i = 0; i < entry.getValue().size() - 1; i++) {
-                String terminal = entry.getValue().get(i);
-                if (terminal.equals("EPSILON")) {
-                    first_set_print.append(terminal);
-                } else {
-                    first_set_print.append("'").append(terminal).append("', ");
-                }
-            }
-            String terminal_last = entry.getValue().get(entry.getValue().size() - 1);
-            if (terminal_last.equals("EPSILON")) {
-                first_set_print.append(terminal_last);
-            } else {
-                first_set_print.append("'").append(terminal_last).append("'");
-            }
-        }
-
-        // output follow sets
-        for (Map.Entry<String, ArrayList<String>> entry : follow_sets.entrySet()) {
-            StringBuilder follow_set_print = new StringBuilder();
-            for (int i = 0; i < entry.getValue().size() - 1; i++) {
-                String terminal = entry.getValue().get(i);
-                follow_set_print.append("'").append(terminal).append("', ");
-            }
-            String terminalLast = entry.getValue().get(entry.getValue().size() - 1);
-            follow_set_print.append("'").append(terminalLast).append("'");
-//                System.out.println("FOLLOW(<"+ entry.getKey()+">)= [" + follow_set_print +"]");
-        }
+//
+//        // output first sets
+//        for (Map.Entry<String, ArrayList<String>> entry : first_sets.entrySet()) {
+//            StringBuilder first_set_print = new StringBuilder();
+//            for (int i = 0; i < entry.getValue().size() - 1; i++) {
+//                String terminal = entry.getValue().get(i);
+//                if (terminal.equals("EPSILON")) {
+//                    first_set_print.append(terminal);
+//                } else {
+//                    first_set_print.append("'").append(terminal).append("', ");
+//                }
+//            }
+//            String terminal_last = entry.getValue().get(entry.getValue().size() - 1);
+//            if (terminal_last.equals("EPSILON")) {
+//                first_set_print.append(terminal_last);
+//            } else {
+//                first_set_print.append("'").append(terminal_last).append("'");
+//            }
+//        }
+//
+//        // output follow sets
+//        for (Map.Entry<String, ArrayList<String>> entry : follow_sets.entrySet()) {
+//            StringBuilder follow_set_print = new StringBuilder();
+//            for (int i = 0; i < entry.getValue().size() - 1; i++) {
+//                String terminal = entry.getValue().get(i);
+//                follow_set_print.append("'").append(terminal).append("', ");
+//            }
+//            String terminalLast = entry.getValue().get(entry.getValue().size() - 1);
+//            follow_set_print.append("'").append(terminalLast).append("'");
+////                System.out.println("FOLLOW(<"+ entry.getKey()+">)= [" + follow_set_print +"]");
+//        }
     }
 
 
@@ -230,14 +231,14 @@ public class Grammar {
      */
     private void writeToJSONFiles() {
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.writeValue(new File("./src/main/resources/firstSets.json"), first_sets);
-            mapper.writeValue(new File("./src/main/resources/followSets.json"), follow_sets);
-            mapper.writeValue(new File("./src/main/resources/parsingTable.json"), parsing_table);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        ObjectMapper mapper = new ObjectMapper();
+//        try {
+//            mapper.writeValue(new File("./src/main/resources/firstSets.json"), first_sets);
+//            mapper.writeValue(new File("./src/main/resources/followSets.json"), follow_sets);
+//            mapper.writeValue(new File("./src/main/resources/parsingTable.json"), parsing_table);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -246,33 +247,281 @@ public class Grammar {
      */
     private void importFromJsonFiles() {
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String file_name = "/firstSets.json";
-            System.out.println("[Grammar] Importing FIRST sets from file: " + file_name);
-            InputStream in = getClass().getResourceAsStream(file_name);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            first_sets = mapper.readValue(reader, new TypeReference<Map<String, ArrayList<String>>>() {
-            });
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            String file_name = "/exclude/firstSets.json";
+//            System.out.println("[Grammar] Importing FIRST sets from file: " + file_name);
+//            InputStream in = getClass().getResourceAsStream(file_name);
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//            first_sets = mapper.readValue(reader, new TypeReference<Map<String, ArrayList<String>>>() {
+//            });
+//
+//            file_name = "/exclude/followSets.json";
+//            System.out.println("[Grammar] Importing FOLLOW sets from file: " + file_name);
+//            in = getClass().getResourceAsStream(file_name);
+//            reader = new BufferedReader(new InputStreamReader(in));
+//            follow_sets = mapper.readValue(reader, new TypeReference<Map<String, ArrayList<String>>>() {
+//            });
+//
+//            file_name = "/exclude/parsingTable.json";
+//            System.out.println("[Grammar] Importing parsing table from file: " + file_name);
+//            in = getClass().getResourceAsStream(file_name);
+//            reader = new BufferedReader(new InputStreamReader(in));
+//            parsing_table = mapper.readValue(reader, new TypeReference<Map<String, Map<String, String>>>() {
+//            });
+//
+//            reader.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+    }
 
-            file_name = "/followSets.json";
-            System.out.println("[Grammar] Importing FOLLOW sets from file: " + file_name);
-            in = getClass().getResourceAsStream(file_name);
-            reader = new BufferedReader(new InputStreamReader(in));
-            follow_sets = mapper.readValue(reader, new TypeReference<Map<String, ArrayList<String>>>() {
-            });
-
-            file_name = "/parsingTable.json";
-            System.out.println("[Grammar] Importing parsing table from file: " + file_name);
-            in = getClass().getResourceAsStream(file_name);
-            reader = new BufferedReader(new InputStreamReader(in));
-            parsing_table = mapper.readValue(reader, new TypeReference<Map<String, Map<String, String>>>() {
-            });
-
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void printStatements() {
+        for (Map.Entry<String, ArrayList<String>> entry : follow_sets.entrySet()) {
+            StringBuilder first_set = new StringBuilder();
+            for (String first : entry.getValue()) {
+                first_set.append("\"").append(first).append("\", ");
+            }
+            String first_set_string = first_set.substring(0, first_set.length() - 2);
+            System.out.println("follow_sets.put(\"" + entry.getKey() + "\", new ArrayList<>(Arrays.asList(" + first_set_string + ")));");
         }
+        for (Map.Entry<String, Map<String, String>> entry : parsing_table.entrySet()) {
+            StringBuilder table_entry_map_builder = new StringBuilder();
+            for (Map.Entry<String, String> pair : entry.getValue().entrySet()) {
+                table_entry_map_builder.append("{\"").append(pair.getKey()).append("\", \"").append(pair.getValue()).append("\"}, ");
+            }
+            String table_entry_map = table_entry_map_builder.substring(0, table_entry_map_builder.length() - 2);
+            System.out.println("table_entry_table = Stream.of(new String[][]{" + table_entry_map + "}).collect(Collectors.toMap(data->data[0], data->data[1]));");
+            System.out.println("parsing_table.put(\"" + entry.getKey() + "\", table_entry_table);");
+        }
+    }
+
+
+    private void createFirstSets() {
+        first_sets.put("FUNCDECL", new ArrayList<>(Collections.singletonList("func")));
+        first_sets.put("STATEMENT", new ArrayList<>(Arrays.asList("if", "while", "read", "write", "return", "break", "continue", "id")));
+        first_sets.put("ASSIGNSTATTAIL", new ArrayList<>(Collections.singletonList("assign")));
+        first_sets.put("INHERIT", new ArrayList<>(Arrays.asList("inherits", "EPSILON")));
+        first_sets.put("FUNCORVARIDNESTTAIL", new ArrayList<>(Arrays.asList("dot", "EPSILON")));
+        first_sets.put("ASSIGNOP", new ArrayList<>(Collections.singletonList("assign")));
+        first_sets.put("FUNCORASSIGNSTATIDNESTVARTAIL", new ArrayList<>(Arrays.asList("dot", "assign")));
+        first_sets.put("CLASSDECL", new ArrayList<>(Arrays.asList("class", "EPSILON")));
+        first_sets.put("FUNCBODY", new ArrayList<>(Collections.singletonList("lcurbr")));
+        first_sets.put("ADDOP", new ArrayList<>(Arrays.asList("plus", "minus", "or")));
+        first_sets.put("FPARAMSTAIL", new ArrayList<>(Arrays.asList("comma", "EPSILON")));
+        first_sets.put("FUNCORASSIGNSTATIDNEST", new ArrayList<>(Arrays.asList("lpar", "lsqbr", "dot", "assign")));
+        first_sets.put("INDICEREP", new ArrayList<>(Arrays.asList("lsqbr", "EPSILON")));
+        first_sets.put("SIGN", new ArrayList<>(Arrays.asList("plus", "minus")));
+        first_sets.put("TYPE", new ArrayList<>(Arrays.asList("integer", "float", "string", "id")));
+        first_sets.put("MULTOP", new ArrayList<>(Arrays.asList("mult", "div", "and")));
+        first_sets.put("VARIABLEIDNESTTAIL", new ArrayList<>(Arrays.asList("dot", "EPSILON")));
+        first_sets.put("FUNCTION", new ArrayList<>(Collections.singletonList("func")));
+        first_sets.put("CLASSMETHOD", new ArrayList<>(Arrays.asList("sr", "EPSILON")));
+        first_sets.put("VISIBILITY", new ArrayList<>(Arrays.asList("public", "private", "EPSILON")));
+        first_sets.put("INTNUM", new ArrayList<>(Arrays.asList("intnum", "EPSILON")));
+        first_sets.put("ARITHEXPR", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        first_sets.put("APARAMS", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus", "EPSILON")));
+        first_sets.put("FUNCORASSIGNSTATIDNESTFUNCTAIL", new ArrayList<>(Arrays.asList("dot", "EPSILON")));
+        first_sets.put("CLASSDECLBODY", new ArrayList<>(Arrays.asList("public", "private", "func", "integer", "float", "string", "id", "EPSILON")));
+        first_sets.put("STATBLOCK", new ArrayList<>(Arrays.asList("lcurbr", "if", "while", "read", "write", "return", "break", "continue", "id", "EPSILON")));
+        first_sets.put("ARRAYSIZEREPT", new ArrayList<>(Arrays.asList("lsqbr", "EPSILON")));
+        first_sets.put("RELOP", new ArrayList<>(Arrays.asList("eq", "neq", "lt", "gt", "leq", "geq")));
+        first_sets.put("MEMBERDECL", new ArrayList<>(Arrays.asList("func", "integer", "float", "string", "id")));
+        first_sets.put("EXPRTAIL", new ArrayList<>(Arrays.asList("eq", "neq", "lt", "gt", "leq", "geq", "EPSILON")));
+        first_sets.put("VARDECLREP", new ArrayList<>(Arrays.asList("integer", "float", "string", "id", "EPSILON")));
+        first_sets.put("FUNCHEAD", new ArrayList<>(Collections.singletonList("func")));
+        first_sets.put("FUNCDEF", new ArrayList<>(Arrays.asList("func", "EPSILON")));
+        first_sets.put("TERM", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        first_sets.put("APARAMSTAIL", new ArrayList<>(Arrays.asList("comma", "EPSILON")));
+        first_sets.put("ARITHEXPRTAIL", new ArrayList<>(Arrays.asList("plus", "minus", "or", "EPSILON")));
+        first_sets.put("EXPR", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        first_sets.put("VARIABLE", new ArrayList<>(Collections.singletonList("id")));
+        first_sets.put("VARDECL", new ArrayList<>(Arrays.asList("integer", "float", "string", "id")));
+        first_sets.put("METHODBODYVAR", new ArrayList<>(Arrays.asList("var", "EPSILON")));
+        first_sets.put("NESTEDID", new ArrayList<>(Arrays.asList("comma", "EPSILON")));
+        first_sets.put("FUNCSTATTAIL", new ArrayList<>(Arrays.asList("dot", "lpar", "lsqbr")));
+        first_sets.put("VARIABLEIDNEST", new ArrayList<>(Arrays.asList("lsqbr", "dot", "EPSILON")));
+        first_sets.put("FUNCSTATTAILIDNEST", new ArrayList<>(Arrays.asList("dot", "EPSILON")));
+        first_sets.put("FACTOR", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        first_sets.put("FUNCDECLTAIL", new ArrayList<>(Arrays.asList("void", "integer", "float", "string", "id")));
+        first_sets.put("STATEMENTLIST", new ArrayList<>(Arrays.asList("if", "while", "read", "write", "return", "break", "continue", "id", "EPSILON")));
+        first_sets.put("FUNCORASSIGNSTAT", new ArrayList<>(Collections.singletonList("id")));
+        first_sets.put("FUNCORVARIDNEST", new ArrayList<>(Arrays.asList("lpar", "lsqbr", "dot", "EPSILON")));
+        first_sets.put("FUNCORVAR", new ArrayList<>(Collections.singletonList("id")));
+        first_sets.put("START", new ArrayList<>(Arrays.asList("main", "class", "func")));
+        first_sets.put("FPARAMS", new ArrayList<>(Arrays.asList("integer", "float", "string", "id", "EPSILON")));
+        first_sets.put("TERMTAIL", new ArrayList<>(Arrays.asList("mult", "div", "and", "EPSILON")));
+        first_sets.put("PROG", new ArrayList<>(Arrays.asList("main", "class", "func")));
+    }
+
+    private void createFollowSets() {
+        follow_sets.put("FUNCDECL", new ArrayList<>(Arrays.asList("public", "private", "func", "integer", "float", "string", "id", "rcurbr")));
+        follow_sets.put("STATEMENT", new ArrayList<>(Arrays.asList("if", "while", "read", "write", "return", "break", "continue", "id", "else", "semi", "rcurbr")));
+        follow_sets.put("ASSIGNSTATTAIL", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("INHERIT", new ArrayList<>(Collections.singletonList("lcurbr")));
+        follow_sets.put("FUNCORVARIDNESTTAIL", new ArrayList<>(Arrays.asList("mult", "div", "and", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("ASSIGNOP", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        follow_sets.put("FUNCORASSIGNSTATIDNESTVARTAIL", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("CLASSDECL", new ArrayList<>(Arrays.asList("func", "main")));
+        follow_sets.put("FUNCBODY", new ArrayList<>(Arrays.asList("main", "func")));
+        follow_sets.put("ADDOP", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        follow_sets.put("FPARAMSTAIL", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("FUNCORASSIGNSTATIDNEST", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("INDICEREP", new ArrayList<>(Arrays.asList("mult", "div", "and", "semi", "assign", "dot", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("SIGN", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        follow_sets.put("TYPE", new ArrayList<>(Arrays.asList("lcurbr", "semi", "id")));
+        follow_sets.put("MULTOP", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        follow_sets.put("VARIABLEIDNESTTAIL", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("FUNCTION", new ArrayList<>(Arrays.asList("main", "func")));
+        follow_sets.put("CLASSMETHOD", new ArrayList<>(Collections.singletonList("lpar")));
+        follow_sets.put("VISIBILITY", new ArrayList<>(Arrays.asList("func", "integer", "float", "string", "id")));
+        follow_sets.put("INTNUM", new ArrayList<>(Collections.singletonList("rsqbr")));
+        follow_sets.put("ARITHEXPR", new ArrayList<>(Arrays.asList("semi", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("APARAMS", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("FUNCORASSIGNSTATIDNESTFUNCTAIL", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("CLASSDECLBODY", new ArrayList<>(Collections.singletonList("rcurbr")));
+        follow_sets.put("STATBLOCK", new ArrayList<>(Arrays.asList("else", "semi")));
+        follow_sets.put("ARRAYSIZEREPT", new ArrayList<>(Arrays.asList("rpar", "comma", "semi")));
+        follow_sets.put("RELOP", new ArrayList<>(Arrays.asList("intnum", "floatnum", "stringlit", "lpar", "not", "qm", "id", "plus", "minus")));
+        follow_sets.put("MEMBERDECL", new ArrayList<>(Arrays.asList("public", "private", "func", "integer", "float", "string", "id", "rcurbr")));
+        follow_sets.put("EXPRTAIL", new ArrayList<>(Arrays.asList("semi", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("VARDECLREP", new ArrayList<>(Collections.singletonList("rcurbr")));
+        follow_sets.put("FUNCHEAD", new ArrayList<>(Collections.singletonList("lcurbr")));
+        follow_sets.put("FUNCDEF", new ArrayList<>(Collections.singletonList("main")));
+        follow_sets.put("TERM", new ArrayList<>(Arrays.asList("semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("APARAMSTAIL", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("ARITHEXPRTAIL", new ArrayList<>(Arrays.asList("semi", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("EXPR", new ArrayList<>(Arrays.asList("semi", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("VARIABLE", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("VARDECL", new ArrayList<>(Arrays.asList("public", "private", "func", "integer", "float", "string", "id", "rcurbr")));
+        follow_sets.put("METHODBODYVAR", new ArrayList<>(Arrays.asList("if", "while", "read", "write", "return", "break", "continue", "id", "rcurbr")));
+        follow_sets.put("NESTEDID", new ArrayList<>(Collections.singletonList("lcurbr")));
+        follow_sets.put("FUNCSTATTAIL", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("VARIABLEIDNEST", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("FUNCSTATTAILIDNEST", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("FACTOR", new ArrayList<>(Arrays.asList("mult", "div", "and", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("FUNCDECLTAIL", new ArrayList<>(Arrays.asList("lcurbr", "semi")));
+        follow_sets.put("STATEMENTLIST", new ArrayList<>(Collections.singletonList("rcurbr")));
+        follow_sets.put("FUNCORASSIGNSTAT", new ArrayList<>(Collections.singletonList("semi")));
+        follow_sets.put("FUNCORVARIDNEST", new ArrayList<>(Arrays.asList("mult", "div", "and", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("FUNCORVAR", new ArrayList<>(Arrays.asList("mult", "div", "and", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("START", new ArrayList<>(Collections.singletonList("∅")));
+        follow_sets.put("FPARAMS", new ArrayList<>(Collections.singletonList("rpar")));
+        follow_sets.put("TERMTAIL", new ArrayList<>(Arrays.asList("semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar")));
+        follow_sets.put("PROG", new ArrayList<>(Collections.singletonList("∅")));
+    }
+
+    private void createParsingTable() {
+
+        Map<String, String> table_entry_table = new HashMap<>();
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "FUNCDECL_func_id_lpar_FPARAMS_rpar_colon_FUNCDECLTAIL_semi"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCDECL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "STATEMENT_while_lpar_EXPR_rpar_STATBLOCK_semi"}, {"div", "error"}, {"continue", "STATEMENT_continue_semi"}, {"else", "error"}, {"leq", "error"}, {"id", "STATEMENT_FUNCORASSIGNSTAT_semi"}, {"neq", "error"}, {"qm", "error"}, {"write", "STATEMENT_write_lpar_EXPR_rpar_semi"}, {"if", "STATEMENT_if_lpar_EXPR_rpar_then_STATBLOCK_else_STATBLOCK_semi"}, {"read", "STATEMENT_read_lpar_VARIABLE_rpar_semi"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "STATEMENT_break_semi"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "STATEMENT_return_lpar_EXPR_rpar_semi"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("STATEMENT", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "ASSIGNSTATTAIL_ASSIGNOP_EXPR"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("ASSIGNSTATTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "INHERIT_EPSILON"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "INHERIT_inherits_id_NESTEDID"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("INHERIT", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "FUNCORVARIDNESTTAIL_EPSILON"}, {"lpar", "error"}, {"lt", "FUNCORVARIDNESTTAIL_EPSILON"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "FUNCORVARIDNESTTAIL_EPSILON"}, {"continue", "error"}, {"else", "error"}, {"leq", "FUNCORVARIDNESTTAIL_EPSILON"}, {"id", "error"}, {"neq", "FUNCORVARIDNESTTAIL_EPSILON"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "FUNCORVARIDNESTTAIL_EPSILON"}, {"plus", "FUNCORVARIDNESTTAIL_EPSILON"}, {"lsqbr", "error"}, {"minus", "FUNCORVARIDNESTTAIL_EPSILON"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCORVARIDNESTTAIL_dot_id_FUNCORVARIDNEST"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "FUNCORVARIDNESTTAIL_EPSILON"}, {"not", "error"}, {"public", "error"}, {"and", "FUNCORVARIDNESTTAIL_EPSILON"}, {"rpar", "FUNCORVARIDNESTTAIL_EPSILON"}, {"semi", "FUNCORVARIDNESTTAIL_EPSILON"}, {"rsqbr", "FUNCORVARIDNESTTAIL_EPSILON"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "FUNCORVARIDNESTTAIL_EPSILON"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "FUNCORVARIDNESTTAIL_EPSILON"}, {"comma", "FUNCORVARIDNESTTAIL_EPSILON"}, {"func", "error"}, {"colon", "FUNCORVARIDNESTTAIL_EPSILON"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORVARIDNESTTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "ASSIGNOP_assign"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("ASSIGNOP", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "CLASSDECL_EPSILON"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "CLASSDECL_class_id_INHERIT_lcurbr_CLASSDECLBODY_rcurbr_semi_CLASSDECL"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "CLASSDECL_EPSILON"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("CLASSDECL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCORASSIGNSTATIDNESTVARTAIL_dot_id_FUNCORASSIGNSTATIDNEST"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "FUNCORASSIGNSTATIDNESTVARTAIL_ASSIGNSTATTAIL"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORASSIGNSTATIDNESTVARTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "FUNCBODY_lcurbr_METHODBODYVAR_STATEMENTLIST_rcurbr"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCBODY", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "ADDOP_plus"}, {"lsqbr", "error"}, {"minus", "ADDOP_minus"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "ADDOP_or"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("ADDOP", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "FPARAMSTAIL_EPSILON"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "FPARAMSTAIL_comma_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FPARAMSTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "FUNCORASSIGNSTATIDNEST_lpar_APARAMS_rpar_FUNCORASSIGNSTATIDNESTFUNCTAIL"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "FUNCORASSIGNSTATIDNEST_INDICEREP_FUNCORASSIGNSTATIDNESTVARTAIL"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCORASSIGNSTATIDNEST_INDICEREP_FUNCORASSIGNSTATIDNESTVARTAIL"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "FUNCORASSIGNSTATIDNEST_INDICEREP_FUNCORASSIGNSTATIDNESTVARTAIL"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORASSIGNSTATIDNEST", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "INDICEREP_EPSILON"}, {"lpar", "error"}, {"lt", "INDICEREP_EPSILON"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "INDICEREP_EPSILON"}, {"continue", "error"}, {"else", "error"}, {"leq", "INDICEREP_EPSILON"}, {"id", "error"}, {"neq", "INDICEREP_EPSILON"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "INDICEREP_EPSILON"}, {"plus", "INDICEREP_EPSILON"}, {"lsqbr", "INDICEREP_lsqbr_EXPR_rsqbr_INDICEREP"}, {"minus", "INDICEREP_EPSILON"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "INDICEREP_EPSILON"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "INDICEREP_EPSILON"}, {"not", "error"}, {"public", "error"}, {"and", "INDICEREP_EPSILON"}, {"rpar", "INDICEREP_EPSILON"}, {"semi", "INDICEREP_EPSILON"}, {"rsqbr", "INDICEREP_EPSILON"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "INDICEREP_EPSILON"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "INDICEREP_EPSILON"}, {"comma", "INDICEREP_EPSILON"}, {"func", "error"}, {"colon", "INDICEREP_EPSILON"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "INDICEREP_EPSILON"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("INDICEREP", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "SIGN_plus"}, {"lsqbr", "error"}, {"minus", "SIGN_minus"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("SIGN", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "TYPE_integer"}, {"float", "TYPE_float"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "TYPE_id"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "TYPE_string"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("TYPE", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "MULTOP_mult"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "MULTOP_div"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "MULTOP_and"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("MULTOP", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "VARIABLEIDNESTTAIL_dot_id_VARIABLEIDNEST"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "VARIABLEIDNESTTAIL_EPSILON"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("VARIABLEIDNESTTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "FUNCTION_FUNCHEAD_FUNCBODY"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCTION", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "CLASSMETHOD_EPSILON"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "CLASSMETHOD_sr_id"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("CLASSMETHOD", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "VISIBILITY_EPSILON"}, {"float", "VISIBILITY_EPSILON"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "VISIBILITY_EPSILON"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "VISIBILITY_private"}, {"string", "VISIBILITY_EPSILON"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "VISIBILITY_public"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "VISIBILITY_EPSILON"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("VISIBILITY", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "INTNUM_intnum"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "INTNUM_EPSILON"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("INTNUM", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"neq", "error"}, {"qm", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"lsqbr", "error"}, {"minus", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"private", "error"}, {"string", "error"}, {"intnum", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"geq", "error"}, {"not", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "ARITHEXPR_TERM_ARITHEXPRTAIL"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("ARITHEXPR", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "APARAMS_EXPR_APARAMSTAIL"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "APARAMS_EXPR_APARAMSTAIL"}, {"neq", "error"}, {"qm", "APARAMS_EXPR_APARAMSTAIL"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "APARAMS_EXPR_APARAMSTAIL"}, {"lsqbr", "error"}, {"minus", "APARAMS_EXPR_APARAMSTAIL"}, {"private", "error"}, {"string", "error"}, {"intnum", "APARAMS_EXPR_APARAMSTAIL"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "APARAMS_EXPR_APARAMSTAIL"}, {"geq", "error"}, {"not", "APARAMS_EXPR_APARAMSTAIL"}, {"public", "error"}, {"and", "error"}, {"rpar", "APARAMS_EPSILON"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "APARAMS_EXPR_APARAMSTAIL"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("APARAMS", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCORASSIGNSTATIDNESTFUNCTAIL_dot_id_FUNCSTATTAIL"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "FUNCORASSIGNSTATIDNESTFUNCTAIL_EPSILON"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORASSIGNSTATIDNESTFUNCTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "ARRAYSIZEREPT_lsqbr_INTNUM_rsqbr_ARRAYSIZEREPT"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "ARRAYSIZEREPT_EPSILON"}, {"semi", "ARRAYSIZEREPT_EPSILON"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "ARRAYSIZEREPT_EPSILON"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("ARRAYSIZEREPT", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"float", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"string", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "CLASSDECLBODY_EPSILON"}, {"gt", "error"}, {"comma", "error"}, {"func", "CLASSDECLBODY_VISIBILITY_MEMBERDECL_CLASSDECLBODY"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("CLASSDECLBODY", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "STATBLOCK_STATEMENT"}, {"div", "error"}, {"continue", "STATBLOCK_STATEMENT"}, {"else", "STATBLOCK_EPSILON"}, {"leq", "error"}, {"id", "STATBLOCK_STATEMENT"}, {"neq", "error"}, {"qm", "error"}, {"write", "STATBLOCK_STATEMENT"}, {"if", "STATBLOCK_STATEMENT"}, {"read", "STATBLOCK_STATEMENT"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "STATBLOCK_lcurbr_STATEMENTLIST_rcurbr"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "STATBLOCK_EPSILON"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "STATBLOCK_STATEMENT"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "STATBLOCK_STATEMENT"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("STATBLOCK", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "RELOP_lt"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "RELOP_leq"}, {"id", "error"}, {"neq", "RELOP_neq"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "RELOP_eq"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "RELOP_geq"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "RELOP_gt"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("RELOP", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "MEMBERDECL_VARDECL"}, {"float", "MEMBERDECL_VARDECL"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "MEMBERDECL_VARDECL"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "MEMBERDECL_VARDECL"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "MEMBERDECL_FUNCDECL"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("MEMBERDECL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "EXPRTAIL_RELOP_ARITHEXPR"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "EXPRTAIL_RELOP_ARITHEXPR"}, {"id", "error"}, {"neq", "EXPRTAIL_RELOP_ARITHEXPR"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "EXPRTAIL_RELOP_ARITHEXPR"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "EXPRTAIL_RELOP_ARITHEXPR"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "EXPRTAIL_EPSILON"}, {"semi", "EXPRTAIL_EPSILON"}, {"rsqbr", "EXPRTAIL_EPSILON"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "EXPRTAIL_RELOP_ARITHEXPR"}, {"comma", "EXPRTAIL_EPSILON"}, {"func", "error"}, {"colon", "EXPRTAIL_EPSILON"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("EXPRTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "VARDECLREP_VARDECL_VARDECLREP"}, {"float", "VARDECLREP_VARDECL_VARDECLREP"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "VARDECLREP_VARDECL_VARDECLREP"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "VARDECLREP_VARDECL_VARDECLREP"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "VARDECLREP_EPSILON"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("VARDECLREP", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "FUNCDEF_EPSILON"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "FUNCDEF_FUNCTION_FUNCDEF"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCDEF", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "FUNCHEAD_func_id_CLASSMETHOD_lpar_FPARAMS_rpar_colon_FUNCDECLTAIL"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCHEAD", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "TERM_FACTOR_TERMTAIL"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "TERM_FACTOR_TERMTAIL"}, {"neq", "error"}, {"qm", "TERM_FACTOR_TERMTAIL"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "TERM_FACTOR_TERMTAIL"}, {"lsqbr", "error"}, {"minus", "TERM_FACTOR_TERMTAIL"}, {"private", "error"}, {"string", "error"}, {"intnum", "TERM_FACTOR_TERMTAIL"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "TERM_FACTOR_TERMTAIL"}, {"geq", "error"}, {"not", "TERM_FACTOR_TERMTAIL"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "TERM_FACTOR_TERMTAIL"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("TERM", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "APARAMSTAIL_EPSILON"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "APARAMSTAIL_comma_EXPR_APARAMSTAIL"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("APARAMSTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "ARITHEXPRTAIL_EPSILON"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "ARITHEXPRTAIL_EPSILON"}, {"id", "error"}, {"neq", "ARITHEXPRTAIL_EPSILON"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "ARITHEXPRTAIL_EPSILON"}, {"plus", "ARITHEXPRTAIL_ADDOP_TERM_ARITHEXPRTAIL"}, {"lsqbr", "error"}, {"minus", "ARITHEXPRTAIL_ADDOP_TERM_ARITHEXPRTAIL"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "ARITHEXPRTAIL_EPSILON"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "ARITHEXPRTAIL_EPSILON"}, {"semi", "ARITHEXPRTAIL_EPSILON"}, {"rsqbr", "ARITHEXPRTAIL_EPSILON"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "ARITHEXPRTAIL_ADDOP_TERM_ARITHEXPRTAIL"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "ARITHEXPRTAIL_EPSILON"}, {"comma", "ARITHEXPRTAIL_EPSILON"}, {"func", "error"}, {"colon", "ARITHEXPRTAIL_EPSILON"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("ARITHEXPRTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "EXPR_ARITHEXPR_EXPRTAIL"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "EXPR_ARITHEXPR_EXPRTAIL"}, {"neq", "error"}, {"qm", "EXPR_ARITHEXPR_EXPRTAIL"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "EXPR_ARITHEXPR_EXPRTAIL"}, {"lsqbr", "error"}, {"minus", "EXPR_ARITHEXPR_EXPRTAIL"}, {"private", "error"}, {"string", "error"}, {"intnum", "EXPR_ARITHEXPR_EXPRTAIL"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "EXPR_ARITHEXPR_EXPRTAIL"}, {"geq", "error"}, {"not", "EXPR_ARITHEXPR_EXPRTAIL"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "EXPR_ARITHEXPR_EXPRTAIL"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("EXPR", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "VARIABLE_id_VARIABLEIDNEST"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("VARIABLE", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "VARDECL_TYPE_id_ARRAYSIZEREPT_semi"}, {"float", "VARDECL_TYPE_id_ARRAYSIZEREPT_semi"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "VARDECL_TYPE_id_ARRAYSIZEREPT_semi"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "VARDECL_TYPE_id_ARRAYSIZEREPT_semi"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("VARDECL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "METHODBODYVAR_EPSILON"}, {"div", "error"}, {"continue", "METHODBODYVAR_EPSILON"}, {"else", "error"}, {"leq", "error"}, {"id", "METHODBODYVAR_EPSILON"}, {"neq", "error"}, {"qm", "error"}, {"write", "METHODBODYVAR_EPSILON"}, {"if", "METHODBODYVAR_EPSILON"}, {"read", "METHODBODYVAR_EPSILON"}, {"void", "error"}, {"$", "error"}, {"var", "METHODBODYVAR_var_lcurbr_VARDECLREP_rcurbr"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "METHODBODYVAR_EPSILON"}, {"rcurbr", "METHODBODYVAR_EPSILON"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "METHODBODYVAR_EPSILON"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("METHODBODYVAR", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "NESTEDID_EPSILON"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "NESTEDID_comma_id_NESTEDID"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("NESTEDID", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "FUNCSTATTAIL_lpar_APARAMS_rpar_FUNCSTATTAILIDNEST"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "FUNCSTATTAIL_INDICEREP_dot_id_FUNCSTATTAIL"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCSTATTAIL_INDICEREP_dot_id_FUNCSTATTAIL"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCSTATTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "VARIABLEIDNEST_INDICEREP_VARIABLEIDNESTTAIL"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "VARIABLEIDNEST_INDICEREP_VARIABLEIDNESTTAIL"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "VARIABLEIDNEST_INDICEREP_VARIABLEIDNESTTAIL"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("VARIABLEIDNEST", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "FACTOR_lpar_EXPR_rpar"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "FACTOR_FUNCORVAR"}, {"neq", "error"}, {"qm", "FACTOR_qm_lsqbr_EXPR_colon_EXPR_colon_EXPR_rsqbr"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "FACTOR_SIGN_FACTOR"}, {"lsqbr", "error"}, {"minus", "FACTOR_SIGN_FACTOR"}, {"private", "error"}, {"string", "error"}, {"intnum", "FACTOR_intnum"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "FACTOR_stringlit"}, {"geq", "error"}, {"not", "FACTOR_not_FACTOR"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "FACTOR_floatnum"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FACTOR", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCSTATTAILIDNEST_dot_id_FUNCSTATTAIL"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "FUNCSTATTAILIDNEST_EPSILON"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCSTATTAILIDNEST", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "FUNCDECLTAIL_TYPE"}, {"float", "FUNCDECLTAIL_TYPE"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "FUNCDECLTAIL_TYPE"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "FUNCDECLTAIL_void"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "FUNCDECLTAIL_TYPE"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCDECLTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"div", "error"}, {"continue", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"else", "error"}, {"leq", "error"}, {"id", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"neq", "error"}, {"qm", "error"}, {"write", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"if", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"read", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"rcurbr", "STATEMENTLIST_EPSILON"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "STATEMENTLIST_STATEMENT_STATEMENTLIST"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("STATEMENTLIST", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "FUNCORASSIGNSTAT_id_FUNCORASSIGNSTATIDNEST"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORASSIGNSTAT", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"lpar", "FUNCORVARIDNEST_lpar_APARAMS_rpar_FUNCORVARIDNESTTAIL"}, {"lt", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"continue", "error"}, {"else", "error"}, {"leq", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"id", "error"}, {"neq", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"plus", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"lsqbr", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"minus", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"not", "error"}, {"public", "error"}, {"and", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"rpar", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"semi", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"rsqbr", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"comma", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"func", "error"}, {"colon", "FUNCORVARIDNEST_INDICEREP_FUNCORVARIDNESTTAIL"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORVARIDNEST", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "FUNCORVAR_id_FUNCORVARIDNEST"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FUNCORVAR", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "START_PROG"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "START_PROG"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "START_PROG"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("START", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "FPARAMS_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL"}, {"float", "FPARAMS_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "FPARAMS_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "FPARAMS_TYPE_id_ARRAYSIZEREPT_FPARAMSTAIL"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "FPARAMS_EPSILON"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("FPARAMS", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "TERMTAIL_MULTOP_FACTOR_TERMTAIL"}, {"lpar", "error"}, {"lt", "TERMTAIL_EPSILON"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "TERMTAIL_MULTOP_FACTOR_TERMTAIL"}, {"continue", "error"}, {"else", "error"}, {"leq", "TERMTAIL_EPSILON"}, {"id", "error"}, {"neq", "TERMTAIL_EPSILON"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "TERMTAIL_EPSILON"}, {"plus", "TERMTAIL_EPSILON"}, {"lsqbr", "error"}, {"minus", "TERMTAIL_EPSILON"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "TERMTAIL_EPSILON"}, {"not", "error"}, {"public", "error"}, {"and", "TERMTAIL_MULTOP_FACTOR_TERMTAIL"}, {"rpar", "TERMTAIL_EPSILON"}, {"semi", "TERMTAIL_EPSILON"}, {"rsqbr", "TERMTAIL_EPSILON"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "TERMTAIL_EPSILON"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "TERMTAIL_EPSILON"}, {"comma", "TERMTAIL_EPSILON"}, {"func", "error"}, {"colon", "TERMTAIL_EPSILON"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("TERMTAIL", table_entry_table);
+        table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "PROG_CLASSDECL_FUNCDEF_main_FUNCBODY"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "PROG_CLASSDECL_FUNCDEF_main_FUNCBODY"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "PROG_CLASSDECL_FUNCDEF_main_FUNCBODY"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+        parsing_table.put("PROG", table_entry_table);
     }
 
 
@@ -281,40 +530,40 @@ public class Grammar {
      */
     public void importParsingTable() {
 
-        String file_name = "/exclude/parsingTable.html";
-        System.out.println("[Grammar] Importing parsing table from file: " + file_name);
-        InputStream in = getClass().getResourceAsStream(file_name);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
-        Element table = html_doc.select("table").get(1); //select the table.
-        Elements rows = table.select("tr");
-        Elements first = rows.get(0).select("th,td");       //header of the table
-
-        List<String> headers = new ArrayList<String>();
-        for (Element header : first) {
-            headers.add(header.text());
-            if (!header.text().isEmpty()) {
-                terminal_list.add(header.text());
-            }
-        }
-        for (int i = 1; i < rows.size(); i++) {
-            Element row = rows.get(i);
-            Elements col_vals = rows.get(i).select("th,td");
-            Map<String, String> table_vals = new HashMap<>();
-            int col_count = 1;
-            for (int j = 1; j < col_vals.size(); j++) {
-                String ruleID = col_vals.get(j).text();
-                if (!ruleID.isEmpty()) {
-                    ruleID = ruleID.replace(" → ", "_").replace(" ", "_").replace("&epsilon", "EPSILON");
-                    table_vals.put(headers.get(col_count++), ruleID);
-                } else {
-                    table_vals.put(headers.get(col_count++), "error");
-                }
-            }
-            String non_terminal = col_vals.get(0).text();
-            parsing_table.put(non_terminal, table_vals);
-            nonTerminal_list.add(non_terminal);
-        }
+//        String file_name = "/exclude/parsingTable.html";
+//        System.out.println("[Grammar] Importing parsing table from file: " + file_name);
+//        InputStream in = getClass().getResourceAsStream(file_name);
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//        Document html_doc = Jsoup.parse(reader.lines().collect(Collectors.joining()), "UTF-8");
+//        Element table = html_doc.select("table").get(1); //select the table.
+//        Elements rows = table.select("tr");
+//        Elements first = rows.get(0).select("th,td");       //header of the table
+//
+//        List<String> headers = new ArrayList<String>();
+//        for (Element header : first) {
+//            headers.add(header.text());
+//            if (!header.text().isEmpty()) {
+//                terminal_list.add(header.text());
+//            }
+//        }
+//        for (int i = 1; i < rows.size(); i++) {
+//            Element row = rows.get(i);
+//            Elements col_vals = rows.get(i).select("th,td");
+//            Map<String, String> table_vals = new HashMap<>();
+//            int col_count = 1;
+//            for (int j = 1; j < col_vals.size(); j++) {
+//                String ruleID = col_vals.get(j).text();
+//                if (!ruleID.isEmpty()) {
+//                    ruleID = ruleID.replace(" → ", "_").replace(" ", "_").replace("&epsilon", "EPSILON");
+//                    table_vals.put(headers.get(col_count++), ruleID);
+//                } else {
+//                    table_vals.put(headers.get(col_count++), "error");
+//                }
+//            }
+//            String non_terminal = col_vals.get(0).text();
+//            parsing_table.put(non_terminal, table_vals);
+//            nonTerminal_list.add(non_terminal);
+//        }
     }
 
 
@@ -440,11 +689,6 @@ public class Grammar {
     public ArrayList<String> getNonTerminal_list() {
         return nonTerminal_list;
     }
-
-
-//    public Map<String, Rule> getRules() {
-//        return rules;
-//    }
 
 
     public Map<String, Map<String, String>> getParsing_table() {

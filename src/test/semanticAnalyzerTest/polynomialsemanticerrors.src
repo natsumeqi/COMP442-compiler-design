@@ -16,7 +16,7 @@ class LINEAR inherits POLYNOMIAL {
 	public func evaluate(float x) : float;                        // 9.3
 };
 
-class QUADRATIC inherits POLYNOMIAL {
+class QUADRATIC inherits LINEAR {
 	private float a;                                              // 8.5
 	private float b;                                              // 8.5
 	private float c;

@@ -75,10 +75,10 @@ public class SyntacticAnalyzer {
             File outfile_error = new File(file_path_temp + ".outsyntaxerrors");
             File outfile_DOT = new File(file_path_temp + ".dot");
             File outfile_AST = new File(file_path_temp + ".outast");
-            System.out.println("[Lexer] Writing to the file: " + outfile_derivation.getName());
-            System.out.println("[Lexer] Writing to the file: " + outfile_error.getName());
-            System.out.println("[Lexer] Writing to the file: " + outfile_DOT.getName());
-            System.out.println("[Lexer] Writing to the file: " + outfile_AST.getName());
+            System.out.println("[Parser] Writing to the file: " + outfile_derivation.getName());
+            System.out.println("[Parser] Writing to the file: " + outfile_error.getName());
+            System.out.println("[Parser] Writing to the file: " + outfile_DOT.getName());
+            System.out.println("[Parser] Writing to the file: " + outfile_AST.getName());
             writer_derivation = new PrintWriter(outfile_derivation);
             writer_err_report = new PrintWriter(outfile_error);
             writer_DOT = new PrintWriter(outfile_DOT);

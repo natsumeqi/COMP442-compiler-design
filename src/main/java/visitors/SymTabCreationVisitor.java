@@ -210,7 +210,7 @@ public class SymTabCreationVisitor extends Visitor {
                         append(func_name).append("' in the class: ").append(class_name).append("\r\n");
             } else {
                 // check overridden function
-                m_errors.append("[9.3][semantic error][line:"+p_node.m_line+"] Overridden inherited member function: \t").append("'").
+                m_errors.append("[9.3][semantic warning][line:"+p_node.m_line+"] Overridden inherited member function: \t").append("'").
                         append(func_name).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
             }
         }

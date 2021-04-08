@@ -45,7 +45,11 @@ public class LexicalAnalyzer {
             writer_tok = new PrintWriter(outfile_tok);
             writer_err = new PrintWriter(outfile_err);
 
-        } catch (Exception e) {
+        }catch (FileNotFoundException e){
+            System.err.println("Folder or file does not exist. ");
+            System.exit(0);
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
