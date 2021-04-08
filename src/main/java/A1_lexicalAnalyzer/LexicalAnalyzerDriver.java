@@ -1,4 +1,4 @@
-package lexicalAnalyzer;
+package A1_lexicalAnalyzer;
 
 import java.io.File;
 

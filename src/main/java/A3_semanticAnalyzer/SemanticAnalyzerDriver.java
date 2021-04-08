@@ -1,6 +1,6 @@
-package semanticAnalyzer;
+package A3_semanticAnalyzer;
 
-import syntacticAnalyzer.SyntacticAnalyzer;
+import A2_syntacticAnalyzer.SyntacticAnalyzer;
 
 import java.io.File;
 

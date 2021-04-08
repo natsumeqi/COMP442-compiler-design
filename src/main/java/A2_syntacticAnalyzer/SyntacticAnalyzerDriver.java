@@ -1,4 +1,4 @@
-package syntacticAnalyzer;
+package A2_syntacticAnalyzer;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package syntacticAnalyzer;
+package A2_syntacticAnalyzer;
 
 //import com.fasterxml.jackson.core.type.TypeReference;
 //import com.fasterxml.jackson.databind.ObjectMapper;

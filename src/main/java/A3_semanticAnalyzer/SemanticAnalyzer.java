@@ -1,4 +1,4 @@
-package semanticAnalyzer;
+package A3_semanticAnalyzer;
 
 import AST.Node;
 import visitors.ReconstructSourceProgramVisitor;
