@@ -19,24 +19,26 @@ public class ComputeMemSizeVisitor extends Visitor {
 
     public int sizeOfEntry(Node p_node) {
         int size = 0;
-        if (p_node.m_symTabEntry.m_type.equals("int"))
+        if (p_node.m_symTabEntry.m_type.equals("integer"))
             size = 4;
         else if (p_node.m_symTabEntry.m_type.equals("float"))
             size = 8;
         // if it is an array, multiply by all dimension sizes
         VarEntry ve = (VarEntry) p_node.m_symTabEntry;
-        if (!ve.m_dims.isEmpty())
-            for (String dim : ve.m_dims) {
-                // todo []
-                int dim_int = Integer.parseInt(dim);
-                size *= dim_int;
-            }
+        if (ve.m_dims != null) {
+            if (!ve.m_dims.isEmpty())
+                for (String dim : ve.m_dims) {
+                    // todo []
+                    int dim_int = Integer.parseInt(dim);
+                    size *= dim_int;
+                }
+        }
         return size;
     }
 
     public int sizeOfTypeNode(Node p_node) {
         int size = 0;
-        if (p_node.m_type.equals("int"))
+        if (p_node.m_type.equals("integer"))
             size = 4;
         else if (p_node.m_type.equals("float"))
             size = 8;
@@ -101,7 +103,11 @@ public class ComputeMemSizeVisitor extends Visitor {
             member.accept(this);
         }
 
-
+        // computes size and offsets
+        for (SymTabEntry entry : p_node.m_symTab.m_symList){
+            entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
+            p_node.m_symTab.m_size -= entry.m_size;
+        }
     }
 
     public void visit(InherListNode p_node) {
@@ -194,6 +200,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             // check multiple declared identifier in function
             SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
             if (var_entry.m_name == null) {
+                p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
             }
 
@@ -205,6 +212,7 @@ public class ComputeMemSizeVisitor extends Visitor {
                 // check multiple declared identifier in class
                 SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
                 if (var_entry.m_name == null) {
+                    p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                 }
             }
@@ -307,6 +315,17 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.accept(this);
         }
 
+        // compute total size and offsets along the way
+        // this should be node on all nodes that represent
+        // a scope and contain their own table
+        // stack frame contains the return value at the bottom of the stack
+        p_node.m_symTab.m_size = -(this.sizeOfTypeNode(p_node));
+        //then is the return addess is stored on the stack frame
+        p_node.m_symTab.m_size -= 4;
+        for (SymTabEntry entry : p_node.m_symTab.m_symList){
+            entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
+            p_node.m_symTab.m_size -= entry.m_size;
+        }
     }
 
     public void visit(FuncBodyNode p_node) {
@@ -335,6 +354,12 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.accept(this);
         }
 
+        // compute size and offsets
+        for (SymTabEntry entry : p_node.m_symTab.m_symList){
+            entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
+            p_node.m_symTab.m_size -= entry.m_size;
+        }
+
     }
 
     public void visit(DotNode p_node) {
@@ -349,11 +374,12 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        if (p_node.m_type != null ) {
+        if (p_node.m_type != null) {
             p_node.m_moonVarName = this.getNewTempVarName();
 //            System.out.println("p_node: " + p_node.getType());
 //            System.out.println("p_node: child1:  " + p_node.getChildren().get(0).m_type);
             p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getType(), p_node.m_moonVarName, null);
+            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
             p_node.m_symTab.addEntry(p_node.m_symTabEntry);
         }
     }
@@ -363,9 +389,40 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        if (p_node.m_type != null ) {
+        if (p_node.m_type != null) {
             p_node.m_moonVarName = this.getNewTempVarName();
             p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getType(), p_node.m_moonVarName, null);
+            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+        }
+    }
+
+    public void visit(FloatNode p_node) {
+        p_node.m_moonVarName = this.getNewTempVarName();
+        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName, null);
+        p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+    }
+
+
+    public void visit(NumNode p_node) {
+//        System.out.println(p_node.m_moonVarName);
+        p_node.m_moonVarName = this.getNewTempVarName();
+        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName, null);
+        p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+
+    }
+
+    public void visit(FuncCallStatNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
+        if (p_node.m_type != null) {
+            p_node.m_moonVarName = this.getNewTempVarName();
+            p_node.m_symTabEntry = new VarEntry("retval", p_node.getType(), p_node.m_moonVarName, null);
+            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
             p_node.m_symTab.addEntry(p_node.m_symTabEntry);
         }
     }
@@ -490,17 +547,6 @@ public class ComputeMemSizeVisitor extends Visitor {
         }
     }
 
-    public void visit(FuncCallStatNode p_node) {
-        for (Node child : p_node.getChildren()) {
-            child.m_symTab = p_node.m_symTab;
-            child.accept(this);
-        }
-        if (p_node.m_type != null) {
-            p_node.m_moonVarName = this.getNewTempVarName();
-            p_node.m_symTabEntry = new VarEntry("retval", p_node.getType(), p_node.m_moonVarName, null);
-            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-        }
-    }
 
     public void visit(VariableNode p_node) {
         for (Node child : p_node.getChildren()) {
@@ -547,11 +593,6 @@ public class ComputeMemSizeVisitor extends Visitor {
     public void visit(DimNode p_node) {
     }
 
-    public void visit(FloatNode p_node) {
-        p_node.m_moonVarName =  this.getNewTempVarName() ;
-        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName, null);
-        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-    }
 
     public void visit(IndiceNode p_node) {
     }
@@ -568,15 +609,6 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-    }
-
-
-    public void visit(NumNode p_node) {
-        System.out.println(p_node.m_moonVarName);
-        p_node.m_moonVarName =  this.getNewTempVarName() ;
-        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName, null);
-        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-
     }
 
 
