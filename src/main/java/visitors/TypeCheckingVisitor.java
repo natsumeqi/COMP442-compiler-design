@@ -347,6 +347,7 @@ public class TypeCheckingVisitor extends Visitor {
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
         p_node.m_data = p_node.getChildren().get(0).getData();
+//        System.out.println("datamem: "+p_node.m_type);
     }
 
     public void visit(TypeNode p_node) {
@@ -380,8 +381,10 @@ public class TypeCheckingVisitor extends Visitor {
 
 //         search variable in symbol table; for cases in Dot, the type is not right, will check in the Dot node
         if (p_node.m_symTab != null) {
+//            System.out.println("p_node.m_data:"+p_node.m_data);
             SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
             if (entry.m_name != null) {
+//                System.out.println("entry.m_name: "+entry.m_name+" entry.type: "+ entry.m_type);
                 p_node.m_type = entry.m_type;
             } else {
 
@@ -657,6 +660,12 @@ public class TypeCheckingVisitor extends Visitor {
             }
         }
         p_node.m_type = "[" + p_node.getChildren().size() + "]";
+    }
+
+    public void visit(RelExprNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.accept(this);
+        }
     }
 
 

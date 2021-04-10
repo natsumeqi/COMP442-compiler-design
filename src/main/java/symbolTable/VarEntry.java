@@ -20,30 +20,28 @@ public class VarEntry extends SymTabEntry {
     public String toString() {
         String dim_print;
         if (m_dims != null) {
-             dim_print = m_dims.toString().substring(1, m_dims.toString().length() - 1).replace(", ","");
-        }else{
-            dim_print="";
+            dim_print = m_dims.toString().substring(1, m_dims.toString().length() - 1).replace(", ", "");
+        } else {
+            dim_print = "";
         }
 
         if (m_visibility == null) {
             return String.format("%-12s", "| " + m_kind) +
                     String.format("%-16s", "| " + m_name) +
-                    String.format("%-40s", "| " + m_type + dim_print)
+                    String.format("%-40s", "| " + m_type + dim_print) +
                     //String.format("%-12"  , "| " + m_dims) +
-//                String.format("%-8s"  , "| " + m_size) +
-//                String.format("%-8s"  , "| " + m_offset)
-                    + "|"
-                    ;
+                    String.format("%-8s", "| " + m_size) +
+                    String.format("%-8s", "| " + m_offset)
+                    + "|";
         } else {
             return String.format("%-12s", "| " + m_kind) +
                     String.format("%-16s", "| " + m_name) +
                     String.format("%-40s", "| " + m_type + dim_print) +
-                    String.format("%-12s", "| " + m_visibility)
+                    String.format("%-12s", "| " + m_visibility) +
                     //String.format("%-12"  , "| " + m_dims) +
-//                String.format("%-8s"  , "| " + m_size) +
-//                String.format("%-8s"  , "| " + m_offset)
-                    + "|"
-                    ;
+                    String.format("%-8s", "| " + m_size) +
+                    String.format("%-8s", "| " + m_offset)
+                    + "|";
         }
 
     }

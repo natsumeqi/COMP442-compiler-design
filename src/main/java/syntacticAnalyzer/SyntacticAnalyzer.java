@@ -1,8 +1,8 @@
-package A2_syntacticAnalyzer;
+package syntacticAnalyzer;
 
 import AST.Node;
-import A1_lexicalAnalyzer.LexicalAnalyzer;
-import A1_lexicalAnalyzer.Token;
+import lexicalAnalyzer.LexicalAnalyzer;
+import lexicalAnalyzer.Token;
 
 import java.io.File;
 import java.io.PrintStream;

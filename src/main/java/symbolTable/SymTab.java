@@ -167,15 +167,15 @@ public class SymTab {
         String prelinespacing = "";
         for (int i = 0; i < this.m_tableLevel; i++)
             prelinespacing += "|    ";
-        stringtoreturn += "\n" + prelinespacing + "===================================================================================\n";
+        stringtoreturn += "\n" + prelinespacing + "=====================================================================================\n";
         stringtoreturn += prelinespacing + String.format("%-30s", "| table: " + m_name) +
-//                String.format("%-27s" , " scope offset: " + m_size) +
+                String.format("%-54s" , " scope offset: " + m_size) +
                 "|\n";
-        stringtoreturn += prelinespacing + "=========================================================================\n";
+        stringtoreturn += prelinespacing + "=====================================================================================\n";
         for (int i = 0; i < m_symList.size(); i++) {
             stringtoreturn += prelinespacing + m_symList.get(i).toString() + '\n';
         }
-        stringtoreturn += prelinespacing + "=========================================================================";
+        stringtoreturn += prelinespacing + "=====================================================================================";
         return stringtoreturn;
     }
 }

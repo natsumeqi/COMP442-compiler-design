@@ -1,4 +1,4 @@
-package A1_lexicalAnalyzer;
+package lexicalAnalyzer;
 
 public class Token {
 

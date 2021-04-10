@@ -12,10 +12,10 @@ import AST.*;
  * IdNode, AddOpNode, MultOpNode, and AssignStatp_node.
  */
 
-public class ReconstructSourceProgramVisitor extends Visitor {
+public class ReconstructSourceVisitor extends Visitor {
 
 
-    public ReconstructSourceProgramVisitor() {
+    public ReconstructSourceVisitor() {
     }
 
 

@@ -1,4 +1,4 @@
-package A2_syntacticAnalyzer;
+package syntacticAnalyzer;
 
 public class Rule {
     private String rule_id;

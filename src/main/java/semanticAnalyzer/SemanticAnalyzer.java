@@ -1,7 +1,8 @@
-package A3_semanticAnalyzer;
+package semanticAnalyzer;
 
 import AST.Node;
-import visitors.ReconstructSourceProgramVisitor;
+import visitors.ComputeMemSizeVisitor;
+import visitors.ReconstructSourceVisitor;
 import visitors.SymTabCreationVisitor;
 import visitors.TypeCheckingVisitor;
 
@@ -16,7 +17,8 @@ public class SemanticAnalyzer {
 
     private final SymTabCreationVisitor STCVisitor = new SymTabCreationVisitor();
     private final TypeCheckingVisitor TCVisitor = new TypeCheckingVisitor();
-    private final ReconstructSourceProgramVisitor RSPVisitor = new ReconstructSourceProgramVisitor   ();
+    private final ReconstructSourceVisitor RSPVisitor = new ReconstructSourceVisitor();
+    private final ComputeMemSizeVisitor CMSVisitor = new ComputeMemSizeVisitor();
 
     private PrintStream writer_symTab;
     private PrintStream writer_semantic_error;
@@ -35,6 +37,7 @@ public class SemanticAnalyzer {
         progNode.accept(RSPVisitor);
         progNode.accept(STCVisitor);
         progNode.accept(TCVisitor);
+        progNode.accept(CMSVisitor);
     }
 
 

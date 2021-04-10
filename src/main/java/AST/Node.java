@@ -16,7 +16,7 @@ public abstract class Node {
     public String m_sa_name = null;
     public int m_line;
 
-    private List<Node> m_children = new ArrayList<Node>();
+    private List<Node> m_children = new ArrayList<>();
     private Node m_parent = null;
     public String m_data = null;
     public static int m_nodeLevel = 0;
@@ -36,20 +36,19 @@ public abstract class Node {
     public String m_type = null;
 
     // introduced by the construct assignment and expression string visitor
-    public String m_subtreeString = new String();
+    public String m_subtreeString = "";
 
     // introduced by symbol table creation visitor
     public SymTab m_symTab = null;
     public SymTabEntry m_symTabEntry = null;
 
-//    // introduced by code generation visitors
-//    public  String      m_localRegister      = new String();
-//    public  String      m_leftChildRegister  = new String();
-//    public  String      m_rightChildRegister = new String();
-//    public  String      m_moonVarName        = new String();
+    // introduced by code generation visitors
+    public  String      m_localRegister      = "";
+    public  String      m_leftChildRegister  = "";
+    public  String      m_rightChildRegister = "";
+    public  String      m_moonVarName        = "";
 
     public Node() {
-
     }
 
     public Node(String p_data) {

@@ -1,4 +1,4 @@
-package A2_syntacticAnalyzer;
+package syntacticAnalyzer;
 
 //import com.fasterxml.jackson.core.type.TypeReference;
 //import com.fasterxml.jackson.databind.ObjectMapper;
@@ -413,7 +413,7 @@ public class Grammar {
 
     private void createParsingTable() {
 
-        Map<String, String> table_entry_table = new HashMap<>();
+        Map<String, String> table_entry_table;
         table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "error"}, {"div", "error"}, {"continue", "error"}, {"else", "error"}, {"leq", "error"}, {"id", "error"}, {"neq", "error"}, {"qm", "error"}, {"write", "error"}, {"if", "error"}, {"read", "error"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "error"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "FUNCDECL_func_id_lpar_FPARAMS_rpar_colon_FUNCDECLTAIL_semi"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "error"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
         parsing_table.put("FUNCDECL", table_entry_table);
         table_entry_table = Stream.of(new String[][]{{"mult", "error"}, {"lpar", "error"}, {"lt", "error"}, {"main", "error"}, {"integer", "error"}, {"float", "error"}, {"while", "STATEMENT_while_lpar_EXPR_rpar_STATBLOCK_semi"}, {"div", "error"}, {"continue", "STATEMENT_continue_semi"}, {"else", "error"}, {"leq", "error"}, {"id", "STATEMENT_FUNCORASSIGNSTAT_semi"}, {"neq", "error"}, {"qm", "error"}, {"write", "STATEMENT_write_lpar_EXPR_rpar_semi"}, {"if", "STATEMENT_if_lpar_EXPR_rpar_then_STATBLOCK_else_STATBLOCK_semi"}, {"read", "STATEMENT_read_lpar_VARIABLE_rpar_semi"}, {"void", "error"}, {"$", "error"}, {"var", "error"}, {"then", "error"}, {"eq", "error"}, {"plus", "error"}, {"lsqbr", "error"}, {"minus", "error"}, {"private", "error"}, {"string", "error"}, {"intnum", "error"}, {"dot", "error"}, {"lcurbr", "error"}, {"stringlit", "error"}, {"geq", "error"}, {"not", "error"}, {"public", "error"}, {"and", "error"}, {"rpar", "error"}, {"semi", "error"}, {"rsqbr", "error"}, {"inherits", "error"}, {"class", "error"}, {"sr", "error"}, {"or", "error"}, {"break", "STATEMENT_break_semi"}, {"rcurbr", "error"}, {"gt", "error"}, {"comma", "error"}, {"func", "error"}, {"colon", "error"}, {"floatnum", "error"}, {"return", "STATEMENT_return_lpar_EXPR_rpar_semi"}, {"assign", "error"}}).collect(Collectors.toMap(data -> data[0], data -> data[1]));

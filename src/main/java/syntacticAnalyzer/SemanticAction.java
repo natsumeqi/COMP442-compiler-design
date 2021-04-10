@@ -1,4 +1,4 @@
-package A2_syntacticAnalyzer;
+package syntacticAnalyzer;
 
 public class SemanticAction {
     private String sem_act_id;
