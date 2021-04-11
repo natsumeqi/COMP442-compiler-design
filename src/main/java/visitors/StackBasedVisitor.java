@@ -46,19 +46,19 @@ public class StackBasedVisitor extends Visitor {
         // generate code
         m_moonExecCode += "% processing temporal(add): " + p_node.m_moonVarName + " := " + p_node.getChildren().get(0).m_moonVarName + " " + p_node.getData() + " " + p_node.getChildren().get(1).m_moonVarName + "\n";
         // load the values of the operands into registers
-        m_moonExecCode += m_mooncodeindent + "lw " + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
-        m_moonExecCode += m_mooncodeindent + "lw " + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
         if (p_node.m_data.equals("or")) {
 
         } else {
             if (p_node.m_data.equals("+")) {
                 // add operands
-                m_moonExecCode += m_mooncodeindent + "add " + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+                m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
             } else {
-                m_moonExecCode += m_mooncodeindent + "sub " + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+                m_moonExecCode += m_mooncodeindent + "sub\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
             }
             // assign the result into a temporary variable (assumed to have been previously created by the symbol table generator)
-            m_moonExecCode += m_mooncodeindent + "sw " + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register3 + "\n";
+            m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register3 + "\n";
         }
 
         // deallocate the registers
@@ -77,8 +77,8 @@ public class StackBasedVisitor extends Visitor {
         // generate code
         m_moonExecCode += "% processing temporal(mul): " + p_node.m_moonVarName + " := " + p_node.getChildren().get(0).m_moonVarName + " " + p_node.getData() + " " + p_node.getChildren().get(1).m_moonVarName + "\n";
         // load the values of the operands into registers
-        m_moonExecCode += m_mooncodeindent + "lw " + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
-        m_moonExecCode += m_mooncodeindent + "lw " + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
         if (p_node.m_data.equals("and")) {
 //            // add operands
 //            m_moonExecCode += m_mooncodeindent + "mul "  + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
@@ -87,13 +87,13 @@ public class StackBasedVisitor extends Visitor {
 
         } else {
             if (p_node.m_data.equals("*")) {
-                m_moonExecCode += m_mooncodeindent + "mul " + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+                m_moonExecCode += m_mooncodeindent + "mul\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
 
             } else {
-                m_moonExecCode += m_mooncodeindent + "div " + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+                m_moonExecCode += m_mooncodeindent + "div\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
             }
             // assign the result into a temporary variable (assumed to have been previously created by the symbol table generator)
-            m_moonExecCode += m_mooncodeindent + "sw " + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register3 + "\n";
+            m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register3 + "\n";
 
         }
         // deallocate the registers
@@ -112,9 +112,9 @@ public class StackBasedVisitor extends Visitor {
         // generate code
         m_moonExecCode += "% processing literal: " + p_node.m_moonVarName + " := " + p_node.getData() + "\n";
         // create a value corresponding to the literal value
-        m_moonExecCode += m_mooncodeindent + "addi " + local_register1 + ",r0," + p_node.getData() + "\n";
+        m_moonExecCode += m_mooncodeindent + "addi\t" + local_register1 + ",r0," + p_node.getData() + "\n";
         // assign this value to a temporary variable (assumed to have been previously created by the symbol table generator)
-        m_moonExecCode += m_mooncodeindent + "sw " + p_node.m_symTabEntry.m_offset + "(r14)," + local_register1 + "\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTabEntry.m_offset + "(r14)," + local_register1 + "\n";
         // deallocate the register for the current node
         this.m_registerPool.push(local_register1);
     }
@@ -205,7 +205,8 @@ public class StackBasedVisitor extends Visitor {
         m_moonExecCode += m_mooncodeindent + "entry\n";
         // make the stack frame pointer (address stored in r14) point
         // to the top address allocated to the moon processor
-        m_moonExecCode += m_mooncodeindent + "addi r14,r0,topaddr\n";
+        m_moonExecCode +=  "% set stack pointer\n";
+        m_moonExecCode += m_mooncodeindent + "addi\tr14,r0,topaddr\n";
         // propagate acceptance of this visitor to all the children
         for (Node child : p_node.getChildren()) {
             child.accept(this);
@@ -319,6 +320,35 @@ public class StackBasedVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
+        // create a local variable and allocate a register to this subcomputation
+        String local_register1 = this.m_registerPool.pop();
+        // generate code
+        m_moonExecCode +=  "% processing: read("  + p_node.getChildren().get(0).m_moonVarName + ")\n";
+        // prompt user to enter
+        m_moonExecCode += m_mooncodeindent2 + "% ask for "+p_node.getChildren().get(0).m_moonVarName+"\n";
+        m_moonExecCode += m_mooncodeindent + "addi\t"+local_register1+",r0,ent" + p_node.getChildren().get(0).m_moonVarName + "\n";
+        m_moonDataCode += String.format("%-10s" , "ent"+p_node.getChildren().get(0).m_moonVarName) + "db\t\"Enter "+p_node.getChildren().get(0).m_moonVarName+": \", 0\n";
+        m_moonExecCode += m_mooncodeindent + "addi\tr14,r14," + p_node.m_symTab.m_size + "\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t-8(r14)," + local_register1 + "\n";
+        m_moonExecCode += m_mooncodeindent + "jl\tr15, putstr\n";
+        m_moonExecCode += m_mooncodeindent + "subi\tr14,r14," + p_node.m_symTab.m_size + "\n";
+        // make the stack frame pointer point to the called function's stack frame
+        m_moonExecCode += m_mooncodeindent2 + "% link buffer to stack\n";
+        m_moonExecCode += m_mooncodeindent + "addi\tr14,r14," + p_node.m_symTab.m_size + "\n";
+        m_moonExecCode += m_mooncodeindent + "addi\t" + local_register1 + ",r0, buf\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t-8(r14)," + local_register1 + "\n";
+        m_moonExecCode += m_mooncodeindent2 + "% read a string from stdin\n";
+        m_moonExecCode += m_mooncodeindent + "jl\tr15, getstr\n";
+        m_moonExecCode += m_mooncodeindent2 + "% convert string to integer\n";
+        m_moonExecCode += m_mooncodeindent + "jl\tr15, strint\n";
+        m_moonExecCode += m_mooncodeindent2 + "% store "+p_node.getChildren().get(0).m_moonVarName+"\n";
+        // make the stack frame pointer point back to the current function's stack frame
+        m_moonExecCode += m_mooncodeindent + "subi\tr14,r14," + p_node.m_symTab.m_size + "\n";
+        // receive the return value in r13 and right away put it in the next called function's stack frame
+        m_moonExecCode += m_mooncodeindent + "sw\t"+ p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset+"(r14),r13\n";
+
+        //deallocate local register
+        this.m_registerPool.push(local_register1);
     }
 
 
@@ -327,29 +357,29 @@ public class StackBasedVisitor extends Visitor {
             child.accept(this);
         }
         // create a local variable and allocate a register to this subcomputation
-        String localregister1 = this.m_registerPool.pop();
+        String local_register1 = this.m_registerPool.pop();
         //generate code
-        m_moonExecCode +=  "% processing: put("  + p_node.getChildren().get(0).m_moonVarName + ")\n";
+        m_moonExecCode +=  "% processing: write("  + p_node.getChildren().get(0).m_moonVarName + ")\n";
         // put the value to be printed into a register
-        m_moonExecCode += m_mooncodeindent + "lw " + localregister1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
         m_moonExecCode += m_mooncodeindent2 + "% put value on stack\n";
         // make the stack frame pointer point to the called function's stack frame
-        m_moonExecCode += m_mooncodeindent + "addi r14,r14," + p_node.m_symTab.m_size + "\n";
+        m_moonExecCode += m_mooncodeindent + "addi\tr14,r14," + p_node.m_symTab.m_size + "\n";
         // copy the value to be printed in the called function's stack frame
-        m_moonExecCode += m_mooncodeindent + "sw -8(r14)," + localregister1 + "\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t-8(r14)," + local_register1 + "\n";
         m_moonExecCode += m_mooncodeindent2 + "% link buffer to stack\n";
-        m_moonExecCode += m_mooncodeindent + "addi " + localregister1 + ",r0, buf\n";
-        m_moonExecCode += m_mooncodeindent + "sw -12(r14)," + localregister1 + "\n";
+        m_moonExecCode += m_mooncodeindent + "addi " + local_register1 + ",r0, buf\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t-12(r14)," + local_register1 + "\n";
         m_moonExecCode += m_mooncodeindent2 + "% convert int to string for output\n";
-        m_moonExecCode += m_mooncodeindent + "jl r15, intstr\n";
+        m_moonExecCode += m_mooncodeindent + "jl\tr15, intstr\n";
         // receive the return value in r13 and right away put it in the next called function's stack frame
-        m_moonExecCode += m_mooncodeindent + "sw -8(r14),r13\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t-8(r14),r13\n";
         m_moonExecCode += m_mooncodeindent2 + "% output to console\n";
-        m_moonExecCode += m_mooncodeindent + "jl r15, putstr\n";
+        m_moonExecCode += m_mooncodeindent + "jl\tr15, putstr\n";
         // make the stack frame pointer point back to the current function's stack frame
-        m_moonExecCode += m_mooncodeindent + "subi r14,r14," + p_node.m_symTab.m_size + "\n";
+        m_moonExecCode += m_mooncodeindent + "subi\tr14,r14," + p_node.m_symTab.m_size + "\n";
         //deallocate local register
-        this.m_registerPool.push(localregister1);
+        this.m_registerPool.push(local_register1);
     }
 
     public void visit(ReturnStatNode p_node) {
@@ -376,9 +406,9 @@ public class StackBasedVisitor extends Visitor {
         //generate code
         m_moonExecCode +=  "% processing assignment: "  + p_node.getChildren().get(0).m_moonVarName + " := " + p_node.getChildren().get(1).m_moonVarName + "\n";
         // load the assigned value into a register
-        m_moonExecCode += m_mooncodeindent + "lw "   + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t"   + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
         // assign the value to the assigned variable
-        m_moonExecCode += m_mooncodeindent + "sw "   + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t"   + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
         // deallocate local registers
         this.m_registerPool.push(local_register1);
         this.m_registerPool.push(local_register2);
