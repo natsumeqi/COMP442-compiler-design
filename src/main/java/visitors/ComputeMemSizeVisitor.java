@@ -521,6 +521,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
+        p_node.m_moonVarName = p_node.getChildren().get(0).m_moonVarName;
     }
 
     public void visit(WhileStatNode p_node) {
@@ -624,7 +625,13 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        p_node.m_moonVarName = p_node.getChildren().get(0).m_moonVarName;
+        if (p_node.m_type != null) {
+            p_node.m_moonVarName = this.getNewTempVarName();
+            p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getType(), p_node.m_moonVarName, null);
+            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+        }
+//        p_node.m_moonVarName = p_node.getChildren().get(0).m_moonVarName;
     }
 
     public void visit(RelOpNode p_node) {

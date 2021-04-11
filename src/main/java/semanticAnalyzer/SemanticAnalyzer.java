@@ -34,9 +34,13 @@ public class SemanticAnalyzer {
     }
 
     public void createTableAndChecking(){
+        // reconstruct source
         progNode.accept(RSPVisitor);
+        // symbol table creation
         progNode.accept(STCVisitor);
+        // check type
         progNode.accept(TCVisitor);
+        // add new variables to table, computes memory size and offset
         progNode.accept(CMSVisitor);
     }
 

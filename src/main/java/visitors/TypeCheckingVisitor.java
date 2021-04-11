@@ -192,6 +192,8 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
         String left_operand_type = p_node.getChildren().get(0).getType();
         String right_operand_type = p_node.getChildren().get(1).getType();
+//        System.out.println("add: "+left_operand_type);
+//        System.out.println("add: "+right_operand_type);
         if (left_operand_type != null) {
             if (left_operand_type.equals(right_operand_type)) {
                 p_node.setType(left_operand_type);
@@ -665,6 +667,28 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(RelExprNode p_node) {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
+        }
+        String left_operand_type = p_node.getChildren().get(0).getType();
+        String right_operand_type = p_node.getChildren().get(2).getType();
+//        System.out.println(left_operand_type);
+//        System.out.println(right_operand_type);
+        if (left_operand_type != null) {
+            if (left_operand_type.equals(right_operand_type)) {
+                p_node.setType(left_operand_type);
+            } else {
+                p_node.setType("typeerror");
+                // add only once in error set
+                if (!error_set.contains(p_node.m_line)) {
+                    this.m_errors += "[10.1][semantic error][line:" + p_node.m_line + "] Type error in RelOpNode:  "
+                            + p_node.getChildren().get(0).getData()
+                            + "(" + p_node.getChildren().get(0).getType() + ")"
+                            + " and "
+                            + p_node.getChildren().get(1).getData()
+                            + "(" + p_node.getChildren().get(1).getType() + ")"
+                            + "\n";
+                    error_set.add(p_node.m_line);
+                }
+            }
         }
     }
 

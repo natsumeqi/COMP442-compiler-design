@@ -122,6 +122,7 @@ public class ReconstructSourceVisitor extends Visitor {
         p_node.m_subtreeString += "if(" + p_node.getChildren().get(0).m_subtreeString + ")";
         p_node.m_subtreeString += "\nthen {" + p_node.getChildren().get(1).m_subtreeString + "} ";
         p_node.m_subtreeString += "else" + p_node.getChildren().get(2).m_subtreeString + ";";
+        p_node.m_line = p_node.getChildren().get(0).m_line;
     }
 
     public void visit(WhileStatNode p_node) {
