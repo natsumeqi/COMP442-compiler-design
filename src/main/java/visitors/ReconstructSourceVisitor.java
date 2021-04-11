@@ -130,6 +130,7 @@ public class ReconstructSourceVisitor extends Visitor {
             child.accept(this);
         p_node.m_subtreeString += "while(" + p_node.getChildren().get(0).m_subtreeString + ")";
         p_node.m_subtreeString += "{\n" + p_node.getChildren().get(1).m_subtreeString + "};";
+        p_node.m_line = p_node.getChildren().get(0).m_line;
     }
 
     public void visit(ReadStatNode p_node) {
