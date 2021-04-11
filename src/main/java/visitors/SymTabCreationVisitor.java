@@ -9,7 +9,7 @@ import java.util.Vector;
 public class SymTabCreationVisitor extends Visitor {
 
     /**
-     * Template from astvisitor
+     * Template from lecture material: astvisitor
      * Visitor to create symbol tables and their entries.
      * <p>
      * This concerns only nodes that either:

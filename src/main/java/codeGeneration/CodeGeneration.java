@@ -2,6 +2,7 @@ package codeGeneration;
 
 import AST.Node;
 import visitors.ComputeMemSizeVisitor;
+import visitors.StackBasedVisitor;
 import visitors.SymTabCreationVisitor;
 
 import java.io.File;
@@ -12,8 +13,9 @@ public class CodeGeneration {
 
     private Node progNode;
 
-    private final SymTabCreationVisitor STCVisitor   = new SymTabCreationVisitor();
-    private final ComputeMemSizeVisitor CMSVisitor = new ComputeMemSizeVisitor();
+
+//    private final ComputeMemSizeVisitor CMSVisitor = new ComputeMemSizeVisitor();
+    private final StackBasedVisitor SBVisitor = new StackBasedVisitor();
 
 
     private PrintStream writer_moon;
@@ -28,7 +30,8 @@ public class CodeGeneration {
 
     public void generateCode(){
 
-        progNode.accept(CMSVisitor);
+//        progNode.accept(CMSVisitor);
+        progNode.accept(SBVisitor);
     }
 
 
@@ -36,12 +39,13 @@ public class CodeGeneration {
     public void writeToFiles(String src_file_path) {
         try {
             String file_path_temp = src_file_path.substring(0, src_file_path.length() - 4);
-            File outfile_moon = new File(file_path_temp + ".moon");
+            File outfile_moon = new File(file_path_temp + ".m");
             System.out.println("[Code] Writing to the file: " + outfile_moon.getName());
             writer_moon = new PrintStream(outfile_moon);
             PrintStream console = System.out;
             System.setOut(writer_moon);
-//            System.out.println(CMSVisitor.m_errors);
+            System.out.println(SBVisitor.m_moonExecCode);
+            System.out.println(SBVisitor.m_moonDataCode);
             System.setOut(console);
 
         } catch (FileNotFoundException e) {
