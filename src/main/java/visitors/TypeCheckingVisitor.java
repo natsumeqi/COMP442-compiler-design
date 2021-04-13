@@ -59,6 +59,7 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(FuncDefNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+        p_node.m_type = p_node.getChildren().get(3).m_type;
     }
 
     public void visit(ScopeNode p_node) {
@@ -76,13 +77,15 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(FParamNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
+        p_node.m_type = returnTypeDate(p_node.getChildren().get(0));
+//        System.out.println(p_node.m_type);
     }
 
     public void visit(DimListNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
         if (p_node.getChildren().size() >= 2) {
-            for (int i = 1; i < p_node.getChildren().size(); i++) {
+            for (int i = 0; i < p_node.getChildren().size(); i++) {
                 if (p_node.getChildren().get(i).m_data.equals("[]")) {
                     this.m_errors += "[13.4][semantic error][line:" + p_node.m_line + "] Array dimension unknown:  '" + p_node.m_subtreeString + "'\n";
                 }
@@ -690,7 +693,13 @@ public class TypeCheckingVisitor extends Visitor {
         }
     }
 
-
+    private String returnTypeDate(Node p_node) {
+        if (p_node.isLeaf()) {
+            return p_node.getData();
+        } else {
+            return p_node.getChildren().get(0).getData().toUpperCase();
+        }
+    }
 }
 
 

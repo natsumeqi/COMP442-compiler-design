@@ -28,20 +28,24 @@ public class ComputeMemSizeVisitor extends Visitor {
         if (ve.m_dims != null) {
             if (!ve.m_dims.isEmpty())
                 for (String dim : ve.m_dims) {
-                    // todo []
-                    int dim_int = Integer.parseInt(dim);
+                    // todo test []
+                    String dim_string =dim.substring(1,dim.length()-1);
+                    if(!dim_string.isEmpty() && !dim_string.equals("0") ){
+                    int dim_int = Integer.parseInt(dim_string);
                     size *= dim_int;
-                }
+                }}
         }
         return size;
     }
 
     public int sizeOfTypeNode(Node p_node) {
         int size = 0;
-        if (p_node.m_type.equals("integer"))
-            size = 4;
-        else if (p_node.m_type.equals("float"))
-            size = 8;
+//        if(p_node.m_type!=null) {
+            if (p_node.m_type.equals("integer"))
+                size = 4;
+            else if (p_node.m_type.equals("float"))
+                size = 8;
+//        }
         return size;
     }
 
@@ -139,13 +143,7 @@ public class ComputeMemSizeVisitor extends Visitor {
     }
 
 
-    private String returnTypeDate(Node p_node) {
-        if (p_node.isLeaf()) {
-            return p_node.getData();
-        } else {
-            return p_node.getChildren().get(0).getData().toUpperCase();
-        }
-    }
+
 
 
     public void visit(FuncDeclNode p_node) {
@@ -154,7 +152,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             func_visibility = p_node.getLm_sibling().getData();
         }
         String func_name = p_node.getChildren().get(0).getData();
-        String func_type = returnTypeDate(p_node.getChildren().get(2));
+        String func_type = p_node.getChildren().get(2).getType();
         String fParam_type;
 
 
@@ -181,7 +179,7 @@ public class ComputeMemSizeVisitor extends Visitor {
 
         // aggregate information from the subtree
         // get the type from the first child node and aggregate here
-        String var_type = returnTypeDate(p_node.getChildren().get(0));
+        String var_type = p_node.getChildren().get(0).getType();
         // get the id from the second child node and aggregate here
         String var_id = p_node.getChildren().get(1).getData();
         // loop over the list of dimension nodes and aggregate here
@@ -233,7 +231,7 @@ public class ComputeMemSizeVisitor extends Visitor {
 
 
     public void visit(FuncDefNode p_node) {
-        String func_type = returnTypeDate(p_node.getChildren().get(3));
+        String func_type = p_node.getChildren().get(3).getType();
         String func_name = p_node.getChildren().get(1).getData();
         String fParam_type, fParam_name;
         String func_scope = "";
@@ -250,7 +248,8 @@ public class ComputeMemSizeVisitor extends Visitor {
 
         // add parameter as VarEntry into the table
         for (Node param : p_node.getChildren().get(2).getChildren()) {
-            fParam_type = param.getChildren().get(0).getData();
+//            fParam_type = returnTypeDate(param.getChildren().get(0));
+            fParam_type = param.getChildren().get(0).getType();
             fParam_name = param.getChildren().get(1).getData();
             String fParam;
             StringBuilder dim_string = new StringBuilder();
@@ -262,7 +261,10 @@ public class ComputeMemSizeVisitor extends Visitor {
 
             fParam = fParam_type + dim_string;
             fParam_list.add(fParam);
-            local_table.addEntry(new VarEntry("param", fParam_type, fParam_name, dim_list));
+            VarEntry param_entry =new VarEntry("param", fParam_type, fParam_name, dim_list);
+//            System.out.println(param.m_type);
+            param_entry.m_size = this.sizeOfTypeNode( param);
+            local_table.addEntry(param_entry);
         }
 
 
@@ -289,7 +291,7 @@ public class ComputeMemSizeVisitor extends Visitor {
                 }
             }
         } else {    // for free functions
-
+//            System.out.println(func_name);
             p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, local_table, p_node.m_line);
 
             // check multiply declared classes
@@ -302,10 +304,10 @@ public class ComputeMemSizeVisitor extends Visitor {
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                     p_node.m_symTab = local_table;
                 }
-
-            } else {
-                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-                p_node.m_symTab = local_table;
+                else {
+                    p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                    p_node.m_symTab = local_table;
+                }
             }
         }
 
@@ -407,7 +409,7 @@ public class ComputeMemSizeVisitor extends Visitor {
     public void visit(NumNode p_node) {
 //        System.out.println(p_node.m_moonVarName);
         p_node.m_moonVarName = this.getNewTempVarName();
-        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName, null);
+        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName+"_"+p_node.m_data, null);// todo
         p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
 

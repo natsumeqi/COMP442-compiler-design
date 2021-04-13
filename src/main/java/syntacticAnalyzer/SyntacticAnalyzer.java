@@ -174,6 +174,7 @@ public class SyntacticAnalyzer {
                     // when the top of parsing stack is a semantic action
                 } else {
                     if (grammar.getSemantic_actions_list().contains(top_of_stack)) {
+//                        System.out.println(top_of_stack);
                         semanticActionOnStack();
                     }
                 }
@@ -501,10 +502,13 @@ public class SyntacticAnalyzer {
                             // first create a parent node, then reuse the node to make a family. Ex: makeFamily(Sign_i, Factor_s, reuse)
                             if (parameters[parameters.length - 1].trim().equals("reuse")) {
                                 String op_name = parameters[0];
-                                for (int i = parameters.length - 2; i >= 0; i--) {
+                                for (int i = parameters.length - 2; i > 0; i--) {
                                     if (!semantic_stack.isEmpty()) {
                                         node_on_top = semantic_stack.peek();
+//                                        System.out.println("node_on_top: "+node_on_top.m_sa_name);
+//                                        System.out.println("parameter[i]: "+parameters[i]);
                                         if (parameters[i].trim().equals(node_on_top.m_sa_name)) {
+//                                            System.out.println("op_name: "+op_name);
 
                                             // reserve the node for opNode
                                             if (node_on_top.m_sa_name.equals(op_name)) {
@@ -550,6 +554,7 @@ public class SyntacticAnalyzer {
 
                     // keep the arraylist consistent with the following call of makeFamily
                     if (parameters[parameters.length - 1].trim().equals("reuse")) {
+//                        System.out.println("opnode_back: "+opNode_backup.m_sa_name);
                         opNode = opNode_backup;
                     } else {
                         opNode = nodeFactory.makeNode(op, op, node_line);

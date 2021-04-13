@@ -2,6 +2,7 @@ package visitors;
 
 import AST.*;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
@@ -115,7 +116,7 @@ public class StackBasedVisitor extends Visitor {
         m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(2).m_moonVarName).m_offset + "(r14)\n";
 
 
-        String rel_op_moon="";
+        String rel_op_moon = "";
         String rel_op = p_node.getChildren().get(1).m_data;
         switch (rel_op) {
             case "==":
@@ -139,7 +140,7 @@ public class StackBasedVisitor extends Visitor {
         }
 
         // relational operands
-        m_moonExecCode += m_mooncodeindent + rel_op_moon+"\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+        m_moonExecCode += m_mooncodeindent + rel_op_moon + "\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
         // assign the result into a temporary variable (assumed to have been previously created by the symbol table generator)
         m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register3 + "\n";
 
@@ -231,9 +232,18 @@ public class StackBasedVisitor extends Visitor {
 
 
     public void visit(FuncDefNode p_node) {
-        for (Node child : p_node.getChildren()) {
+        m_moonExecCode += "% processing function definition: " + p_node.getChildren().get(1).m_moonVarName + "\n";
+        //create the tag to jump onto
+        // and copy the jumping-back address value in the called function's stack frame
+        m_moonExecCode += String.format("%-10s", p_node.getChildren().get(1).m_moonVarName) + "sw -4(r14),r15\n";
+        //generate the code for the function body
+        for (Node child : p_node.getChildren())
             child.accept(this);
-        }
+        // copy back the jumping-back address into r15
+        m_moonExecCode += m_mooncodeindent + "lw r15,-4(r14)\n";
+        // jump back to the calling function
+        m_moonExecCode += m_mooncodeindent + "jr r15\n";
+        m_moonExecCode += "% end function " + p_node.getChildren().get(1).m_moonVarName + " definition";
     }
 
     public void visit(FuncBodyNode p_node) {
@@ -445,17 +455,26 @@ public class StackBasedVisitor extends Visitor {
         // make the stack frame pointer point back to the current function's stack frame
         m_moonExecCode += m_mooncodeindent + "subi\tr14,r14," + p_node.m_symTab.m_size + "\n";
         // output newline
+        m_moonExecCode += m_mooncodeindent + "addi\t " + local_register1 + ",r0, 13\n";
+        m_moonExecCode += m_mooncodeindent + "putc\t " + local_register1 + "\n";
         m_moonExecCode += m_mooncodeindent + "addi\t " + local_register1 + ",r0, 10\n";
         m_moonExecCode += m_mooncodeindent + "putc\t " + local_register1 + "\n";
-
         //deallocate local register
         this.m_registerPool.push(local_register1);
     }
 
     public void visit(ReturnStatNode p_node) {
-        for (Node child : p_node.getChildren()) {
+        // propagate accepting the same visitor to all the children
+        // this effectively achieves Depth-First AST Traversal
+        String local_register1 = this.m_registerPool.pop();
+        for (Node child : p_node.getChildren())
             child.accept(this);
-        }
+        // copy the result of the return value into the first memory cell in the current stack frame
+        // this way, the return value is conveniently at the top of the calling function's stack frame
+        m_moonExecCode += "% processing: return(" + p_node.getChildren().get(0).m_moonVarName + ")\n";
+        m_moonExecCode += m_mooncodeindent + "lw " + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "sw " + "0(r14)," + local_register1 + "\n";
+        this.m_registerPool.push(local_register1);
     }
 
 
@@ -474,15 +493,51 @@ public class StackBasedVisitor extends Visitor {
         String local_register1 = this.m_registerPool.pop();
         String local_register2 = this.m_registerPool.pop();
         //generate code
-        m_moonExecCode += "% processing assignment: " + p_node.getChildren().get(0).m_moonVarName + " := " + p_node.getChildren().get(1).m_moonVarName + "\n";
+        m_moonExecCode += "% processing assignment: " + p_node.getChildren().get(0).m_subtreeString + " := " + p_node.getChildren().get(1).m_moonVarName + "\n";
         // load the assigned value into a register
         m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(1).m_moonVarName).m_offset + "(r14)\n";
         // assign the value to the assigned variable
-        m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t" + (p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + calculateOffsets(p_node.getChildren().get(0).m_moonVarName, p_node.getChildren().get(0).m_subtreeString, p_node.m_type))
+                + "(r14)," + local_register2 + "\n";
         // deallocate local registers
         this.m_registerPool.push(local_register1);
         this.m_registerPool.push(local_register2);
     }
+
+    private int calculateOffsets(String var_name, String var_string, String type) {
+//        System.out.println(type);
+        int size_of_type = 4;
+
+        if (type.equals("float")) {
+            size_of_type = 8;
+        }
+
+
+        if (var_name.equals(var_string)) {
+            return 0;
+        } else {
+            String indice_string = var_string.substring(var_name.length());
+//            int index=1;
+            int offsets = 0;
+            ArrayList<Integer> indice_list = new ArrayList<>();
+            while (indice_string.length() != 0) {
+
+
+//               if( indice_string.substring(indice_string.indexOf("[") + 1, indice_string.indexOf("]"))){
+//
+//               }
+//                int indice =
+//                        indice_list.add(indice);
+                    indice_string = indice_string.substring(indice_string.indexOf("]") + 1);
+
+            }
+            System.out.println(indice_string);
+            indice_list.forEach(System.out::println);
+            return 0;
+        }
+
+    }
+
 
     public void visit(TypeNode p_node) {
         for (Node child : p_node.getChildren()) {

@@ -23,7 +23,7 @@ public class FuncEntry extends SymTabEntry {
         if (m_visibility == null) {
             return String.format("%-12s", "| " + m_kind) +
                     String.format("%-16s", "| " + m_name) +
-                    String.format("%-40s", "| " + "(" + m_fParam.toString().substring(1, m_fParam.toString().length() - 1) + "):" + m_type) +
+                    String.format("%-50s", "| " + "(" + m_fParam.toString().substring(1, m_fParam.toString().length() - 1) + "):" + m_type) +
                     "|" +
                     m_subtable;
             // String.format("%-12"  , "| " + m_dims) +
@@ -33,7 +33,7 @@ public class FuncEntry extends SymTabEntry {
         } else {
             return String.format("%-12s", "| " + m_kind) +
                     String.format("%-16s", "| " + m_name) +
-                    String.format("%-40s", "| " + "(" + m_fParam.toString().substring(1, m_fParam.toString().length() - 1) + "):" + m_type) +
+                    String.format("%-50s", "| " + "(" + m_fParam.toString().substring(1, m_fParam.toString().length() - 1) + "):" + m_type) +
                     String.format("%-12s", "| " + m_visibility) +
                     "|" +
                     m_subtable;
