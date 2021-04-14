@@ -635,6 +635,10 @@ public class SymTabCreationVisitor extends Visitor {
     }
 
     public void visit(IndiceNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.m_symTab = p_node.m_symTab;
+            child.accept(this);
+        }
     }
 
     public void visit(InlineIfNode p_node) {

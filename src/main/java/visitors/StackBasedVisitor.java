@@ -298,7 +298,7 @@ public class StackBasedVisitor extends Visitor {
         m_moonDataCode += "% buffer space used for console output\n";
         // buffer used by the lib.m subroutines
         m_moonDataCode += String.format("%-10s", "buf") + "res 20\n";
-        m_moonDataCode += String.format("%-10s", "tempaddr") + "res 20\n";
+        m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
         // halting point of the entire program
         m_moonExecCode += m_mooncodeindent + "hlt\n\n";
         m_moonExecCode += "% -----------------------------------------------------------------------\n";
@@ -353,17 +353,27 @@ public class StackBasedVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.accept(this);
         }
-        System.out.println(p_node.m_data);
-        System.out.println(p_node.m_type);
+//        System.out.println(p_node.m_data);
+//        System.out.println(p_node.m_type);
         int size_of_type = sizeOfTypeNode(p_node);
 
-        System.out.println(p_node.m_moonVarName);
-        System.out.println(p_node.m_type);
-        System.out.println(p_node.m_data);
+//        System.out.println(p_node.m_moonVarName);
+//        System.out.println(p_node.m_type);
+
+        System.out.println("[datamem]p_node.m_date: "+p_node.m_data);
+        System.out.println("[datamem]size_of_type: "+size_of_type);
+
+
         SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
-        System.out.println(entry.m_dims);
+//        if(p_node.getR_sibling()!=null){
+//
+//        }
+        System.out.println("entry.m_dims: "+entry.m_dims);
         Vector<String> dims_string = new Vector<>();
         if (entry.m_name != null) {
+            dims_string = entry.m_dims;
+        }else{
+            entry = p_node.m_symTabEntry;
             dims_string = entry.m_dims;
         }
 
@@ -373,9 +383,9 @@ public class StackBasedVisitor extends Visitor {
             for (int i = 1; i < dims_string.size(); i++) {
                 int dim_col = 1;
                 for (int j = i; j < dims_string.size(); j++) {
-//                    System.out.println("dims_string: "+dims_string.get(j));
+                    System.out.println("dims_string: "+dims_string.get(j));
                     String dim_integer = dims_string.get(j).substring(1, dims_string.get(j).indexOf("]"));
-//                    System.out.println("dim_integer: "+dim_integer);
+                    System.out.println("dim_integer: "+dim_integer);
                     dim_col *= Integer.parseInt(dim_integer);
                 }
                 dims_col.add(dim_col);
@@ -384,6 +394,7 @@ public class StackBasedVisitor extends Visitor {
         }
         dims_col.add(1);
         dims_col.forEach(System.out::println);
+        System.out.println("dims_col size: "+dims_col.size());
         // if it is a array with dimension, calculate offsets
 
         if (!p_node.getChildren().get(1).isLeaf()) {
@@ -392,10 +403,13 @@ public class StackBasedVisitor extends Visitor {
             String local_register3 = this.m_registerPool.pop();
 
             Node first_index_node = p_node.getChildren().get(1).getChildren().get(0);
+            System.out.println( "indice size: "+p_node.getChildren().get(1).getChildren().size());
             for (int i = 0; i < p_node.getChildren().get(1).getChildren().size(); i++) {
 
                 Node index_expr_node = p_node.getChildren().get(1).getChildren().get(i);
                 // generate code
+                System.out.println(i);
+                System.out.println(p_node.m_line);
                 m_moonExecCode += "% processing offsets(mul): " + p_node.m_moonVarName + " := " + index_expr_node.m_moonVarName + " * " + dims_col.get(i) + "\n";
                 // load the values of the operands into registers
                 m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)\n";
@@ -419,7 +433,7 @@ public class StackBasedVisitor extends Visitor {
             m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)\n";
             m_moonExecCode += m_mooncodeindent + "muli\t" + local_register2 + "," + local_register1 + "," + size_of_type + "\n";
             // assign the result back into the first literal variable
-            m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
+//            m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
 
 
 //            // add variable offset
@@ -431,10 +445,10 @@ public class StackBasedVisitor extends Visitor {
 
 
 //            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register2 + ",r0," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "\n";
-            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)\n";
+//            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)\n";
 //            m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + ",r0,"+local_register2+ "\n";
 
-            m_moonExecCode += m_mooncodeindent + "sw\ttempaddr(r0)," + local_register2+ "\n";
+            m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register2+ "\n";
 
 //            m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register3+"\n";
 
@@ -562,13 +576,13 @@ public class StackBasedVisitor extends Visitor {
         //generate code
         m_moonExecCode += "% processing: write(" + p_node.getChildren().get(0).m_moonVarName + ")\n";
         // put the value to be printed into a register
-        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",tempaddr(r0)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",offset(r0)\n";
         m_moonExecCode += m_mooncodeindent + "sub\tr14,r14," + local_register2+"\n";
 
         m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
         m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register2+"\n";
 
-//        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",tempaddr(r0)\n";
+//        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",offset(r0)\n";
 //        m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register2 + "\n";   //todo
 
         m_moonExecCode += m_mooncodeindent2 + "% put value on stack\n";
@@ -635,6 +649,10 @@ public class StackBasedVisitor extends Visitor {
     }
 
 
+
+
+
+
     public void visit(DotNode p_node) {
         // process the first data member
         p_node.getChildren().get(0).accept(this);
@@ -644,41 +662,52 @@ public class StackBasedVisitor extends Visitor {
         String local_register1 = this.m_registerPool.pop();
         String local_register2 = this.m_registerPool.pop();
         String local_register3 = this.m_registerPool.pop();
-        String local_register4 = this.m_registerPool.pop();
-        for (int i = 1; i < p_node.getChildren().size(); i++) {
+
+        if(!p_node.getChildren().get(0).getChildren().get(1).isLeaf()) {
+
+            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + ",offset(r0)\n";
+//            m_moonExecCode += m_mooncodeindent + "sub\tr14,r14," + local_register1 + "\n";
+        }else{
+            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register1 + ",r0,0\n";
+        }
 
 
-//            m_moonExecCode += m_mooncodeindent + "sw\ttempaddr(r0),r14\n";
+
+
+
+//            m_moonExecCode += m_mooncodeindent + "sw\toffset(r0),r14\n";
 //            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)\n";
 //            m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register2+"\n";
 
             m_moonExecCode += "% processing dot: " + p_node.m_subtreeString + "\n";
-            // store the offset of the previous data member
-            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + ",tempaddr(r0)\n";
-
-            // add the two offsets
-            m_moonExecCode += m_mooncodeindent + "add\t" + local_register2 + "," + local_register1 + ", r14\n";
-            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register3 + "," + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(i).m_moonVarName).m_offset + "\n";
 
 
-            if (!p_node.getChildren().get(i).getChildren().get(1).isLeaf()) {
-                // reset r14
-                m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register1 + "\n";   //todo
-                p_node.getChildren().get(i).accept(this);
-                m_moonExecCode += m_mooncodeindent + "lw\t" + local_register4 + ",tempaddr(r0)\n";
-                m_moonExecCode += m_mooncodeindent + "add\tr14," + local_register3 + "," + local_register4 + "\n";
-                m_moonExecCode += m_mooncodeindent + "sw\ttempaddr(r0),r14\n";
+//            // add the two offsets
+//            m_moonExecCode += m_mooncodeindent + "add\t" + local_register2 + "," + local_register1 + ", r14\n";
+//            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register3 + "," + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(i).m_moonVarName).m_offset + "\n";
+
+
+            if (!p_node.getChildren().get(1).getChildren().get(1).isLeaf()) {
+//                m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register1 + "\n";   //todo
+                p_node.getChildren().get(1).accept(this);
+                m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",offset(r0)\n";
+                m_moonExecCode += m_mooncodeindent + "add\t" +local_register3 +"," +local_register1 + "," + local_register2 + "\n";
+                m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3+ "\n";
             } else {
-                p_node.getChildren().get(i).accept(this);
-                m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register3 + "\n";
-                m_moonExecCode += m_mooncodeindent + "sw\ttempaddr(r0),r14\n";
-            }
+                p_node.getChildren().get(1).accept(this);
+                m_moonExecCode += m_mooncodeindent + "add\t"+ local_register3 +",r0," + local_register1 + "\n";
+                m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3+ "\n";
+
         }
         this.m_registerPool.push(local_register1);
         this.m_registerPool.push(local_register2);
-
-
+        this.m_registerPool.push(local_register3);
     }
+
+
+
+
+
 
 
     public void visit(AssignStatNode p_node) {
@@ -705,8 +734,8 @@ public class StackBasedVisitor extends Visitor {
 
 //        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).getChildren().get(0).getChildren().get(1).getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
 //        m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register2+"\n";
-       // retrieve the temporary address
-        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register3 + ",tempaddr(r0)\n";
+       // retrieve the offset
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register3 + ",offset(r0)\n";
         m_moonExecCode += m_mooncodeindent + "sub\tr14,r14," + local_register3+"\n";
 
         // assign the value to the assigned variable
@@ -714,7 +743,7 @@ public class StackBasedVisitor extends Visitor {
 //        m_moonExecCode += m_mooncodeindent + "sw\t" + local_register3 + "(r14)," + local_register1 + "\n";
         m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register3+"\n";
 //        if (p_node.getChildren().get(0).getChildren().get(0).m_sa_name.equals("DataMem_s") && !p_node.getChildren().get(0).getChildren().get(0).getChildren().get(1).isLeaf()) {
-//            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register3 + ",tempaddr(r0)\n";
+//            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register3 + ",offset(r0)\n";
 //            m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register3 + "\n";   //todo
 //        }
 
