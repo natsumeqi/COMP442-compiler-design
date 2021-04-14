@@ -633,6 +633,15 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
+        System.out.println("indice type : "+p_node.getParent().m_type);
+        if(!p_node.isLeaf()){
+            if (p_node.m_type != null) {
+                p_node.m_moonVarName = this.getNewTempVarName();
+                p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getParent().m_type, p_node.m_moonVarName, null);
+                p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+            }
+        }
     }
 
     public void visit(InlineIfNode p_node) {
