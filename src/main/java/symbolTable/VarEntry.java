@@ -36,7 +36,7 @@ public class VarEntry extends SymTabEntry {
         } else {
             return String.format("%-12s", "| " + m_kind) +
                     String.format("%-16s", "| " + m_name) +
-                    String.format("%-40s", "| " + m_type + dim_print) +
+                    String.format("%-28s", "| " + m_type + dim_print) +
                     String.format("%-12s", "| " + m_visibility) +
                     //String.format("%-12"  , "| " + m_dims) +
                     String.format("%-8s", "| " + m_size) +

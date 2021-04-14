@@ -352,7 +352,8 @@ public class TypeCheckingVisitor extends Visitor {
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
         p_node.m_data = p_node.getChildren().get(0).getData();
-//        System.out.println("datamem: "+p_node.m_type);
+//        System.out.println("datamem data: "+p_node.m_data);
+//        System.out.println("datamem type: "+p_node.m_type);
     }
 
     public void visit(TypeNode p_node) {
@@ -389,7 +390,7 @@ public class TypeCheckingVisitor extends Visitor {
 //            System.out.println("p_node.m_data:"+p_node.m_data);
             SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
             if (entry.m_name != null) {
-//                System.out.println("entry.m_name: "+entry.m_name+" entry.type: "+ entry.m_type);
+                System.out.println("entry.m_name: "+entry.m_name+" entry.type: "+ entry.m_type);
                 p_node.m_type = entry.m_type;
             } else {
 
@@ -447,6 +448,9 @@ public class TypeCheckingVisitor extends Visitor {
 
                 }
 
+                // assign type to the right of dot operator for code generation(need to know the type of the class)
+                p_node.getChildren().get(1).m_type = var_or_func_type;
+                System.out.println("var of func type: "+ var_or_func_type);
 
             } // function or variable is not declared in the class
 
@@ -690,6 +694,18 @@ public class TypeCheckingVisitor extends Visitor {
                     error_set.add(p_node.m_line);
                 }
             }
+        }
+    }
+
+    public void visit(MembListNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.accept(this);
+        }
+    }
+
+    public void visit(MembDeclNode p_node) {
+        for (Node child : p_node.getChildren()) {
+            child.accept(this);
         }
     }
 
