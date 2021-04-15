@@ -55,7 +55,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             } else {
                 if (p_node.m_type.equals("float")) {
                     size = 8;
-                }else   {
+                } else {
                     SymTabEntry class_entry = p_node.m_symTab.lookupName(p_node.m_symTabEntry.m_type);
                     if (class_entry.m_name != null) {
                         size = -class_entry.m_subtable.m_size;
@@ -607,12 +607,14 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        System.out.println("func call type: "+ p_node.m_type);
+        System.out.println("func call type: " + p_node.m_type);
         if (p_node.m_type != null) {
-            p_node.m_moonVarName = this.getNewTempVarName();
-            p_node.m_symTabEntry = new VarEntry("retval", p_node.getType(), p_node.m_moonVarName, null);
-            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
-            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+            if (!p_node.m_type.equals("void")) {
+                p_node.m_moonVarName = this.getNewTempVarName();
+                p_node.m_symTabEntry = new VarEntry("retval", p_node.getType(), p_node.m_moonVarName, null);
+                p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+            }
         }
     }
 
@@ -640,7 +642,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.accept(this);
         }
 //        System.out.println("indice type : "+p_node.getParent().m_type);
-        if(!p_node.isLeaf()){
+        if (!p_node.isLeaf()) {
             if (p_node.m_type != null) {
                 p_node.m_moonVarName = this.getNewTempVarName();
                 p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getParent().m_type, p_node.m_moonVarName, null);
