@@ -260,15 +260,15 @@ public class StackBasedVisitor extends Visitor {
         m_moonExecCode += "% processing function definition: " + p_node.getChildren().get(1).m_moonVarName + "\n";
         //create the tag to jump onto
         // and copy the jumping-back address value in the called function's stack frame
-        m_moonExecCode += String.format("%-10s", p_node.getChildren().get(1).m_moonVarName) + "sw -4(r14),r15\n";
+        m_moonExecCode += String.format("%-10s", p_node.getChildren().get(1).m_moonVarName) + "sw\t-4(r14),r15\n";
         //generate the code for the function body
         for (Node child : p_node.getChildren())
             child.accept(this);
         // copy back the jumping-back address into r15
-        m_moonExecCode += m_mooncodeindent + "lw r15,-4(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\tr15,-4(r14)\n";
         // jump back to the calling function
-        m_moonExecCode += m_mooncodeindent + "jr r15\n";
-        m_moonExecCode += "% end function " + p_node.getChildren().get(1).m_moonVarName + " definition";
+        m_moonExecCode += m_mooncodeindent + "jr\tr15\n";
+        m_moonExecCode += "% end function " + p_node.getChildren().get(1).m_moonVarName + " definition\n";
     }
 
     public void visit(FuncBodyNode p_node) {
@@ -285,6 +285,7 @@ public class StackBasedVisitor extends Visitor {
 
     public void visit(MainBlockNode p_node) {
         // generate moon program's entry point
+        m_moonExecCode +=  "%------------------------------------------------------\n";
         m_moonExecCode += m_mooncodeindent + "entry\n";
         // make the stack frame pointer (address stored in r14) point
         // to the top address allocated to the moon processor
@@ -360,15 +361,15 @@ public class StackBasedVisitor extends Visitor {
 //        System.out.println(p_node.m_moonVarName);
 //        System.out.println(p_node.m_type);
 
-        System.out.println("[datamem]p_node.m_date: "+p_node.m_data);
-        System.out.println("[datamem]size_of_type: "+size_of_type);
+//        System.out.println("[datamem]p_node.m_date: "+p_node.m_data);
+//        System.out.println("[datamem]size_of_type: "+size_of_type);
 
 
         SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
 //        if(p_node.getR_sibling()!=null){
 //
 //        }
-        System.out.println("entry.m_dims: "+entry.m_dims);
+//        System.out.println("entry.m_dims: "+entry.m_dims);
         Vector<String> dims_string = new Vector<>();
         if (entry.m_name != null) {
             dims_string = entry.m_dims;
@@ -393,8 +394,8 @@ public class StackBasedVisitor extends Visitor {
 
         }
         dims_col.add(1);
-        dims_col.forEach(System.out::println);
-        System.out.println("dims_col size: "+dims_col.size());
+//        dims_col.forEach(System.out::println);
+//        System.out.println("dims_col size: "+dims_col.size());
 
         // if it is a array with dimension, calculate offsets
         if (!p_node.getChildren().get(1).isLeaf()) {
@@ -404,13 +405,13 @@ public class StackBasedVisitor extends Visitor {
 
 //            Node first_index_node = p_node.getChildren().get(1).getChildren().get(0);
             String index_temp_varible = p_node.getChildren().get(1).m_moonVarName;
-            System.out.println( "indice size: "+p_node.getChildren().get(1).getChildren().size());
+//            System.out.println( "indice size: "+p_node.getChildren().get(1).getChildren().size());
             for (int i = 0; i < p_node.getChildren().get(1).getChildren().size(); i++) {
 
                 Node index_expr_node = p_node.getChildren().get(1).getChildren().get(i);
                 // generate code
-                System.out.println(i);
-                System.out.println(p_node.m_line);
+//                System.out.println(i);
+//                System.out.println(p_node.m_line);
                 m_moonExecCode += "% processing offsets(mul): " + p_node.m_moonVarName + " := " + index_expr_node.m_moonVarName + " * " + dims_col.get(i) + "\n";
                 // load the values of the operands into registers
                 m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)\n";
@@ -617,8 +618,8 @@ public class StackBasedVisitor extends Visitor {
         // copy the result of the return value into the first memory cell in the current stack frame
         // this way, the return value is conveniently at the top of the calling function's stack frame
         m_moonExecCode += "% processing: return(" + p_node.getChildren().get(0).m_moonVarName + ")\n";
-        m_moonExecCode += m_mooncodeindent + "lw " + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
-        m_moonExecCode += m_mooncodeindent + "sw " + "0(r14)," + local_register1 + "\n";
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t" + "0(r14)," + local_register1 + "\n";
         this.m_registerPool.push(local_register1);
     }
 
@@ -788,7 +789,38 @@ public class StackBasedVisitor extends Visitor {
             child.accept(this);
         }
         // update after computing offsets
-        p_node.m_moonVarName = p_node.getChildren().get(0).m_moonVarName;
+        p_node.m_data = p_node.getChildren().get(0).m_data;
+
+        String local_register1 = this.m_registerPool.pop();
+
+        // pass parameters
+        // here we assume that the parameters are the size of a word,
+        // which is not true for arrays and objects.
+        // In those cases, a loop copying the values e.g. byte-by-byte is necessary
+        SymTabEntry table_entry_of_called_function = p_node.m_symTab.lookupName(p_node.m_data);
+        System.out.println("funccall node data: "+p_node.getData());
+        System.out.println("table_entry: "+table_entry_of_called_function.m_name);
+        int index_of_param = 0;
+        m_moonExecCode += "% processing: function call to "  + p_node.getChildren().get(0).m_moonVarName + " \n";
+        for(Node param : p_node.getChildren().get(1).getChildren()){
+            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(param.m_moonVarName).m_offset + "(r14)\n";
+            int offset_of_param = p_node.m_symTab.m_size + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset;
+            m_moonExecCode += m_mooncodeindent + "sw\t" + offset_of_param + "(r14)," + local_register1 + "\n";
+            index_of_param++;
+        }
+        // make the stack frame pointer point to the called function's stack frame
+        m_moonExecCode += m_mooncodeindent + "addi\tr14,r14," + p_node.m_symTab.m_size + "\n";
+        // jump to the called function's code
+        // here the function's name is the label
+        // a unique label generator is necessary in the general case
+        m_moonExecCode += m_mooncodeindent + "jl\tr15," + p_node.getData() + "\n";
+        // upon jumping back, set the stack frame pointer back to the current function's stack frame
+        m_moonExecCode += m_mooncodeindent + "subi\tr14,r14," + p_node.m_symTab.m_size + "\n";
+        // copy the return value in memory space to store it on the current stack frame
+        // to evaluate the expression in which it is
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.m_size + "(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register1 + "\n";
+        this.m_registerPool.push(local_register1);
     }
 
 

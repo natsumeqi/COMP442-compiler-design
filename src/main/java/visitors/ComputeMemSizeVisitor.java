@@ -78,6 +78,11 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.accept(this);
         }
 
+        // compute total size and offsets along the way
+        for (SymTabEntry entry : p_node.m_symTab.m_symList) {
+            entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
+            p_node.m_symTab.m_size -= entry.m_size;
+        }
 //        System.out.println(p_node.m_symTab);
 //        System.out.println(this.m_errors);
 
@@ -397,9 +402,9 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        System.out.println("[compute addop node] "+p_node.m_type);
-        System.out.println("[compute addop node child:] "+p_node.getChildren().get(0).m_type);
-        System.out.println("[compute addop node child:] "+p_node.getChildren().get(1).m_type);
+//        System.out.println("[compute addop node] "+p_node.m_type);
+//        System.out.println("[compute addop node child:] "+p_node.getChildren().get(0).m_type);
+//        System.out.println("[compute addop node child:] "+p_node.getChildren().get(1).m_type);
         if (p_node.m_type != null) {
             p_node.m_moonVarName = this.getNewTempVarName();
             p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getType(), p_node.m_moonVarName, null);
@@ -443,12 +448,6 @@ public class ComputeMemSizeVisitor extends Visitor {
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
-        }
-        if (p_node.m_type != null) {
-            p_node.m_moonVarName = this.getNewTempVarName();
-            p_node.m_symTabEntry = new VarEntry("retval", p_node.getType(), p_node.m_moonVarName, null);
-            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
-            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
         }
     }
 
@@ -608,6 +607,13 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
+        System.out.println("func call type: "+ p_node.m_type);
+        if (p_node.m_type != null) {
+            p_node.m_moonVarName = this.getNewTempVarName();
+            p_node.m_symTabEntry = new VarEntry("retval", p_node.getType(), p_node.m_moonVarName, null);
+            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+        }
     }
 
 
@@ -633,7 +639,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        System.out.println("indice type : "+p_node.getParent().m_type);
+//        System.out.println("indice type : "+p_node.getParent().m_type);
         if(!p_node.isLeaf()){
             if (p_node.m_type != null) {
                 p_node.m_moonVarName = this.getNewTempVarName();

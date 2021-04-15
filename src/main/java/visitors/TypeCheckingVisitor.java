@@ -272,8 +272,8 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
         }
         p_node.m_type = p_node.getChildren().get(0).getType();
-        System.out.println("[type TermNode : ]"+ p_node.m_type);
-        System.out.println("[type termNode : string] "+p_node.m_subtreeString);
+//        System.out.println("[type TermNode : ]"+ p_node.m_type);
+//        System.out.println("[type termNode : string] "+p_node.m_subtreeString);
     }
 
     public void visit(FactorNode p_node) {
@@ -392,7 +392,7 @@ public class TypeCheckingVisitor extends Visitor {
 //            System.out.println("p_node.m_data:"+p_node.m_data);
             SymTabEntry entry = p_node.m_symTab.lookupName(p_node.m_data);
             if (entry.m_name != null) {
-                System.out.println("entry.m_name: "+entry.m_name+" entry.type: "+ entry.m_type);
+//                System.out.println("entry.m_name: "+entry.m_name+" entry.type: "+ entry.m_type);
                 p_node.m_type = entry.m_type;
             } else {
 
@@ -405,9 +405,9 @@ public class TypeCheckingVisitor extends Visitor {
 
             }
         }
-        System.out.println("[type Idnode: data: ]"+p_node.m_data );
-               System.out.println("[type Idnode: type: "+ p_node.m_type);
-        System.out.println("[type Idnode: line: "+ p_node.m_line);
+//        System.out.println("[type Idnode: data: ]"+p_node.m_data );
+//               System.out.println("[type Idnode: type: "+ p_node.m_type);
+//        System.out.println("[type Idnode: line: "+ p_node.m_line);
     }
 
 
@@ -425,11 +425,11 @@ public class TypeCheckingVisitor extends Visitor {
 
 
         if (class_entry.m_name != null) {
-            System.out.println("class_entry: "+class_entry);
-            System.out.println("var_func_name:" +var_func_name);
+//            System.out.println("class_entry: "+class_entry);
+//            System.out.println("var_func_name:" +var_func_name);
             SymTabEntry func_var_entry = class_entry.m_subtable.lookupNameInOneTable(var_func_name);
             if (func_var_entry.m_name != null) {
-                System.out.println("func_var_entry: "+func_var_entry);
+//                System.out.println("func_var_entry: "+func_var_entry);
                 var_or_func_type = func_var_entry.m_type;
                 p_node.setType(var_or_func_type);
 
@@ -459,7 +459,7 @@ public class TypeCheckingVisitor extends Visitor {
                 // assign type to the right of dot operator for code generation(need to know the type of the class)
                 p_node.getChildren().get(1).m_type = var_or_func_type;
                 p_node.getChildren().get(1).m_symTabEntry = func_var_entry;
-                System.out.println("var of func type: "+ var_or_func_type);
+//                System.out.println("var of func type: "+ var_or_func_type);
 
             } // function or variable is not declared in the class
 
