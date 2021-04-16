@@ -499,7 +499,7 @@ public class SyntacticAnalyzer {
                             }
                         } else {
 
-                            // first create a parent node, then reuse the node to make a family. Ex: makeFamily(Sign_i, Factor_s, reuse)
+                            // first create a parent node, then reuse the node to make a family. Ex: makeFamily(MultOp_i, Term_s, MultOp_i, Factor_s, reuse)
                             if (parameters[parameters.length - 1].trim().equals("reuse")) {
                                 String op_name = parameters[0];
                                 for (int i = parameters.length - 2; i > 0; i--) {
@@ -514,13 +514,20 @@ public class SyntacticAnalyzer {
                                             if (node_on_top.m_sa_name.equals(op_name)) {
                                                 opNode_backup = semantic_stack.pop();
                                             } else {
+//                                                System.out.println("pop");
                                                 Node node_to_pop = semantic_stack.pop();
                                                 para_nodes.add(node_to_pop);
                                             }
                                         }
                                     }
                                 }
-
+                                if(parameters[0].trim().equals("Sign_i")){  // special case for  makeFamily(Sign_i, Factor_s, reuse)
+                                    if (!semantic_stack.isEmpty()) {
+                                        node_on_top = semantic_stack.peek();
+                                        if (node_on_top.m_sa_name.equals(op_name)) {
+                                            opNode_backup = semantic_stack.pop();}
+                                    }
+                                }
 
                             } else {
 
@@ -559,6 +566,8 @@ public class SyntacticAnalyzer {
                     } else {
                         opNode = nodeFactory.makeNode(op, op, node_line);
                     }
+//                    System.out.println("opNode: "+opNode);
+//                    System.out.println("para_nodes: "+ para_nodes);
 
                     node_to_push = makeFamily(opNode, para_nodes);
 //                    node_to_push.print();

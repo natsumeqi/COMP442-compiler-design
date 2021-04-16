@@ -476,9 +476,9 @@ public class StackBasedVisitor extends Visitor {
             for (int i = 1; i < dims_string.size(); i++) {
                 int dim_col = 1;
                 for (int j = i; j < dims_string.size(); j++) {
-                    System.out.println("dims_string: " + dims_string.get(j));
+//                    System.out.println("dims_string: " + dims_string.get(j));
                     String dim_integer = dims_string.get(j).substring(1, dims_string.get(j).indexOf("]"));
-                    System.out.println("dim_integer: " + dim_integer);
+//                    System.out.println("dim_integer: " + dim_integer);
                     dim_col *= Integer.parseInt(dim_integer);
                 }
                 dims_col.add(dim_col);
@@ -498,8 +498,8 @@ public class StackBasedVisitor extends Visitor {
 
             // if it is a parameter variable, retrieve the real address
             SymTabEntry func_or_var = p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName);
-            System.out.println(func_or_var.m_kind);
-            System.out.println(p_node.getChildren().get(0).m_moonVarName);
+//            System.out.println(func_or_var.m_kind);
+//            System.out.println(p_node.getChildren().get(0).m_moonVarName);
             if (func_or_var.m_name != null) {
                 if (func_or_var.m_kind.equals("param") && func_or_var.m_dims != null && !func_or_var.m_dims.isEmpty()) {
 //                System.out.println("???: "+p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset );
@@ -806,7 +806,7 @@ public class StackBasedVisitor extends Visitor {
 //            m_moonExecCode += m_mooncodeindent + "add\t" + local_register2 + "," + local_register1 + ", r14\n";
 //            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register3 + "," + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(i).m_moonVarName).m_offset + "\n";
 
-
+if(p_node.getChildren().get(1).getChildren().size()>=2){
         if (!p_node.getChildren().get(1).getChildren().get(1).isLeaf()) {
 //                m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register1 + "\n";   //todo
             p_node.getChildren().get(1).accept(this);
@@ -818,7 +818,7 @@ public class StackBasedVisitor extends Visitor {
             m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + ",r0," + local_register1 + "\n";
             m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3 + "\n";
 
-        }
+        }}
         this.m_registerPool.push(local_register1);
         this.m_registerPool.push(local_register2);
         this.m_registerPool.push(local_register3);
@@ -846,9 +846,9 @@ public class StackBasedVisitor extends Visitor {
 //                    System.out.println("func_or_var1: "+func_or_var1);
             // if it is a parameter variable and an array, retrieve the real address
             if (func_or_var1.m_dims != null && !func_or_var1.m_dims.isEmpty()) {
-                System.out.println("func_or_var1: " + func_or_var1);
+//                System.out.println("func_or_var1: " + func_or_var1);
                 if (func_or_var1.m_kind.equals("param")) {
-                    System.out.println("param generate coed : " + p_node.m_subtreeString);
+//                    System.out.println("param generate coed : " + p_node.m_subtreeString);
                     m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register1 + "\n";
                     m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",0(r14)\n";
                     m_moonExecCode += m_mooncodeindent + "sub\tr14,r14," + local_register1 + "\n";
@@ -934,13 +934,13 @@ public class StackBasedVisitor extends Visitor {
         // which is not true for arrays and objects.
         // In those cases, a loop copying the values e.g. byte-by-byte is necessary
         SymTabEntry table_entry_of_called_function = p_node.m_symTab.lookupName(p_node.m_data);
-        System.out.println("funccall node data: " + p_node.getData());
-        System.out.println("table_entry: " + table_entry_of_called_function.m_name);
+//        System.out.println("funccall node data: " + p_node.getData());
+//        System.out.println("table_entry: " + table_entry_of_called_function.m_name);
         int index_of_param = 0;
         m_moonExecCode += "% processing: function call to " + p_node.getChildren().get(0).m_moonVarName + " \n";
         for (Node param : p_node.getChildren().get(1).getChildren()) {
 
-            System.out.println("param.moonvarname: " + param.m_moonVarName);
+//            System.out.println("param.moonvarname: " + param.m_moonVarName);
 
             // if the parameter is an array, pass the address instead
             if (p_node.m_symTab.lookupName(param.m_moonVarName).m_dims != null && !p_node.m_symTab.lookupName(param.m_moonVarName).m_dims.isEmpty()) {
@@ -949,9 +949,11 @@ public class StackBasedVisitor extends Visitor {
             } else {
                 m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(param.m_moonVarName).m_offset + "(r14)\n";
             }
+            if(table_entry_of_called_function.m_subtable!=null) {
+                int offset_of_param = p_node.m_symTab.m_size + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset;
+                m_moonExecCode += m_mooncodeindent + "sw\t" + offset_of_param + "(r14)," + local_register1 + "\n";
+            }
 
-            int offset_of_param = p_node.m_symTab.m_size + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset;
-            m_moonExecCode += m_mooncodeindent + "sw\t" + offset_of_param + "(r14)," + local_register1 + "\n";
             index_of_param++;
         }
         // make the stack frame pointer point to the called function's stack frame

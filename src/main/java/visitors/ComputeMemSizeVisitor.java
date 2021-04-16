@@ -19,30 +19,32 @@ public class ComputeMemSizeVisitor extends Visitor {
 
     public int sizeOfEntry(Node p_node) {
         int size = 0;
-        if (p_node.m_symTabEntry.m_type.equals("integer")) {
-            size = 4;
-        } else {
-            if (p_node.m_symTabEntry.m_type.equals("float")) {
-                size = 8;
+        if (p_node.m_symTabEntry != null && p_node.m_symTabEntry.m_type!=null) {
+            if (p_node.m_symTabEntry.m_type.equals("integer")) {
+                size = 4;
             } else {
-                SymTabEntry class_entry = p_node.m_symTab.lookupName(p_node.m_symTabEntry.m_type);
-                if (class_entry.m_name != null) {
-                    size = -class_entry.m_subtable.m_size;
-                }
-            }
-        }
-        // if it is an array, multiply by all dimension sizes
-        VarEntry ve = (VarEntry) p_node.m_symTabEntry;
-        if (ve.m_dims != null) {
-            if (!ve.m_dims.isEmpty())
-                for (String dim : ve.m_dims) {
-                    // todo test []
-                    String dim_string = dim.substring(1, dim.length() - 1);
-                    if (!dim_string.isEmpty() && !dim_string.equals("0")) {
-                        int dim_int = Integer.parseInt(dim_string);
-                        size *= dim_int;
+                if (p_node.m_symTabEntry.m_type.equals("float")) {
+                    size = 8;
+                } else {
+                    SymTabEntry class_entry = p_node.m_symTab.lookupName(p_node.m_symTabEntry.m_type);
+                    if (class_entry.m_name != null) {
+                        size = -class_entry.m_subtable.m_size;
                     }
                 }
+            }
+            // if it is an array, multiply by all dimension sizes
+            VarEntry ve = (VarEntry) p_node.m_symTabEntry;
+            if (ve.m_dims != null) {
+                if (!ve.m_dims.isEmpty())
+                    for (String dim : ve.m_dims) {
+                        // todo test []
+                        String dim_string = dim.substring(1, dim.length() - 1);
+                        if (!dim_string.isEmpty() && !dim_string.equals("0")) {
+                            int dim_int = Integer.parseInt(dim_string);
+                            size *= dim_int;
+                        }
+                    }
+            }
         }
         return size;
     }
@@ -56,6 +58,7 @@ public class ComputeMemSizeVisitor extends Visitor {
                 if (p_node.m_type.equals("float")) {
                     size = 8;
                 } else {
+//                    System.out.println("[compute][sizeoftypenode:] " + p_node.m_symTabEntry);
                     SymTabEntry class_entry = p_node.m_symTab.lookupName(p_node.m_symTabEntry.m_type);
                     if (class_entry.m_name != null) {
                         size = -class_entry.m_subtable.m_size;
@@ -171,7 +174,9 @@ public class ComputeMemSizeVisitor extends Visitor {
             func_visibility = p_node.getLm_sibling().getData();
         }
         String func_name = p_node.getChildren().get(0).getData();
-        String func_type = p_node.getChildren().get(2).getType();
+//        System.out.println("func_name: " + func_name);
+        String func_type = p_node.m_type;
+//        String func_type = returnTypeDate(p_node.getChildren().get(2));
         String fParam_type;
 
 
@@ -188,7 +193,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             fParam = fParam_type + dim_string;
             fParam_list.add(fParam);
         }
-
+//        System.out.println("func_type: " + func_type);
         p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, func_visibility, p_node.m_line);
         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
     }
@@ -218,6 +223,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             // check multiple declared identifier in function
             SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
             if (var_entry.m_name == null) {
+//                System.out.println(":: " + p_node.m_symTabEntry);
                 p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
                 p_node.m_symTab.addEntry(p_node.m_symTabEntry);
             }
@@ -294,16 +300,22 @@ public class ComputeMemSizeVisitor extends Visitor {
             if (p_node.getParent().getParent() != null) {
                 SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
                 if (class_entry.m_subtable != null) {
+//                    System.out.println(class_entry);
                     SymTabEntry func_decl = class_entry.m_subtable.lookupName(func_name);
                     if (func_decl.m_name != null) {
+//                        System.out.println(func_decl.m_name);
+//                        System.out.println(func_decl.m_type);
                         if (func_decl.m_name.equals(func_name) && func_decl.m_type.equals(func_type)) {
                             if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
+//                                System.out.println("matched");
                                 if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
                                     // make class table be the upper table of member function table
+//                                    System.out.println("matched2");
                                     local_table.m_upperTable = class_entry.m_subtable;
                                     func_decl.m_subtable = local_table;
                                     p_node.m_symTab = local_table;
 
+                                    p_node.m_symTabEntry = func_decl;
                                 }
                             }
                         }
@@ -340,6 +352,7 @@ public class ComputeMemSizeVisitor extends Visitor {
         // this should be node on all nodes that represent
         // a scope and contain their own table
         // stack frame contains the return value at the bottom of the stack
+//        System.out.println("p_node.symtabentry: " + p_node.m_symTabEntry);
         p_node.m_symTab.m_size = -(this.sizeOfTypeNode(p_node));
         //then is the return addess is stored on the stack frame
         p_node.m_symTab.m_size -= 4;
@@ -600,6 +613,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
+//        System.out.println("[compute]Typenode: " + p_node.m_type);
     }
 
     public void visit(FuncCallNode p_node) {
@@ -607,7 +621,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-        System.out.println("func call type: " + p_node.m_type);
+//        System.out.println("func call type: " + p_node.m_type);
         if (p_node.m_type != null) {
             if (!p_node.m_type.equals("void")) {
                 p_node.m_moonVarName = this.getNewTempVarName();

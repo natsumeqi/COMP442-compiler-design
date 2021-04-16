@@ -150,7 +150,8 @@ public class SymTabCreationVisitor extends Visitor {
         if (p_node.isLeaf()) {
             return p_node.getData();
         } else {
-            return p_node.getChildren().get(0).getData().toUpperCase();
+//            return p_node.getChildren().get(0).getData().toUpperCase();
+            return p_node.getChildren().get(0).getData();
         }
     }
 

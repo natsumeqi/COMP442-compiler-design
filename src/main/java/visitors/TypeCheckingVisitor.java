@@ -50,6 +50,12 @@ public class TypeCheckingVisitor extends Visitor {
 
     }
 
+    public void visit(FuncDeclNode p_node) {
+        for (Node child : p_node.getChildren())
+            child.accept(this);
+        p_node.m_type = returnTypeDate(p_node.getChildren().get(2));
+//        System.out.println("[typechecking funcdeclNode type: ]"+ p_node.m_type);
+    }
 
     public void visit(FuncDefListNode p_node) {
         for (Node child : p_node.getChildren())
@@ -373,12 +379,15 @@ public class TypeCheckingVisitor extends Visitor {
             if (p_node.m_type == null) {
                 String undeclared_type = p_node.getChildren().get(0).getData();
 
-                // check if uppercase is good
-                SymTabEntry class_entry = p_node.m_symTab.lookupName(undeclared_type.toUpperCase());
-                if (class_entry.m_name != null) {
-                    p_node.m_type = class_entry.m_name;
-                } else {
-                    this.m_errors += "[11.5][semantic error][line:" + p_node.m_line + "] Use of undeclared class:  '" + undeclared_type + "'\n";
+//                System.out.println("undeclared_type: " + undeclared_type);
+                // check if exist
+                if (p_node.m_symTab != null) {
+                    SymTabEntry class_entry = p_node.m_symTab.lookupName(undeclared_type);
+                    if (class_entry.m_name != null) {
+                        p_node.m_type = class_entry.m_name;
+                    } else {
+                        this.m_errors += "[11.5][semantic error][line:" + p_node.m_line + "] Use of undeclared class:  '" + undeclared_type + "'\n";
+                    }
                 }
             }
         }
@@ -722,7 +731,8 @@ public class TypeCheckingVisitor extends Visitor {
         if (p_node.isLeaf()) {
             return p_node.getData();
         } else {
-            return p_node.getChildren().get(0).getData().toUpperCase();
+            return p_node.getChildren().get(0).getData();
+//            return p_node.getChildren().get(0).getData().toUpperCase();
         }
     }
 }
