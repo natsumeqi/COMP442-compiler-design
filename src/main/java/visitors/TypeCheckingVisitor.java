@@ -646,6 +646,7 @@ public class TypeCheckingVisitor extends Visitor {
                     if (p_node.m_type != null) {
                         p_node.m_type = p_node.m_type.substring(p_node.m_type.indexOf(":") + 1);
                     }
+//                    p_node.m_symTabEntry =
                 }
             }
         }

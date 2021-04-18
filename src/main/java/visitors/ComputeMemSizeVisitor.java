@@ -19,7 +19,7 @@ public class ComputeMemSizeVisitor extends Visitor {
 
     public int sizeOfEntry(Node p_node) {
         int size = 0;
-        if (p_node.m_symTabEntry != null && p_node.m_symTabEntry.m_type!=null) {
+        if (p_node.m_symTabEntry != null && p_node.m_symTabEntry.m_type != null) {
             if (p_node.m_symTabEntry.m_type.equals("integer")) {
                 size = 4;
             } else {
@@ -81,14 +81,43 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.accept(this);
         }
 
+
+        // update scope offset of class
+        for (Node class_decl : p_node.getChildren().get(0).getChildren()) {
+            // reset
+            class_decl.m_symTab.m_size=0;
+            for (SymTabEntry entry : class_decl.m_symTab.m_symList) {
+                if (entry.m_subtable != null) {
+//                    System.out.println("compute:" + entry.m_subtable.m_size);
+                    entry.m_size = -entry.m_subtable.m_size;
+                }
+                if(entry.m_kind.equals("inherit")){
+                    SymTabEntry class_inherit_entry = class_decl.m_symTab.m_upperTable.lookupName(entry.m_name);
+//                    System.out.println(class_inherit_entry);
+//                    System.out.println(class_inherit_entry.m_name);
+                    if (class_inherit_entry.m_name != null && !class_inherit_entry.m_name.equals("none")) {
+//                        System.out.println(class_inherit_entry.m_type);
+//                        System.out.println(class_inherit_entry.m_subtable);
+                        entry.m_size = -class_inherit_entry.m_subtable.m_size;
+                    }
+                }
+//                entry.m_offset = class_decl.m_symTab.m_size - entry.m_size;
+                class_decl.m_symTab.m_size -= entry.m_size;
+            }
+        }
+
+
+
         // compute total size and offsets along the way
         for (SymTabEntry entry : p_node.m_symTab.m_symList) {
             entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
             p_node.m_symTab.m_size -= entry.m_size;
         }
-//        System.out.println(p_node.m_symTab);
-//        System.out.println(this.m_errors);
 
+
+
+        //        System.out.println(p_node.m_symTab);
+//        System.out.println(this.m_errors);
     }
 
     public void visit(ClassListNode p_node) {
@@ -149,6 +178,7 @@ public class ComputeMemSizeVisitor extends Visitor {
                 VarEntry varEntry = new VarEntry("inherit", "", var_id, null);
                 p_node.m_symTab.addEntry(varEntry);
                 p_node.m_symTab.addInherit(p_node.m_symTab.m_upperTable.lookupName(var_id).m_subtable);
+//                child.m_symTabEntry = varEntry;
             }
         }
     }
@@ -316,6 +346,11 @@ public class ComputeMemSizeVisitor extends Visitor {
                                     p_node.m_symTab = local_table;
 
                                     p_node.m_symTabEntry = func_decl;
+
+                                    // create a 'this' varEntry
+                                    VarEntry this_entry = new VarEntry("this", p_node.m_type, "this", null);
+                                    this_entry.m_size =4;
+                                    p_node.m_symTab.addEntry(this_entry);
                                 }
                             }
                         }
@@ -401,12 +436,14 @@ public class ComputeMemSizeVisitor extends Visitor {
             child.m_symTab = p_node.m_symTab;
             child.accept(this);
         }
-//        if (p_node.m_type != null) {
-//            p_node.m_moonVarName = this.getNewTempVarName();
-//            p_node.m_symTabEntry = new VarEntry("tempvar", p_node.getType(), p_node.m_moonVarName, null);
-//            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
-//            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-//        }
+        if (p_node.m_type != null) {
+            p_node.m_moonVarName = this.getNewTempVarName();
+            p_node.m_type = p_node.getType().contains(":")? p_node.getType().substring(p_node.getType().indexOf(":")+1):p_node.getType();
+            p_node.m_symTabEntry = new VarEntry("temp_dot", p_node.getType(), p_node.m_moonVarName, null);
+            System.out.println("[compute dotnode: ]"+p_node.m_type);
+            p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+        }
         p_node.m_moonVarName = p_node.getChildren().get(0).m_moonVarName;  // todo
     }
 

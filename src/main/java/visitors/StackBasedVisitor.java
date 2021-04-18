@@ -55,8 +55,10 @@ public class StackBasedVisitor extends Visitor {
     public void visit(ProgNode p_node) {
         // propagate accepting the same visitor to all the children
         // this effectively achieves Depth-First AST Traversal
+        m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
         for (Node child : p_node.getChildren())
             child.accept(this);
+
     }
 
 
@@ -315,16 +317,17 @@ public class StackBasedVisitor extends Visitor {
 
 
     public void visit(FuncDefNode p_node) {
+        p_node.m_moonVarName = p_node.m_symTab.m_name.replace("::","_");
         m_moonExecCode += "% processing function definition: " + p_node.getChildren().get(1).m_moonVarName + "\n";
         //create the tag to jump onto
         // and copy the jumping-back address value in the called function's stack frame
-        m_moonExecCode += String.format("%-10s", p_node.getChildren().get(1).m_moonVarName) + "\n";
-        m_moonExecCode += m_mooncodeindent + "sw\t-4(r14),r15\n";
+        m_moonExecCode += String.format("%-10s", p_node.m_moonVarName) + "\n";
+        m_moonExecCode += m_mooncodeindent + "sw\t-8(r14),r15\n";
         //generate the code for the function body
         for (Node child : p_node.getChildren())
             child.accept(this);
         // copy back the jumping-back address into r15
-        m_moonExecCode += m_mooncodeindent + "lw\tr15,-4(r14)\n";
+        m_moonExecCode += m_mooncodeindent + "lw\tr15,-8(r14)\n";
         // jump back to the calling function
         m_moonExecCode += m_mooncodeindent + "jr\tr15\n";
         m_moonExecCode += "% end function " + p_node.getChildren().get(1).m_moonVarName + " definition\n";
@@ -358,7 +361,7 @@ public class StackBasedVisitor extends Visitor {
         m_moonDataCode += "% buffer space used for console output\n";
         // buffer used by the lib.m subroutines
         m_moonDataCode += String.format("%-10s", "buf") + "res 20\n";
-        m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
+
         // halting point of the entire program
         m_moonExecCode += m_mooncodeindent + "hlt\n\n";
         m_moonExecCode += "% -----------------------------------------------------------------------\n";
@@ -559,8 +562,10 @@ public class StackBasedVisitor extends Visitor {
 
 
         } else {// when the data member is not a array(IndiceNode is empty)
-
+//            String local_register1 = this.m_registerPool.pop();
+//            m_moonExecCode += m_mooncodeindent + "addi\t"+ local_register1 +",r0,0\n";
             m_moonExecCode += m_mooncodeindent + "sw\toffset(r0),r0\n";
+//            this.m_registerPool.push(local_register1);
         }
 
 
@@ -644,6 +649,8 @@ public class StackBasedVisitor extends Visitor {
         // generate code
         m_moonExecCode += "% processing: read(" + p_node.getChildren().get(0).m_moonVarName + ")\n";
         // prompt user to enter
+//        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + ",offset(r0)\n";
+
         m_moonExecCode += m_mooncodeindent2 + "% ask for " + p_node.getChildren().get(0).m_moonVarName + "\n";
         m_moonExecCode += m_mooncodeindent + "addi\t" + local_register1 + ",r0,ent" + p_node.getChildren().get(0).m_moonVarName + "\n";
         m_moonDataCode += String.format("%-10s", "ent" + p_node.getChildren().get(0).m_moonVarName) + "db\t\"Enter " + p_node.getChildren().get(0).m_moonVarName + ": \", 0\n";
@@ -759,8 +766,22 @@ public class StackBasedVisitor extends Visitor {
         // copy the result of the return value into the first memory cell in the current stack frame
         // this way, the return value is conveniently at the top of the calling function's stack frame
         m_moonExecCode += "% processing: return(" + p_node.getChildren().get(0).m_moonVarName + ")\n";
-        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
-        m_moonExecCode += m_mooncodeindent + "sw\t" + "0(r14)," + local_register1 + "\n";
+
+
+//        SymTabEntry entry = p_node.m_symTab.lookupName( p_node.getChildren().get(0).m_moonVarName);
+//        if(entry.m_name!=null){
+//            if(!entry.m_type.equals("integer") && !entry.m_type.equals("float")){
+//
+//
+//                m_moonExecCode += m_mooncodeindent + "addi\t" + local_register1 + ",r0," + (p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + p_node.m_symTab.m_size) + "\n";
+//            }else{
+                m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(0).m_moonVarName).m_offset + "(r14)\n";
+//            }
+//        }
+
+        m_moonExecCode += m_mooncodeindent + "sw\t" + "-4(r14)," + local_register1 + "\n";
+
+
         this.m_registerPool.push(local_register1);
     }
 
@@ -785,6 +806,8 @@ public class StackBasedVisitor extends Visitor {
         String local_register1 = this.m_registerPool.pop();
         String local_register2 = this.m_registerPool.pop();
         String local_register3 = this.m_registerPool.pop();
+        m_moonExecCode += "% processing dot: " + p_node.m_subtreeString + "\n";
+
 
         if (!p_node.getChildren().get(0).getChildren().get(1).isLeaf()) {
 
@@ -799,26 +822,27 @@ public class StackBasedVisitor extends Visitor {
 //            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(first_index_node.m_moonVarName).m_offset + "(r14)\n";
 //            m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register2+"\n";
 
-        m_moonExecCode += "% processing dot: " + p_node.m_subtreeString + "\n";
+
 
 
 //            // add the two offsets
 //            m_moonExecCode += m_mooncodeindent + "add\t" + local_register2 + "," + local_register1 + ", r14\n";
 //            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register3 + "," + local_register2 + "," + p_node.m_symTab.lookupName(p_node.getChildren().get(i).m_moonVarName).m_offset + "\n";
 
-if(p_node.getChildren().get(1).getChildren().size()>=2){
-        if (!p_node.getChildren().get(1).getChildren().get(1).isLeaf()) {
+        if (p_node.getChildren().get(1).getChildren().size() >= 2) {
+            if (!p_node.getChildren().get(1).getChildren().get(1).isLeaf()) {
 //                m_moonExecCode += m_mooncodeindent + "add\tr14,r0," + local_register1 + "\n";   //todo
-            p_node.getChildren().get(1).accept(this);
-            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",offset(r0)\n";
-            m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
-            m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3 + "\n";
-        } else {
-            p_node.getChildren().get(1).accept(this);
-            m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + ",r0," + local_register1 + "\n";
-            m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3 + "\n";
+                p_node.getChildren().get(1).accept(this);
+                m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",offset(r0)\n";
+                m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+                m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3 + "\n";
+            } else {
+                p_node.getChildren().get(1).accept(this);
+                m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + ",r0," + local_register1 + "\n";
+                m_moonExecCode += m_mooncodeindent + "sw\toffset(r0)," + local_register3 + "\n";
 
-        }}
+            }
+        }
         this.m_registerPool.push(local_register1);
         this.m_registerPool.push(local_register2);
         this.m_registerPool.push(local_register3);
@@ -928,34 +952,76 @@ if(p_node.getChildren().get(1).getChildren().size()>=2){
         p_node.m_data = p_node.getChildren().get(0).m_data;
 
         String local_register1 = this.m_registerPool.pop();
+        String local_register2 = this.m_registerPool.pop();
 
         // pass parameters
         // here we assume that the parameters are the size of a word,
         // which is not true for arrays and objects.
-        // In those cases, a loop copying the values e.g. byte-by-byte is necessary
+
         SymTabEntry table_entry_of_called_function = p_node.m_symTab.lookupName(p_node.m_data);
-//        System.out.println("funccall node data: " + p_node.getData());
-//        System.out.println("table_entry: " + table_entry_of_called_function.m_name);
+        //  member function, relink to the table entry
+        if(table_entry_of_called_function.m_name==null){
+//            table_entry_of_called_function = p_node.getChildren().get(0).getChildren().get(1).m_symTabEntry;    // link to the function entry
+
+            String var_class_type = p_node.getChildren().get(0).getChildren().get(0).getType() == null ? null : p_node.getChildren().get(0).getChildren().get(0).getType();
+            SymTabEntry class_entry = p_node.m_symTab.lookupName(var_class_type);
+            System.out.println(var_class_type);
+            String var_func_name = p_node.getChildren().get(0).getChildren().get(1).m_data;
+            System.out.println(class_entry);
+            if (class_entry.m_name != null) {
+            System.out.println("class_entry: "+class_entry);
+            System.out.println("var_func_name:" +var_func_name);
+                SymTabEntry func_var_entry = class_entry.m_subtable.lookupNameInOneTable(var_func_name);
+                table_entry_of_called_function = func_var_entry;
+            }
+
+        }
+        System.out.println("funccall node data: " + p_node.getData());
+        System.out.println("table_entry: " + table_entry_of_called_function);
+
         int index_of_param = 0;
         m_moonExecCode += "% processing: function call to " + p_node.getChildren().get(0).m_moonVarName + " \n";
+
+
+
+
+
         for (Node param : p_node.getChildren().get(1).getChildren()) {
 
 //            System.out.println("param.moonvarname: " + param.m_moonVarName);
 
             // if the parameter is an array, pass the address instead
             if (p_node.m_symTab.lookupName(param.m_moonVarName).m_dims != null && !p_node.m_symTab.lookupName(param.m_moonVarName).m_dims.isEmpty()) {
-
                 m_moonExecCode += m_mooncodeindent + "addi\t" + local_register1 + ",r0," + (p_node.m_symTab.lookupName(param.m_moonVarName).m_offset - p_node.m_symTab.m_size) + "\n";
             } else {
-                m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(param.m_moonVarName).m_offset + "(r14)\n";
+                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(param.m_moonVarName).m_offset + "(r14)\n";
             }
-            if(table_entry_of_called_function.m_subtable!=null) {
+
+            if (table_entry_of_called_function.m_subtable != null) {
                 int offset_of_param = p_node.m_symTab.m_size + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset;
                 m_moonExecCode += m_mooncodeindent + "sw\t" + offset_of_param + "(r14)," + local_register1 + "\n";
             }
 
             index_of_param++;
         }
+
+        // 'this'
+        // for member function call, pass an address of the object which it belongs to
+        if (p_node.getChildren().get(0).m_sa_name.equals("Dot_s")) {
+
+            System.out.println(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName);
+            System.out.println("call: "+(p_node.m_symTab.lookupName(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName).m_offset));
+            System.out.println("call2: "+p_node.m_symTab.m_size);
+            m_moonExecCode += m_mooncodeindent + "addi\t" + local_register2 + ",r0," + (p_node.m_symTab.lookupName(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName).m_offset - p_node.m_symTab.m_size) + "\n";
+            System.out.println("1: "+ p_node.m_symTab.m_size);
+            System.out.println("2: "+ table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset);
+            int offset_of_param = p_node.m_symTab.m_size + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset;
+            m_moonExecCode += m_mooncodeindent + "sw\t" + offset_of_param + "(r14)," + local_register2 + "\n";
+
+            p_node.m_data = table_entry_of_called_function.m_subtable.m_name.replace("::","_");
+        }
+
+
         // make the stack frame pointer point to the called function's stack frame
         m_moonExecCode += m_mooncodeindent + "addi\tr14,r14," + p_node.m_symTab.m_size + "\n";
         // jump to the called function's code
@@ -966,9 +1032,27 @@ if(p_node.getChildren().get(1).getChildren().size()>=2){
         m_moonExecCode += m_mooncodeindent + "subi\tr14,r14," + p_node.m_symTab.m_size + "\n";
         // copy the return value in memory space to store it on the current stack frame
         // to evaluate the expression in which it is
-        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.m_size + "(r14)\n";
-        m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register1 + "\n";
+
+
+
+        m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + (p_node.m_symTab.m_size-4) + "(r14)\n";
+        System.out.println("---"+p_node.m_moonVarName);
+
+        System.out.println("1funcall: "+p_node.m_type);
+//        if(!p_node.m_type.equals("integer") &&! p_node.m_type.equals("float")){
+//
+//            m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register1 + "\n";
+//            m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + ",0(r14)\n";
+//            m_moonExecCode += m_mooncodeindent + "sub\tr14,r14," + local_register1 + "\n";
+//
+//            m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
+//
+//        }else {
+
+            m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(p_node.m_moonVarName).m_offset + "(r14)," + local_register1 + "\n";
+//        }
         this.m_registerPool.push(local_register1);
+        this.m_registerPool.push(local_register2);
     }
 
 
