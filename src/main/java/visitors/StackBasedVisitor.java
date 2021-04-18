@@ -53,6 +53,7 @@ public class StackBasedVisitor extends Visitor {
     }
 
     public void visit(ProgNode p_node) {
+        m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
         // propagate accepting the same visitor to all the children
         // this effectively achieves Depth-First AST Traversal
         m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
