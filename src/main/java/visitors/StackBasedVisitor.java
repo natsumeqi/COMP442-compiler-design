@@ -56,7 +56,6 @@ public class StackBasedVisitor extends Visitor {
         m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
         // propagate accepting the same visitor to all the children
         // this effectively achieves Depth-First AST Traversal
-        m_moonDataCode += String.format("%-10s", "offset") + "res 4\n";
         for (Node child : p_node.getChildren())
             child.accept(this);
 
@@ -978,19 +977,19 @@ public class StackBasedVisitor extends Visitor {
 
             String var_class_type = p_node.getChildren().get(0).getChildren().get(0).getType() == null ? null : p_node.getChildren().get(0).getChildren().get(0).getType();
             SymTabEntry class_entry = p_node.m_symTab.lookupName(var_class_type);
-            System.out.println(var_class_type);
+//            System.out.println(var_class_type);
             String var_func_name = p_node.getChildren().get(0).getChildren().get(1).m_data;
-            System.out.println(class_entry);
+//            System.out.println(class_entry);
             if (class_entry.m_name != null) {
-                System.out.println("class_entry: " + class_entry);
-                System.out.println("var_func_name:" + var_func_name);
+//                System.out.println("class_entry: " + class_entry);
+//                System.out.println("var_func_name:" + var_func_name);
                 SymTabEntry func_var_entry = class_entry.m_subtable.lookupNameInOneTable(var_func_name);
                 table_entry_of_called_function = func_var_entry;
             }
 
         }
-        System.out.println("funccall node data: " + p_node.getData());
-        System.out.println("table_entry: " + table_entry_of_called_function);
+//        System.out.println("funccall node data: " + p_node.getData());
+//        System.out.println("table_entry: " + table_entry_of_called_function);
 
         int index_of_param = 0;
         m_moonExecCode += "% processing: function call to " + p_node.getChildren().get(0).m_moonVarName + " \n";
@@ -1019,12 +1018,12 @@ public class StackBasedVisitor extends Visitor {
         // for member function call, pass an address of the object which it belongs to
         if (p_node.getChildren().get(0).m_sa_name.equals("Dot_s")) {
 
-            System.out.println(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName);
-            System.out.println("call: " + (p_node.m_symTab.lookupName(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName).m_offset));
-            System.out.println("call2: " + p_node.m_symTab.m_size);
+//            System.out.println(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName);
+//            System.out.println("call: " + (p_node.m_symTab.lookupName(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName).m_offset));
+//            System.out.println("call2: " + p_node.m_symTab.m_size);
             m_moonExecCode += m_mooncodeindent + "addi\t" + local_register2 + ",r0," + (p_node.m_symTab.lookupName(p_node.getChildren().get(0).getChildren().get(0).m_moonVarName).m_offset - p_node.m_symTab.m_size) + "\n";
-            System.out.println("1: " + p_node.m_symTab.m_size);
-            System.out.println("2: " + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset);
+//            System.out.println("1: " + p_node.m_symTab.m_size);
+//            System.out.println("2: " + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset);
             int offset_of_param = p_node.m_symTab.m_size + table_entry_of_called_function.m_subtable.m_symList.get(index_of_param).m_offset;
             m_moonExecCode += m_mooncodeindent + "sw\t" + offset_of_param + "(r14)," + local_register2 + "\n";
 
@@ -1045,9 +1044,9 @@ public class StackBasedVisitor extends Visitor {
 
 
         m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + (p_node.m_symTab.m_size - 4) + "(r14)\n";
-        System.out.println("---" + p_node.m_moonVarName);
+//        System.out.println("---" + p_node.m_moonVarName);
 
-        System.out.println("1funcall: " + p_node.m_type);
+//        System.out.println("1funcall: " + p_node.m_type);
 //        if(!p_node.m_type.equals("integer") &&! p_node.m_type.equals("float")){
 //
 //            m_moonExecCode += m_mooncodeindent + "add\tr14,r14," + local_register1 + "\n";

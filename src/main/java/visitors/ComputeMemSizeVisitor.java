@@ -440,7 +440,7 @@ public class ComputeMemSizeVisitor extends Visitor {
             p_node.m_moonVarName = this.getNewTempVarName();
             p_node.m_type = p_node.getType().contains(":")? p_node.getType().substring(p_node.getType().indexOf(":")+1):p_node.getType();
             p_node.m_symTabEntry = new VarEntry("temp_dot", p_node.getType(), p_node.m_moonVarName, null);
-            System.out.println("[compute dotnode: ]"+p_node.m_type);
+//            System.out.println("[compute dotnode: ]"+p_node.m_type);
             p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
             p_node.m_symTab.addEntry(p_node.m_symTabEntry);
         }
