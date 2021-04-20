@@ -52,8 +52,8 @@ public class ComputeMemSizeVisitor extends Visitor {
     public int sizeOfTypeNode(Node p_node) {
         int size = 0;
         if (p_node.m_type != null) {
-            if (p_node.m_type.equals("integer")) {
-                size = 4;
+            if (p_node.m_type.equals("integer") || p_node.m_type.equals("void")) {
+                size =4;
             } else {
                 if (p_node.m_type.equals("float")) {
                     size = 8;
