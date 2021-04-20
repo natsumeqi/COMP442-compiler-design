@@ -533,20 +533,20 @@ public class StackBasedVisitor extends Visitor {
                 m_moonExecCode += m_mooncodeindent + "muli\t" + local_register2 + "," + local_register1 + "," + dims_col.get(i) + "\n";
 
                 // assign the result back into the first literal variable
-                m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
+//                m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)," + local_register2 + "\n";
 
 
                 if (i == 0) {
-                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)\n";
-                    m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(index_temp_varible).m_offset + "(r14)," + local_register1 + "\n";
+//                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)\n";
+                    m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(index_temp_varible).m_offset + "(r14)," + local_register2 + "\n";
 
 
                 } else {
 
                     m_moonExecCode += "% processing offsets(add): " + p_node.m_moonVarName + " := " + index_expr_node.m_moonVarName + " * " + dims_col.get(i) + "\n";
-                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)\n";
-                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register2 + "," + p_node.m_symTab.lookupName(index_temp_varible).m_offset + "(r14)\n";
-                    m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + "," + local_register1 + "," + local_register2 + "\n";
+//                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_expr_node.m_moonVarName).m_offset + "(r14)\n";
+                    m_moonExecCode += m_mooncodeindent + "lw\t" + local_register1 + "," + p_node.m_symTab.lookupName(index_temp_varible).m_offset + "(r14)\n";
+                    m_moonExecCode += m_mooncodeindent + "add\t" + local_register3 + "," + local_register2 + "," + local_register1 + "\n";
                     m_moonExecCode += m_mooncodeindent + "sw\t" + p_node.m_symTab.lookupName(index_temp_varible).m_offset + "(r14)," + local_register3 + "\n";
 
                 }
