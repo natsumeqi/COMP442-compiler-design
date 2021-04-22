@@ -53,15 +53,17 @@ public class ComputeMemSizeVisitor extends Visitor {
         int size = 0;
         if (p_node.m_type != null) {
             if (p_node.m_type.equals("integer") || p_node.m_type.equals("void")) {
-                size =4;
+                size = 4;
             } else {
                 if (p_node.m_type.equals("float")) {
                     size = 8;
                 } else {
 //                    System.out.println("[compute][sizeoftypenode:] " + p_node.m_symTabEntry);
-                    SymTabEntry class_entry = p_node.m_symTab.lookupName(p_node.m_symTabEntry.m_type);
-                    if (class_entry.m_name != null) {
-                        size = -class_entry.m_subtable.m_size;
+                    if (p_node.m_symTabEntry != null) {
+                        SymTabEntry class_entry = p_node.m_symTab.lookupName(p_node.m_symTabEntry.m_type);
+                        if (class_entry.m_name != null) {
+                            size = -class_entry.m_subtable.m_size;
+                        }
                     }
                 }
             }
@@ -85,13 +87,13 @@ public class ComputeMemSizeVisitor extends Visitor {
         // update scope offset of class
         for (Node class_decl : p_node.getChildren().get(0).getChildren()) {
             // reset
-            class_decl.m_symTab.m_size=0;
+            class_decl.m_symTab.m_size = 0;
             for (SymTabEntry entry : class_decl.m_symTab.m_symList) {
                 if (entry.m_subtable != null) {
 //                    System.out.println("compute:" + entry.m_subtable.m_size);
                     entry.m_size = -entry.m_subtable.m_size;
                 }
-                if(entry.m_kind.equals("inherit")){
+                if (entry.m_kind.equals("inherit")) {
                     SymTabEntry class_inherit_entry = class_decl.m_symTab.m_upperTable.lookupName(entry.m_name);
 //                    System.out.println(class_inherit_entry);
 //                    System.out.println(class_inherit_entry.m_name);
@@ -107,13 +109,11 @@ public class ComputeMemSizeVisitor extends Visitor {
         }
 
 
-
         // compute total size and offsets along the way
         for (SymTabEntry entry : p_node.m_symTab.m_symList) {
             entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
             p_node.m_symTab.m_size -= entry.m_size;
         }
-
 
 
         //        System.out.println(p_node.m_symTab);
@@ -247,27 +247,29 @@ public class ComputeMemSizeVisitor extends Visitor {
         // it will be picked-up by another node above later
 
         // variable in function
-        if (p_node.getParent().getClass().getSimpleName().equals("MethVarNode")) {
-            p_node.m_symTabEntry = new VarEntry("local", var_type, var_id, dim_list);
+        if (p_node.m_symTab != null) {
+            if (p_node.getParent().getClass().getSimpleName().equals("MethVarNode")) {
+                p_node.m_symTabEntry = new VarEntry("local", var_type, var_id, dim_list);
 
-            // check multiple declared identifier in function
-            SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
-            if (var_entry.m_name == null) {
-//                System.out.println(":: " + p_node.m_symTabEntry);
-                p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
-                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-            }
-
-        } else {    // data member in class
-            if (p_node.getParent().getClass().getSimpleName().equals("MembDeclNode")) {
-                String var_visibility = p_node.getLm_sibling().m_data;
-                p_node.m_symTabEntry = new VarEntry("data", var_type, var_id, var_visibility, dim_list);
-
-                // check multiple declared identifier in class
+                // check multiple declared identifier in function
                 SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
                 if (var_entry.m_name == null) {
+//                System.out.println(":: " + p_node.m_symTabEntry);
                     p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                }
+
+            } else {    // data member in class
+                if (p_node.getParent().getClass().getSimpleName().equals("MembDeclNode")) {
+                    String var_visibility = p_node.getLm_sibling().m_data;
+                    p_node.m_symTabEntry = new VarEntry("data", var_type, var_id, var_visibility, dim_list);
+
+                    // check multiple declared identifier in class
+                    SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
+                    if (var_entry.m_name == null) {
+                        p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
+                        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                    }
                 }
             }
         }
@@ -287,96 +289,97 @@ public class ComputeMemSizeVisitor extends Visitor {
 
 
     public void visit(FuncDefNode p_node) {
-        String func_type = p_node.getChildren().get(3).getType();
-        String func_name = p_node.getChildren().get(1).getData();
-        String fParam_type, fParam_name;
-        String func_scope = "";
-        Vector<String> fParam_list = new Vector<>();
-        SymTab local_table;
+        if (p_node.getChildren().size() > 3) {
+            String func_type = p_node.getChildren().get(3).getType();
+            String func_name = p_node.getChildren().get(1).getData();
+            String fParam_type, fParam_name;
+            String func_scope = "";
+            Vector<String> fParam_list = new Vector<>();
+            SymTab local_table;
 
-        // when it is a member function, add scope into the name
-        if (!p_node.getChildren().get(0).isLeaf()) {
-            func_scope = p_node.getChildren().get(0).getChildren().get(0).getData();
-            local_table = new SymTab(2, func_scope + "::" + func_name, p_node.m_symTab);
-        } else {
-            local_table = new SymTab(1, func_name, p_node.m_symTab);
-        }
-
-        // add parameter as VarEntry into the table
-        for (Node param : p_node.getChildren().get(2).getChildren()) {
-//            fParam_type = returnTypeDate(param.getChildren().get(0));
-            fParam_type = param.getChildren().get(0).getType();
-            fParam_name = param.getChildren().get(1).getData();
-            String fParam;
-            StringBuilder dim_string = new StringBuilder();
-            Vector<String> dim_list = new Vector<>();
-            for (Node dim : param.getChildren().get(2).getChildren()) {
-                dim_string.append(dim.getData());
-                dim_list.add(dim.getData());
+            // when it is a member function, add scope into the name
+            if (!p_node.getChildren().get(0).isLeaf()) {
+                func_scope = p_node.getChildren().get(0).getChildren().get(0).getData();
+                local_table = new SymTab(2, func_scope + "::" + func_name, p_node.m_symTab);
+            } else {
+                local_table = new SymTab(1, func_name, p_node.m_symTab);
             }
 
-            fParam = fParam_type + dim_string;
-            fParam_list.add(fParam);
-            VarEntry param_entry = new VarEntry("param", fParam_type, fParam_name, dim_list);
+            // add parameter as VarEntry into the table
+            for (Node param : p_node.getChildren().get(2).getChildren()) {
+//            fParam_type = returnTypeDate(param.getChildren().get(0));
+                fParam_type = param.getChildren().get(0).getType();
+                fParam_name = param.getChildren().get(1).getData();
+                String fParam;
+                StringBuilder dim_string = new StringBuilder();
+                Vector<String> dim_list = new Vector<>();
+                for (Node dim : param.getChildren().get(2).getChildren()) {
+                    dim_string.append(dim.getData());
+                    dim_list.add(dim.getData());
+                }
+
+                fParam = fParam_type + dim_string;
+                fParam_list.add(fParam);
+                VarEntry param_entry = new VarEntry("param", fParam_type, fParam_name, dim_list);
 //            System.out.println(param.m_type);
-            param_entry.m_size = this.sizeOfTypeNode(param);
-            local_table.addEntry(param_entry);
-        }
+                param_entry.m_size = this.sizeOfTypeNode(param);
+                local_table.addEntry(param_entry);
+            }
 
 
-        // add local variables into the table
-        // for member function, check if function header is matched with function declaration in class
-        if (!p_node.getChildren().get(0).isLeaf()) {
-            if (p_node.getParent().getParent() != null) {
-                SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
-                if (class_entry.m_subtable != null) {
+            // add local variables into the table
+            // for member function, check if function header is matched with function declaration in class
+            if (!p_node.getChildren().get(0).isLeaf()) {
+                if (p_node.getParent().getParent() != null) {
+                    SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
+                    if (class_entry.m_subtable != null) {
 //                    System.out.println(class_entry);
-                    SymTabEntry func_decl = class_entry.m_subtable.lookupName(func_name);
-                    if (func_decl.m_name != null) {
+                        SymTabEntry func_decl = class_entry.m_subtable.lookupName(func_name);
+                        if (func_decl.m_name != null) {
 //                        System.out.println(func_decl.m_name);
 //                        System.out.println(func_decl.m_type);
-                        if (func_decl.m_name.equals(func_name) && func_decl.m_type.equals(func_type)) {
-                            if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
+                            if (func_decl.m_name.equals(func_name) && func_decl.m_type.equals(func_type)) {
+                                if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
 //                                System.out.println("matched");
-                                if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
-                                    // make class table be the upper table of member function table
+                                    if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
+                                        // make class table be the upper table of member function table
 //                                    System.out.println("matched2");
-                                    local_table.m_upperTable = class_entry.m_subtable;
-                                    func_decl.m_subtable = local_table;
-                                    p_node.m_symTab = local_table;
+                                        local_table.m_upperTable = class_entry.m_subtable;
+                                        func_decl.m_subtable = local_table;
+                                        p_node.m_symTab = local_table;
 
-                                    p_node.m_symTabEntry = func_decl;
+                                        p_node.m_symTabEntry = func_decl;
 
-                                    // create a 'this' varEntry
-                                    VarEntry this_entry = new VarEntry("this", p_node.m_type, "this", null);
-                                    this_entry.m_size =4;
-                                    p_node.m_symTab.addEntry(this_entry);
+                                        // create a 'this' varEntry
+                                        VarEntry this_entry = new VarEntry("this", p_node.m_type, "this", null);
+                                        this_entry.m_size = 4;
+                                        p_node.m_symTab.addEntry(this_entry);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        } else {    // for free functions
+            } else {    // for free functions
 //            System.out.println(func_name);
-            p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, local_table, p_node.m_line);
+                p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, local_table, p_node.m_line);
 
-            // check multiply declared classes
-            if (p_node.getParent().getParent() != null) {
+                // check multiply declared classes
+                if (p_node.getParent().getParent() != null) {
 
-                // go to global table to check
-                SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
-                if (func_entry.m_name != null) {
-                    // ignore  func_entry.m_type.equals(func_type)
-                    p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-                    p_node.m_symTab = local_table;
-                } else {
-                    p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-                    p_node.m_symTab = local_table;
+                    // go to global table to check
+                    SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
+                    if (func_entry.m_name != null) {
+                        // ignore  func_entry.m_type.equals(func_type)
+                        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                        p_node.m_symTab = local_table;
+                    } else {
+                        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                        p_node.m_symTab = local_table;
+                    }
                 }
             }
         }
-
 
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;
@@ -388,12 +391,14 @@ public class ComputeMemSizeVisitor extends Visitor {
         // a scope and contain their own table
         // stack frame contains the return value at the bottom of the stack
 //        System.out.println("p_node.symtabentry: " + p_node.m_symTabEntry);
-        p_node.m_symTab.m_size = -(this.sizeOfTypeNode(p_node));
-        //then is the return addess is stored on the stack frame
-        p_node.m_symTab.m_size -= 4;
-        for (SymTabEntry entry : p_node.m_symTab.m_symList) {
-            entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
-            p_node.m_symTab.m_size -= entry.m_size;
+        if (p_node.m_symTab != null) {
+            p_node.m_symTab.m_size = -(this.sizeOfTypeNode(p_node));
+            //then is the return addess is stored on the stack frame
+            p_node.m_symTab.m_size -= 4;
+            for (SymTabEntry entry : p_node.m_symTab.m_symList) {
+                entry.m_offset = p_node.m_symTab.m_size - entry.m_size;
+                p_node.m_symTab.m_size -= entry.m_size;
+            }
         }
     }
 
@@ -438,7 +443,7 @@ public class ComputeMemSizeVisitor extends Visitor {
         }
         if (p_node.m_type != null) {
             p_node.m_moonVarName = this.getNewTempVarName();
-            p_node.m_type = p_node.getType().contains(":")? p_node.getType().substring(p_node.getType().indexOf(":")+1):p_node.getType();
+            p_node.m_type = p_node.getType().contains(":") ? p_node.getType().substring(p_node.getType().indexOf(":") + 1) : p_node.getType();
             p_node.m_symTabEntry = new VarEntry("temp_dot", p_node.getType(), p_node.m_moonVarName, null);
 //            System.out.println("[compute dotnode: ]"+p_node.m_type);
             p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
@@ -490,8 +495,9 @@ public class ComputeMemSizeVisitor extends Visitor {
         p_node.m_symTabEntry = new VarEntry("litval_" + p_node.m_data, p_node.getType(), p_node.m_moonVarName, null);// todo
 //        p_node.m_symTabEntry = new VarEntry("litval", p_node.getType(), p_node.m_moonVarName + "_" + p_node.m_data, null);// todo
         p_node.m_symTabEntry.m_size = this.sizeOfEntry(p_node);
-        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-
+        if (p_node.m_symTab != null) {
+            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+        }
     }
 
     public void visit(FuncCallStatNode p_node) {

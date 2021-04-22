@@ -30,7 +30,6 @@ public class SymTabCreationVisitor extends Visitor {
     }
 
 
-
     public void visit(ProgNode p_node) {
         p_node.m_symTab = new SymTab(0, "global", null);
 
@@ -240,39 +239,41 @@ public class SymTabCreationVisitor extends Visitor {
         // it will be picked-up by another node above later
 
         // variable in function
-        if (p_node.getParent().getClass().getSimpleName().equals("MethVarNode")) {
-            p_node.m_symTabEntry = new VarEntry("local", var_type, var_id, dim_list);
+        if (p_node.m_symTab != null) {
+            if (p_node.getParent().getClass().getSimpleName().equals("MethVarNode")) {
+                p_node.m_symTabEntry = new VarEntry("local", var_type, var_id, dim_list);
 
-            // check multiple declared identifier in function
-            SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
-            if (var_entry.m_name != null) {
-                m_errors.append("[8.4][semantic error][line:").append(p_node.m_line).append("] Multiple declared identifier in function: \t").append("'").
-                        append(var_id).append("' in the function ").append(p_node.m_symTab.m_name).append("\r\n");
-            } else {
-                p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-            }
-
-        } else {    // data member in class
-            if (p_node.getParent().getClass().getSimpleName().equals("MembDeclNode")) {
-                String var_visibility = p_node.getLm_sibling().m_data;
-                p_node.m_symTabEntry = new VarEntry("data", var_type, var_id, var_visibility, dim_list);
-
-                // check multiple declared identifier in class
+                // check multiple declared identifier in function
                 SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
                 if (var_entry.m_name != null) {
-                    m_errors.append("[8.3][semantic error][line:").append(p_node.m_line).append("] Multiple declared identifier in class: \t").append("'").
-                            append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
+                    m_errors.append("[8.4][semantic error][line:").append(p_node.m_line).append("] Multiple declared identifier in function: \t").append("'").
+                            append(var_id).append("' in the function ").append(p_node.m_symTab.m_name).append("\r\n");
                 } else {
-
-                    // check shadowed inherited member
-
-                    if (p_node.m_symTab.lookupInInherited(var_id)) {
-                        m_errors.append("[8.5][semantic warning][line:").append(p_node.m_line).append("] shadowed inherited data member: \t").append("'").
-                                append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
-                    }
-
-
                     p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                }
+
+            } else {    // data member in class
+                if (p_node.getParent().getClass().getSimpleName().equals("MembDeclNode")) {
+                    String var_visibility = p_node.getLm_sibling().m_data;
+                    p_node.m_symTabEntry = new VarEntry("data", var_type, var_id, var_visibility, dim_list);
+
+                    // check multiple declared identifier in class
+                    SymTabEntry var_entry = p_node.m_symTab.lookupName(var_id);
+                    if (var_entry.m_name != null) {
+                        m_errors.append("[8.3][semantic error][line:").append(p_node.m_line).append("] Multiple declared identifier in class: \t").append("'").
+                                append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
+                    } else {
+
+                        // check shadowed inherited member
+
+                        if (p_node.m_symTab.lookupInInherited(var_id)) {
+                            m_errors.append("[8.5][semantic warning][line:").append(p_node.m_line).append("] shadowed inherited data member: \t").append("'").
+                                    append(var_id).append("' in the class ").append(p_node.m_symTab.m_name).append("\r\n");
+                        }
+
+
+                        p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                    }
                 }
             }
         }
@@ -292,116 +293,117 @@ public class SymTabCreationVisitor extends Visitor {
 
 
     public void visit(FuncDefNode p_node) {
-        String func_type = returnTypeDate(p_node.getChildren().get(3));
-        String func_name = p_node.getChildren().get(1).getData();
-        String unmatch_line = String.valueOf(p_node.getChildren().get(1).m_line);
-        String fParam_type, fParam_name;
-        String func_scope = "";
-        Vector<String> fParam_list = new Vector<>();
-        SymTab local_table;
+        if (p_node.getChildren().size() > 3) {
+            String func_type = returnTypeDate(p_node.getChildren().get(3));
+            String func_name = p_node.getChildren().get(1).getData();
+            String unmatch_line = String.valueOf(p_node.getChildren().get(1).m_line);
+            String fParam_type, fParam_name;
+            String func_scope = "";
+            Vector<String> fParam_list = new Vector<>();
+            SymTab local_table;
 
-        // when it is a member function, add scope into the name
-        if (!p_node.getChildren().get(0).isLeaf()) {
-            func_scope = p_node.getChildren().get(0).getChildren().get(0).getData();
-            local_table = new SymTab(2, func_scope + "::" + func_name, p_node.m_symTab);
-        } else {
-            local_table = new SymTab(1, func_name, p_node.m_symTab);
-        }
-
-        // add parameter as VarEntry into the table
-        for (Node param : p_node.getChildren().get(2).getChildren()) {
-            fParam_type = param.getChildren().get(0).getData();
-            fParam_name = param.getChildren().get(1).getData();
-            String fParam;
-            StringBuilder dim_string = new StringBuilder();
-            Vector<String> dim_list = new Vector<>();
-            for (Node dim : param.getChildren().get(2).getChildren()) {
-                dim_string.append(dim.getData());
-                dim_list.add(dim.getData());
+            // when it is a member function, add scope into the name
+            if (!p_node.getChildren().get(0).isLeaf()) {
+                func_scope = p_node.getChildren().get(0).getChildren().get(0).getData();
+                local_table = new SymTab(2, func_scope + "::" + func_name, p_node.m_symTab);
+            } else {
+                local_table = new SymTab(1, func_name, p_node.m_symTab);
             }
 
-            fParam = fParam_type + dim_string;
-            fParam_list.add(fParam);
-            local_table.addEntry(new VarEntry("param", fParam_type, fParam_name, dim_list));
-        }
+            // add parameter as VarEntry into the table
+            for (Node param : p_node.getChildren().get(2).getChildren()) {
+                fParam_type = param.getChildren().get(0).getData();
+                fParam_name = param.getChildren().get(1).getData();
+                String fParam;
+                StringBuilder dim_string = new StringBuilder();
+                Vector<String> dim_list = new Vector<>();
+                for (Node dim : param.getChildren().get(2).getChildren()) {
+                    dim_string.append(dim.getData());
+                    dim_list.add(dim.getData());
+                }
+
+                fParam = fParam_type + dim_string;
+                fParam_list.add(fParam);
+                local_table.addEntry(new VarEntry("param", fParam_type, fParam_name, dim_list));
+            }
 
 
-        // add local variables into the table
-        boolean matched = false;
-        // for member function, check if function header is matched with function declaration in class
-        if (!p_node.getChildren().get(0).isLeaf()) {
-            if (p_node.getParent().getParent() != null) {
-                SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
-                if (class_entry.m_subtable != null) {
-                    SymTabEntry func_decl = class_entry.m_subtable.lookupName(func_name);
-                    if (func_decl.m_name != null) {
-                        if (func_decl.m_name.equals(func_name) && func_decl.m_type.equals(func_type)) {
-                            if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
-                                if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
-                                    // make class table be the upper table of member function table
-                                    local_table.m_upperTable = class_entry.m_subtable;
-                                    func_decl.m_subtable = local_table;
-                                    p_node.m_symTab = local_table;
-                                    matched = true;
+            // add local variables into the table
+            boolean matched = false;
+            // for member function, check if function header is matched with function declaration in class
+            if (!p_node.getChildren().get(0).isLeaf()) {
+                if (p_node.getParent().getParent() != null) {
+                    SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
+                    if (class_entry.m_subtable != null) {
+                        SymTabEntry func_decl = class_entry.m_subtable.lookupName(func_name);
+                        if (func_decl.m_name != null) {
+                            if (func_decl.m_name.equals(func_name) && func_decl.m_type.equals(func_type)) {
+                                if (func_decl.getClass().getSimpleName().equals("FuncEntry")) {
+                                    if (func_decl.m_fParam.toString().equals(fParam_list.toString())) {
+                                        // make class table be the upper table of member function table
+                                        local_table.m_upperTable = class_entry.m_subtable;
+                                        func_decl.m_subtable = local_table;
+                                        p_node.m_symTab = local_table;
+                                        matched = true;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        } else {    // for free functions
+            } else {    // for free functions
 
-            p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, local_table, p_node.m_line);
+                p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, local_table, p_node.m_line);
 
-            // check multiply declared classes
-            if (p_node.getParent().getParent() != null) {
+                // check multiply declared classes
+                if (p_node.getParent().getParent() != null) {
 
-                // go to global table to check
-                SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
-                if (func_entry.m_name != null) {
-                    // ignore  func_entry.m_type.equals(func_type)
-                    if (func_entry.m_fParam.toString().equals(fParam_list.toString())) {
-                        m_errors.append("[8.2][semantic error][line:").append(p_node.m_line).append("] Multiple defined free function: \t'").
-                                append(func_name).append("'\r\n");
+                    // go to global table to check
+                    SymTabEntry func_entry = p_node.getParent().getParent().m_symTab.lookupName(func_name);
+                    if (func_entry.m_name != null) {
+                        // ignore  func_entry.m_type.equals(func_type)
+                        if (func_entry.m_fParam.toString().equals(fParam_list.toString())) {
+                            m_errors.append("[8.2][semantic error][line:").append(p_node.m_line).append("] Multiple defined free function: \t'").
+                                    append(func_name).append("'\r\n");
+                        } else {
+                            // overloading free function
+                            m_errors.append("[9.1][semantic warning][line:").append(p_node.m_line).append("] Overloaded free function: \t'").
+                                    append(func_name).append("'\r\n");
+                            p_node.m_symTab.addEntry(p_node.m_symTabEntry);
+                            p_node.m_symTab = local_table;
+                        }
+
                     } else {
-                        // overloading free function
-                        m_errors.append("[9.1][semantic warning][line:").append(p_node.m_line).append("] Overloaded free function: \t'").
-                                append(func_name).append("'\r\n");
                         p_node.m_symTab.addEntry(p_node.m_symTabEntry);
                         p_node.m_symTab = local_table;
                     }
-
-                } else {
-                    p_node.m_symTab.addEntry(p_node.m_symTabEntry);
-                    p_node.m_symTab = local_table;
                 }
+                matched = true;
             }
-            matched = true;
-        }
 
 
-        if (!matched) {
-            m_errors.append("[6.1][semantic error][line:").append(unmatch_line).append("] Definition provided for undeclared member function: \t").
-                    append(func_scope).append(":").append(func_name).append("\r\n");
+            if (!matched) {
+                m_errors.append("[6.1][semantic error][line:").append(unmatch_line).append("] Definition provided for undeclared member function: \t").
+                        append(func_scope).append(":").append(func_name).append("\r\n");
 
-            // make this unmatched member function still exist in the symbol table
-            if (!p_node.getChildren().get(0).isLeaf()) {
-                if (p_node.getParent().getParent() != null) {
-                    SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
-                    // make class table be the upper table of member function table
-                    local_table.m_upperTable = class_entry.m_subtable;
-                    // create a new funcDecl entry
-                    p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, "", p_node.m_line);
-                    p_node.m_symTabEntry.m_subtable = local_table;
-                    if (class_entry.m_subtable != null) {
-                        class_entry.m_subtable.addEntry(p_node.m_symTabEntry);
+                // make this unmatched member function still exist in the symbol table
+                if (!p_node.getChildren().get(0).isLeaf()) {
+                    if (p_node.getParent().getParent() != null) {
+                        SymTabEntry class_entry = p_node.getParent().getParent().m_symTab.lookupName(func_scope);
+                        // make class table be the upper table of member function table
+                        local_table.m_upperTable = class_entry.m_subtable;
+                        // create a new funcDecl entry
+                        p_node.m_symTabEntry = new FuncEntry(func_type, func_name, fParam_list, "", p_node.m_line);
+                        p_node.m_symTabEntry.m_subtable = local_table;
+                        if (class_entry.m_subtable != null) {
+                            class_entry.m_subtable.addEntry(p_node.m_symTabEntry);
 
+                        }
+                        p_node.m_symTab = local_table;
                     }
-                    p_node.m_symTab = local_table;
                 }
             }
         }
-
 
         for (Node child : p_node.getChildren()) {
             child.m_symTab = p_node.m_symTab;

@@ -7,12 +7,13 @@ import lexicalAnalyzer.Token;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 public class SyntacticAnalyzer {
 
     // import from other classes
-    private final LexicalAnalyzer lexical_analyzer;
+    private LexicalAnalyzer lexical_analyzer;
     private final NodeFactory nodeFactory;
     private final Grammar grammar;
 
@@ -28,12 +29,18 @@ public class SyntacticAnalyzer {
     private int index_terminal_derivation;  // keep updated index of the terminal symbol in derivation
     private String top_of_stack;
     private Node progNode;
+    private boolean end_of_file;
 
     // output to files
     private PrintWriter writer_derivation;
     private PrintWriter writer_err_report;
     private PrintWriter writer_DOT;
     private PrintStream writer_AST;
+    public String parser_errors;
+    private PrintWriter writer_string_err;
+    private StringWriter string_err;
+
+    private final HashSet<Integer> error_set = new HashSet<>();
 
 
     /**
@@ -47,7 +54,11 @@ public class SyntacticAnalyzer {
         grammar = new Grammar();
 //        grammar.generateGrammarEx();
         grammar.generateGrammarProject();
+        end_of_file = false;
 
+        parser_errors = "";
+        string_err = new StringWriter();
+        writer_string_err = new PrintWriter(string_err);
     }
 
 
@@ -83,6 +94,8 @@ public class SyntacticAnalyzer {
             writer_err_report = new PrintWriter(outfile_error);
             writer_DOT = new PrintWriter(outfile_DOT);
             writer_AST = new PrintStream(outfile_AST);
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,6 +115,8 @@ public class SyntacticAnalyzer {
         writer_DOT.close();
         writer_AST.flush();
         writer_AST.close();
+//        System.out.println(string_err);
+        parser_errors += string_err;
     }
 
 
@@ -128,7 +143,7 @@ public class SyntacticAnalyzer {
         skipCommentsRead();
 
 
-        while (!parsing_stack.peek().equals("$")) {
+        while (!parsing_stack.peek().equals("$") && !end_of_file) {
             top_of_stack = parsing_stack.peek();
 
             // the top of parsing stack is a terminal symbol
@@ -180,6 +195,7 @@ public class SyntacticAnalyzer {
                 }
             }
         }
+//        System.out.println("out of while in parse()");
 
 
         // print the node to console and file
@@ -187,17 +203,26 @@ public class SyntacticAnalyzer {
 
         PrintStream console = System.out;
         System.setOut(writer_AST);
-        semantic_stack.peek().print();
+        if (!semantic_stack.isEmpty()) {
+            semantic_stack.peek().print();
+        }
         System.setOut(console);
 
-        printToDot(semantic_stack.peek());
-        progNode = semantic_stack.peek();
+        if (!semantic_stack.isEmpty()) {
+            printToDot(semantic_stack.peek());
+            progNode = semantic_stack.peek();
+        }
 
 
         if (!lookahead.equals("$") && !error) {
-            System.out.println("Syntax error at: " + lookahead_token.getLocation() + ";\t Unexpected: '" + lookahead + "'.");
-            writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
-                    append(lookahead).append("'\r\n");
+//            System.out.println("Syntax error at: " + lookahead_token.getLocation() + ";\t Unexpected: '" + lookahead + "'.");
+            if (!error_set.contains(lookahead_token.getLocation())) {
+                writer_err_report.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
+                        append(lookahead).append("'\r\n");
+                writer_string_err.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).append(";\t Unexpected: '").
+                        append(lookahead).append("'\r\n");
+                error_set.add(lookahead_token.getLocation());
+            }
         }
 
         return lookahead.equals("$") && !error;
@@ -345,7 +370,7 @@ public class SyntacticAnalyzer {
                                     break;
                                 }
                             }
-                            if(node_on_top.m_sa_name.equals("Null_s")){
+                            if (node_on_top.m_sa_name.equals("Null_s")) {
                                 semantic_stack.pop();
                             }
 
@@ -521,11 +546,12 @@ public class SyntacticAnalyzer {
                                         }
                                     }
                                 }
-                                if(parameters[0].trim().equals("Sign_i")){  // special case for  makeFamily(Sign_i, Factor_s, reuse)
+                                if (parameters[0].trim().equals("Sign_i")) {  // special case for  makeFamily(Sign_i, Factor_s, reuse)
                                     if (!semantic_stack.isEmpty()) {
                                         node_on_top = semantic_stack.peek();
                                         if (node_on_top.m_sa_name.equals(op_name)) {
-                                            opNode_backup = semantic_stack.pop();}
+                                            opNode_backup = semantic_stack.pop();
+                                        }
                                     }
                                 }
 
@@ -661,6 +687,12 @@ public class SyntacticAnalyzer {
      * @return result in the parsing table
      */
     private String lookupParsingTable(String top_of_stack, String lookahead) {
+//        System.out.println(lookahead);
+        if (lookahead.equals("invalidchar") || lookahead.equals("invalidnum") || lookahead.equals("invalidid") || lookahead.equals("invalidcmt") || lookahead.equals("invalidstringlit")) {
+            System.err.println("[Lexer] Lexical error(s) found!");
+            lexical_analyzer.IOFileClose();
+            System.exit(0);
+        }
         return grammar.getParsing_table().get(top_of_stack).get(lookahead);
     }
 
@@ -721,34 +753,69 @@ public class SyntacticAnalyzer {
         // get the original lexeme
         String expected = grammar.getSymbol_map().get(top_of_stack) == null ? top_of_stack : grammar.getSymbol_map().get(top_of_stack);
 
+//        if(lookahead_token==null){
+//            lookahead_token = terminal_suc_token;
+//        }
         // output error info
         if (lookahead_token != null) {
             String unexpected = grammar.getSymbol_map().get(lookahead) == null ? lookahead : grammar.getSymbol_map().get(lookahead);
 
+//            System.out.println("top of stack: " + top_of_stack);
+//            System.out.println("lookhahead: " + lookahead);
             // top of stack is a terminal symbol
             if (grammar.getTerminal_list().contains(top_of_stack)) {
                 parsing_stack.pop();
 
-                System.out.println("Syntax error at: " + lookahead_token.getLocation());
-                writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).
-                        append("\t Missing expected symbol: '").append(expected).append("'\t Unexpected: '").append(unexpected).append("'\r\n");
+//                System.out.println("top of stack is a terminal symbol.");
+//                System.out.println("Syntax error at: " + lookahead_token.getLocation());
+                if (!error_set.contains(lookahead_token.getLocation())) {
+                    writer_err_report.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).
+                            append("\t Missing expected symbol: '").append(expected).append("'\t Unexpected: '").append(unexpected).append("'\r\n");
+                    writer_string_err.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).
+                            append("\t Missing expected symbol: '").append(expected).append("'\t Unexpected: '").append(unexpected).append("'\r\n");
+                    error_set.add(lookahead_token.getLocation());
+                }
             } else {
 
                 //  pop the stack if the next token is in the FOLLOW set of our current non terminal on top of the stack
                 if (lookahead.equals("$") || follow_sets.get(top_of_stack).contains(lookahead)) {
-                    System.out.println("Syntax error at: " + lookahead_token.getLocation());
-                    writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append("\t Skip parsing : '").
-                            append(unexpected).append("'\t Expected: '").append(expected).append("'\r\n");
-                    parsing_stack.pop();
+//                    System.out.println("pop the stack if the next token is in the FOLLOW set of our current non terminal on top of the stack");
+
+//                    System.out.println("Syntax error at: " + lookahead_token.getLocation());
+                    if (!error_set.contains(lookahead_token.getLocation())) {
+                        writer_err_report.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).append("\t Skip parsing : '").
+                                append(unexpected).append("'\t Expected: '").append(expected).append("'\r\n");
+                        writer_string_err.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).append("\t Skip parsing : '").
+                                append(unexpected).append("'\t Expected: '").append(expected).append("'\r\n");
+                        parsing_stack.pop();
+                        error_set.add(lookahead_token.getLocation());
+                    }
+
                 } else {
+//                    System.out.println("scan tokens until we get one with which we can resume the parse" + lookahead_token.getLocation());
 
                     // scan tokens until we get one with which we can resume the parse
-                    System.out.println("Syntax error at: " + lookahead_token.getLocation());
-                    writer_err_report.append("Syntax error at line: ").append(String.valueOf(lookahead_token.getLocation())).append("\t Unexpected: '").
-                            append(unexpected).append("'\t Expected: '").append(expected).append("'\r\n");
-                    while (!first_sets.get(top_of_stack).contains(lookahead) ||
-                            ((first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead)))) {
+//                    System.out.println("Syntax error at: " + lookahead_token.getLocation());
+                    if (!error_set.contains(lookahead_token.getLocation())) {
+                        writer_err_report.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).append("\t Unexpected: '").
+                                append(unexpected).append("'\t Expected: '").append(expected).append("'\r\n");
+                        writer_string_err.append("[Syntax error] at line: ").append(String.valueOf(lookahead_token.getLocation())).append("\t Unexpected: '").
+                                append(unexpected).append("'\t Expected: '").append(expected).append("'\r\n");
+                        error_set.add(lookahead_token.getLocation());
+                    }else{
                         skipCommentsRead();
+                    }
+//                    System.out.println("[scan while]lookahead: " + lookahead);
+//                    System.out.println("[scan while] first sets:  "+first_sets.get(top_of_stack));
+//                        System.out.println("[scan while] follow sets:  "+follow_sets.get(top_of_stack));
+//                        System.out.println("[scan while] top of stack: "+ top_of_stack);
+                    while (!first_sets.get(top_of_stack).contains(lookahead) &&
+                            ((first_sets.get(top_of_stack).contains("EPSILON") && !follow_sets.get(top_of_stack).contains(lookahead)))) {
+
+                        skipCommentsRead();
+
+//
+
                         if (lookahead.equals("$")) {
                             break;
                         }
@@ -756,13 +823,17 @@ public class SyntacticAnalyzer {
                 }
             }
         } else {
-            System.out.println("Syntax error at the end of the file. \tUnexpected: " + lookahead);
+//            System.out.println("Syntax error at the end of the file. \tUnexpected: " + lookahead);
             System.out.println("The program has syntax error(s).");
-            writer_err_report.append("Syntax error at the end of the file.").append("\t Unexpected: '").
+            writer_err_report.append("[Syntax error] at the end of the file.").append("\t Unexpected: '").
+                    append(lookahead).append("'\r\n");
+            writer_string_err.append("[Syntax error] at the end of the file.").append("\t Unexpected: '").
                     append(lookahead).append("'\r\n");
             writer_err_report.flush();
             writer_err_report.close();
-            System.exit(0);
+//            parser_errors += string_err.toString();
+            end_of_file = true;
+//            System.exit(0);
         }
     }
 
@@ -784,6 +855,7 @@ public class SyntacticAnalyzer {
             }
         } while (lookahead_type.equals("blockcmt") || lookahead_type.equals("inlinecmt"));
         lookahead = toTerminalSymbols(lookahead_type);
+//        System.out.println("[skipcomments Read] " + lookahead);
     }
 
 

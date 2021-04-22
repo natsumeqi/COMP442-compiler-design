@@ -171,12 +171,14 @@ public class ReconstructSourceVisitor extends Visitor {
     public void visit(FuncDefNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
-        p_node.m_subtreeString += "func " + p_node.getChildren().get(0).m_subtreeString;
-        p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString;
-        p_node.m_subtreeString += p_node.getChildren().get(2).m_subtreeString + ": ";
-        p_node.m_subtreeString += p_node.getChildren().get(3).m_subtreeString + "\n";
-        p_node.m_subtreeString += p_node.getChildren().get(4).m_subtreeString + "\n\n";
-        p_node.m_line = p_node.getChildren().get(1).m_line;
+        if(p_node.getChildren().size()>4) {
+            p_node.m_subtreeString += "func " + p_node.getChildren().get(0).m_subtreeString;
+            p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString;
+            p_node.m_subtreeString += p_node.getChildren().get(2).m_subtreeString + ": ";
+            p_node.m_subtreeString += p_node.getChildren().get(3).m_subtreeString + "\n";
+            p_node.m_subtreeString += p_node.getChildren().get(4).m_subtreeString + "\n\n";
+            p_node.m_line = p_node.getChildren().get(1).m_line;
+        }
     }
 
     public void visit(ScopeNode p_node) {
@@ -198,10 +200,14 @@ public class ReconstructSourceVisitor extends Visitor {
         for (Node child : p_node.getChildren())
             child.accept(this);
         if (p_node.getChildren().get(0).isLeaf()) {
-            p_node.m_subtreeString += "{\n" + p_node.getChildren().get(1).m_subtreeString + "}";
+            if(p_node.getChildren().size()>1) {
+                p_node.m_subtreeString += "{\n" + p_node.getChildren().get(1).m_subtreeString + "}";
+            }
         } else {
             p_node.m_subtreeString += "{\n  var\n  {\n" + p_node.getChildren().get(0).m_subtreeString + "  }\n";
-            p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString + "}";
+            if(p_node.getChildren().size()>1) {
+                p_node.m_subtreeString += p_node.getChildren().get(1).m_subtreeString + "}";
+            }
         }
     }
 

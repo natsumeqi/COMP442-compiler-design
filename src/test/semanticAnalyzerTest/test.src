@@ -43,6 +43,23 @@ class E inherits D {                                                   // 14.1
 };
 
 
+
+class F{
+    private H aH;                    // circular class though member
+};
+
+class G inherits F{
+
+};
+
+class H inherits G{
+
+};
+
+
+
+
+
 // ====== Function Definitions ====== //
 func POLYNOMIAL::evaluate(float x) : float
 {

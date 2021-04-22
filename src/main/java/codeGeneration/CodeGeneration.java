@@ -31,7 +31,10 @@ public class CodeGeneration {
     public void generateCode(){
 
 //        progNode.accept(CMSVisitor);
-        progNode.accept(SBVisitor);
+        if(progNode!=null) {
+            System.out.println("[Code] StackBased visitor starts: ");
+            progNode.accept(SBVisitor);
+        }
     }
 
 

@@ -8,6 +8,9 @@ public class LexicalAnalyzer {
     private BufferedReader reader;
     private PrintWriter writer_tok;
     private PrintWriter writer_err;
+    private StringWriter string_err;
+    private PrintWriter writer_string_err;
+    public String lexical_errors;
     private Token curr_token;           // token object storing info
     private StringBuilder curr_lexeme;  // records the lexeme for the current token
     private int curr_line;              // records the current line
@@ -21,6 +24,8 @@ public class LexicalAnalyzer {
         out_line = 1;
         is_finished = false;
         num_nested_cmt = 0;
+        string_err = new StringWriter();
+        writer_string_err = new PrintWriter(string_err);
     }
 
     public boolean isFinished() {
@@ -67,6 +72,7 @@ public class LexicalAnalyzer {
             writer_tok.close();
             writer_err.flush();
             writer_err.close();
+            lexical_errors = string_err.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -262,19 +268,24 @@ public class LexicalAnalyzer {
             switch (curr_token.getType()) {
                 case "invalidchar":
                     writer_err.append("Lexical error: Invalid character: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
+                    writer_string_err.append("Lexical error: Invalid character: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
                     break;
                 case "invalidnum":
                     writer_err.append("Lexical error: Invalid number: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
+                    writer_string_err.append("Lexical error: Invalid number: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
                     break;
                 case "invalidid":
                     writer_err.append("Lexical error: Invalid identifier: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
+                    writer_string_err.append("Lexical error: Invalid identifier: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
                     break;
                 case "invalidcmt":
                     num_nested_cmt = 0;
                     writer_err.append("Lexical error: Unclosed comments: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
+                    writer_string_err.append("Lexical error: Unclosed comments: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
                     break;
                 case "invalidstringlit":
                     writer_err.append("Lexical error: Invalid string: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
+                    writer_string_err.append("Lexical error: Invalid string: \"").append(curr_token.getLexeme()).append("\": line ").append(String.valueOf(curr_token.getLocation())).append(".\n");
                     break;
             }
         }

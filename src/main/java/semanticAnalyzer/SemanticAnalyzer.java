@@ -22,6 +22,7 @@ public class SemanticAnalyzer {
 
     private PrintStream writer_symTab;
     private PrintStream writer_semantic_error;
+    public String parser_errors;
 
 
     public SemanticAnalyzer() {
@@ -33,15 +34,21 @@ public class SemanticAnalyzer {
         this.progNode = progNode;
     }
 
-    public void createTableAndChecking(){
-        // reconstruct source
-        progNode.accept(RSPVisitor);
-        // symbol table creation
-        progNode.accept(STCVisitor);
-        // check type
-        progNode.accept(TCVisitor);
-        // add new variables to table, computes memory size and offset
-        progNode.accept(CMSVisitor);
+    public void createTableAndChecking() {
+        if (progNode != null) {
+            System.out.println("[Semantic] ReconstructSource visitor starts: ");
+            // reconstruct source
+            progNode.accept(RSPVisitor);
+            System.out.println("[Semantic] SymTabCreation visitor starts: ");
+            // symbol table creation
+            progNode.accept(STCVisitor);
+            System.out.println("[Semantic] TypeChecking visitor starts: ");
+            // check type
+            progNode.accept(TCVisitor);
+            System.out.println("[Semantic] ComputeMemSize visitor starts: ");
+            // add new variables to table, computes memory size and offset
+            progNode.accept(CMSVisitor);
+        }
     }
 
 
@@ -54,9 +61,31 @@ public class SemanticAnalyzer {
             System.out.println("[Semantic] Writing to the file: " + outfile_semantic_errors.getName());
             writer_symTab = new PrintStream(outfile_symTab);
             writer_semantic_error = new PrintStream(outfile_semantic_errors);
+            if (!parser_errors.isEmpty()) {
+                System.out.println("-----------------------------------------ERROR-----------------------------------------");
+                System.out.println();
+                System.out.println(parser_errors);
+            }
+            if (!STCVisitor.m_errors.toString().isEmpty()) {
+                if(parser_errors.isEmpty()){
+                    System.out.println("-----------------------------------------ERROR-----------------------------------------");
+                }
+                System.out.print(STCVisitor.m_errors);
+            }
+            if (!TCVisitor.m_errors.isEmpty()) {
+                if(parser_errors.isEmpty() && STCVisitor.m_errors.toString().isEmpty()){
+                    System.out.println("-----------------------------------------ERROR-----------------------------------------");
+
+                }
+                System.out.println(TCVisitor.m_errors);
+                System.out.println("-----------------------------------------ERROR-----------------------------------------");
+            }
+
             PrintStream console = System.out;
             System.setOut(writer_symTab);
-            System.out.println(progNode.m_symTab);
+            if (progNode != null) {
+                System.out.println(progNode.m_symTab);
+            }
             System.setOut(writer_semantic_error);
             System.out.print(STCVisitor.m_errors);
             System.out.println(TCVisitor.m_errors);
@@ -76,5 +105,8 @@ public class SemanticAnalyzer {
         writer_semantic_error.close();
     }
 
+    public void setParser_errors(String errors) {
+        parser_errors = errors;
+    }
 
 }

@@ -44,10 +44,23 @@ public class TypeCheckingVisitor extends Visitor {
         // check circular class dependencies through inheritance
         String class_name = p_node.m_symTab.m_name;
         if (p_node.m_symTab.checkCircular(class_name)) {
-            this.m_errors += "[14.1][semantic error][line:" + p_node.m_line + "] Circular class dependency:  '" + class_name + "'\n";
+            this.m_errors += "[14.1][semantic error][line:" + p_node.m_line + "] Circular class dependency through inheritance:  '" + class_name + "'\n";
         }
 
-
+        // check circular class dependencies through members
+        for (SymTabEntry entry : p_node.m_symTab.m_symList) {
+            if (entry.m_kind.equals("data")) {
+                if (!entry.m_type.equals("integer") && !entry.m_type.equals("float")) {
+                    SymTabEntry class_entry = p_node.m_symTab.lookupName(entry.m_type);
+                    if(class_entry.m_name!=null){
+//                        System.out.println(class_entry.m_name);
+                        if (class_entry.m_subtable.checkCircular(p_node.m_symTab.m_name)) {
+                            this.m_errors += "[14.2][semantic error][line:" + p_node.m_line + "] Circular class dependency through member:  '" + entry.m_name + "'\n";
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void visit(FuncDeclNode p_node) {
@@ -65,7 +78,9 @@ public class TypeCheckingVisitor extends Visitor {
     public void visit(FuncDefNode p_node) {
         for (Node child : p_node.getChildren())
             child.accept(this);
-        p_node.m_type = p_node.getChildren().get(3).m_type;
+        if (p_node.getChildren().size() > 3) {
+            p_node.m_type = p_node.getChildren().get(3).m_type;
+        }
     }
 
     public void visit(ScopeNode p_node) {
@@ -145,7 +160,15 @@ public class TypeCheckingVisitor extends Visitor {
             child.accept(this);
         String return_stat_type = p_node.getChildren().get(0).getType();
         String func_name = p_node.m_symTab.m_name;
-        String lookup_func_name = func_name.substring(func_name.indexOf("::") + 2);
+        String lookup_func_name;
+        if (func_name.contains("::")) {
+            lookup_func_name = func_name.substring(func_name.indexOf("::") + 2);
+        } else {
+            lookup_func_name = func_name;
+        }
+//        System.out.println(lookup_func_name);
+//        System.out.println(func_name);
+//        System.out.println(p_node.m_symTab.lookupName(lookup_func_name).m_name);
         String func_return_type = p_node.m_symTab.lookupName(lookup_func_name).m_type;
         if (return_stat_type != null) {
             if (return_stat_type.equals(func_return_type)) {
